@@ -40,7 +40,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwPrOycGcGdaQmTp4KfJNMlWuuu9_Uoo8kLcBC0vTYVUNLMe0QZcTa8sWIpVHtVXAcE/exec';
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwGLXXe1hN-xeAhpk9pCXVJ91tU2WG8T2pTn7TOTctBzT6d-BOMLuA87Tas3cZ4uZwE/exec';
 
         // Lucide icons as inline SVG components
         const Home = ({ className }) => (
@@ -89,6 +89,8 @@
             const [submitting, setSubmitting] = useState(false);
             const [toast, setToast] = useState(null);
             const [formData, setFormData] = useState({
+                isDestination: null, // null = not selected, true = house destination, false = just trick-or-treating
+                groupSize: 2,
                 address: '',
                 name: '',
                 trickOrTreat: false,
@@ -185,15 +187,14 @@
                     let center = { lat: 36.175, lng: -115.136 };
                     let zoom = 13;
 
-                    if (registrations.length > 0) {
-                        const validCoords = registrations.filter(r => r.Latitude && r.Longitude);
-                        
-                        if (validCoords.length > 0) {
-                            const avgLat = validCoords.reduce((sum, r) => sum + parseFloat(r.Latitude), 0) / validCoords.length;
-                            const avgLng = validCoords.reduce((sum, r) => sum + parseFloat(r.Longitude), 0) / validCoords.length;
-                            center = { lat: avgLat, lng: avgLng };
-                            zoom = 15;
-                        }
+                    // Filter to only registrations with addresses
+                    const houseRegistrations = registrations.filter(r => r.Address && r.Latitude && r.Longitude);
+
+                    if (houseRegistrations.length > 0) {
+                        const avgLat = houseRegistrations.reduce((sum, r) => sum + parseFloat(r.Latitude), 0) / houseRegistrations.length;
+                        const avgLng = houseRegistrations.reduce((sum, r) => sum + parseFloat(r.Longitude), 0) / houseRegistrations.length;
+                        center = { lat: avgLat, lng: avgLng };
+                        zoom = 15;
                     }
 
                     const map = new window.google.maps.Map(document.getElementById('map'), {
@@ -228,9 +229,7 @@
 
                     mapRef.current = map;
 
-                    registrations.forEach(reg => {
-                        if (!reg.Latitude || !reg.Longitude) return;
-
+                    houseRegistrations.forEach(reg => {
                         const lat = parseFloat(reg.Latitude);
                         const lng = parseFloat(reg.Longitude);
 
@@ -335,14 +334,23 @@
             };
 
             const handleSubmit = async () => {
-                if (!formData.address) {
-                    setToast('Please enter your address');
-                    return;
-                }
-                
-                if (!formData.trickOrTreat && !formData.decorations && !formData.specialEvent) {
-                    setToast('Please select at least one participation type');
-                    return;
+                // If just trick-or-treating
+                if (formData.isDestination === false) {
+                    if (!formData.groupSize || formData.groupSize < 1) {
+                        setToast('Please enter how many people in your group');
+                        return;
+                    }
+                } else {
+                    // If hosting at house
+                    if (!formData.address) {
+                        setToast('Please enter your address');
+                        return;
+                    }
+                    
+                    if (!formData.trickOrTreat && !formData.decorations && !formData.specialEvent) {
+                        setToast('Please select at least one activity');
+                        return;
+                    }
                 }
 
                 try {
@@ -361,6 +369,8 @@
                     await loadRegistrations();
                     
                     setFormData({ 
+                        isDestination: null,
+                        groupSize: 2,
                         address: '', 
                         name: '', 
                         trickOrTreat: false,
@@ -371,7 +381,12 @@
                         lng: null
                     });
                     setView('map');
-                    setToast('🎃 Your house is now on the map!');
+                    
+                    if (formData.isDestination === false) {
+                        setToast('🎃 Thanks for registering! Happy trick-or-treating!');
+                    } else {
+                        setToast('🎃 Your house is now on the map!');
+                    }
                 } catch (error) {
                     console.error('Error submitting:', error);
                     setToast('Something went wrong. Please try again.');
@@ -430,11 +445,21 @@
                             <div className="space-y-4">
                                 {/* Stats Card */}
                                 <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
-                                    <div className="flex items-center justify-between mb-3">
+                                    <div className="grid grid-cols-2 gap-4 mb-3">
                                         <div>
-                                            <div className="text-2xl font-bold text-orange-400">{registrations.length}</div>
+                                            <div className="text-2xl font-bold text-orange-400">
+                                                {registrations.filter(r => r.Address).length}
+                                            </div>
                                             <div className="text-sm text-purple-200">Houses Participating</div>
                                         </div>
+                                        <div>
+                                            <div className="text-2xl font-bold text-purple-300">
+                                                {registrations.filter(r => !r.Address).reduce((sum, r) => sum + (parseInt(r.GroupSize) || 0), 0)}
+                                            </div>
+                                            <div className="text-sm text-purple-200">People Trick-or-Treating</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between mb-3">
                                         <div className="flex gap-2">
                                             <div className="flex flex-col items-center">
                                                 <div className="w-10 h-10 rounded-full bg-orange-500/20 border border-orange-500 flex items-center justify-center">
@@ -536,11 +561,11 @@
                                 <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
                                     <h2 className="font-bold text-lg mb-1 text-orange-400">All Houses</h2>
                                     <p className="text-xs text-purple-400 mb-4">Tap 🎃 to track your progress</p>
-                                    {registrations.length === 0 ? (
+                                    {registrations.filter(r => r.Address).length === 0 ? (
                                         <p className="text-purple-300 text-center py-8">No registrations yet. Be the first! 👻</p>
                                     ) : (
                                         <div className="space-y-3">
-                                            {registrations.map((reg, idx) => {
+                                            {registrations.filter(r => r.Address).map((reg, idx) => {
                                                 const { Icon, color } = getPrimaryIcon(reg);
                                                 const types = getParticipationTypes(reg);
                                                 const isVisited = visitedHouses.includes(reg.Address);
@@ -598,12 +623,101 @@
                         ) : (
                             <div className="max-w-2xl mx-auto">
                                 <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-6">
-                                    <h2 className="text-2xl font-bold text-orange-400 mb-2">Register Your House</h2>
+                                    <h2 className="text-2xl font-bold text-orange-400 mb-2">Join Glenheatherween!</h2>
                                     <p className="text-purple-200 mb-6 text-sm sm:text-base">
-                                        Let neighbors know how you're participating this Halloween!
+                                        Help your neighbors plan their Halloween night!
                                     </p>
 
-                                    <div className="space-y-5">
+                                    {formData.isDestination === null ? (
+                                        // Step 1: Choose participation type
+                                        <div className="space-y-4">
+                                            <h3 className="text-lg font-semibold text-orange-300 mb-4">How are you participating?</h3>
+                                            
+                                            <button
+                                                onClick={() => setFormData({...formData, isDestination: true})}
+                                                className="w-full p-6 border-2 border-purple-700 rounded-xl hover:bg-orange-500/10 hover:border-orange-500 cursor-pointer transition text-left"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-4xl">🏠</div>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold text-lg text-orange-300 mb-1">
+                                                            My house is a destination
+                                                        </div>
+                                                        <div className="text-sm text-purple-300">
+                                                            Handing out candy, have decorations, or hosting a special event
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </button>
+
+                                            <button
+                                                onClick={() => setFormData({...formData, isDestination: false})}
+                                                className="w-full p-6 border-2 border-purple-700 rounded-xl hover:bg-purple-500/10 hover:border-purple-400 cursor-pointer transition text-left"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-4xl">👻</div>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold text-lg text-purple-300 mb-1">
+                                                            Just trick-or-treating
+                                                        </div>
+                                                        <div className="text-sm text-purple-300">
+                                                            Walking around the neighborhood getting candy
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    ) : formData.isDestination === false ? (
+                                        // Step 2a: Just trick-or-treating form
+                                        <div className="space-y-5">
+                                            <button
+                                                onClick={() => setFormData({...formData, isDestination: null})}
+                                                className="text-sm text-purple-300 hover:text-orange-400 mb-4"
+                                            >
+                                                ← Back
+                                            </button>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-semibold text-orange-300 mb-2">
+                                                    How many people in your group?
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={formData.groupSize}
+                                                    onChange={(e) => setFormData({...formData, groupSize: parseInt(e.target.value)})}
+                                                    className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100"
+                                                    disabled={submitting}
+                                                />
+                                                <p className="text-xs text-purple-400 mt-1">
+                                                    This helps candy distributors know how much to buy
+                                                </p>
+                                            </div>
+
+                                            <button
+                                                onClick={handleSubmit}
+                                                disabled={submitting}
+                                                className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-600 hover:to-purple-700 active:from-purple-700 active:to-purple-800 transition shadow-lg disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                            >
+                                                {submitting ? (
+                                                    <>
+                                                        <Loader className="w-5 h-5 animate-spin" />
+                                                        <span>Registering...</span>
+                                                    </>
+                                                ) : (
+                                                    '👻 Register for Trick-or-Treating'
+                                                )}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        // Step 2b: House destination form
+                                        <div className="space-y-5">
+                                            <button
+                                                onClick={() => setFormData({...formData, isDestination: null})}
+                                                className="text-sm text-purple-300 hover:text-orange-400 mb-4"
+                                            >
+                                                ← Back
+                                            </button>
                                         <div>
                                             <label className="block text-sm font-semibold text-orange-300 mb-2">
                                                 Your Address *
@@ -729,6 +843,7 @@
                                             )}
                                         </button>
                                     </div>
+                                    )}
                                 </div>
                             </div>
                         )}
