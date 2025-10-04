@@ -16,7 +16,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbz3awYhFv_FZqu-oCM1wfqOQT3QmJi3ghCY2Kk8HAG8HwFZYfq-wo2ybgTjwKHeTozt/exec';
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzyzK9-BbucJ29AXNV9FKkXox3rjF1VNwHY0RDykBh87hAYk8BTtD3kYT0w8HOYRDTI/exec';
 
         // Lucide icons as inline SVG components
         const Home = ({ className }) => (
@@ -66,8 +66,15 @@
             });
             
             const [registrations, setRegistrations] = useState([]);
+            const [activeFilters, setActiveFilters] = useState({
+                trickOrTreat: true,
+                decorations: true,
+                specialEvent: true
+            });
             const addressInputRef = useRef(null);
             const autocompleteRef = useRef(null);
+            const mapRef = useRef(null);
+            const markersRef = useRef([]);
 
             useEffect(() => {
                 loadRegistrations();
@@ -105,6 +112,145 @@
                     });
                 }
             }, [view]);
+
+            // Initialize Google Map
+            useEffect(() => {
+                if (view === 'map' && window.google && !loading) {
+                    // Clear existing markers
+                    markersRef.current.forEach(marker => marker.setMap(null));
+                    markersRef.current = [];
+
+                    // Default center (Las Vegas area)
+                    let center = { lat: 36.175, lng: -115.136 };
+                    let zoom = 13;
+
+                    // If we have registrations with coordinates, center on them
+                    if (registrations.length > 0) {
+                        const validCoords = registrations.filter(r => r.Latitude && r.Longitude);
+                        
+                        if (validCoords.length > 0) {
+                            // Calculate center from all points
+                            const avgLat = validCoords.reduce((sum, r) => sum + parseFloat(r.Latitude), 0) / validCoords.length;
+                            const avgLng = validCoords.reduce((sum, r) => sum + parseFloat(r.Longitude), 0) / validCoords.length;
+                            center = { lat: avgLat, lng: avgLng };
+                            zoom = 15;
+                        }
+                    }
+
+                    // Create map
+                    const map = new window.google.maps.Map(document.getElementById('map'), {
+                        center: center,
+                        zoom: zoom,
+                        styles: [
+                            {
+                                featureType: 'poi',
+                                elementType: 'labels',
+                                stylers: [{ visibility: 'off' }]
+                            }
+                        ]
+                    });
+
+                    mapRef.current = map;
+
+                    // Add markers for each registration
+                    registrations.forEach(reg => {
+                        if (!reg.Latitude || !reg.Longitude) return;
+
+                        const lat = parseFloat(reg.Latitude);
+                        const lng = parseFloat(reg.Longitude);
+
+                        // Determine marker color based on participation type
+                        let pinColor = '#f97316'; // orange for trick-or-treat
+                        let iconLabel = '🏠';
+                        
+                        if (reg.SpecialEvent) {
+                            pinColor = '#eab308'; // yellow for special event
+                            iconLabel = '⭐';
+                        } else if (reg.TrickOrTreat) {
+                            pinColor = '#f97316'; // orange
+                            iconLabel = '🏠';
+                        } else if (reg.Decorations) {
+                            pinColor = '#a855f7'; // purple
+                            iconLabel = '👻';
+                        }
+
+                        // Create custom marker
+                        const marker = new window.google.maps.Marker({
+                            position: { lat, lng },
+                            map: map,
+                            title: reg.Address,
+                            icon: {
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: 12,
+                                fillColor: pinColor,
+                                fillOpacity: 1,
+                                strokeColor: '#ffffff',
+                                strokeWeight: 2
+                            },
+                            label: {
+                                text: iconLabel,
+                                fontSize: '16px'
+                            }
+                        });
+
+                        // Store metadata for filtering
+                        marker.metadata = {
+                            trickOrTreat: reg.TrickOrTreat,
+                            decorations: reg.Decorations,
+                            specialEvent: reg.SpecialEvent
+                        };
+
+                        // Build activities list for info window
+                        const activities = [];
+                        if (reg.TrickOrTreat) activities.push('🏠 Trick-or-Treat');
+                        if (reg.Decorations) activities.push('👻 Decorations');
+                        if (reg.SpecialEvent) activities.push('⭐ Special Event');
+
+                        // Create info window content
+                        const infoContent = `
+                            <div style="padding: 8px; max-width: 250px;">
+                                <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">${reg.Address}</div>
+                                ${reg.Name ? `<div style="color: #666; font-size: 14px; margin-bottom: 8px;">${reg.Name}</div>` : ''}
+                                <div style="margin-bottom: 4px;">
+                                    ${activities.map(a => `<div style="font-size: 14px; margin: 2px 0;">${a}</div>`).join('')}
+                                </div>
+                                ${reg.Notes ? `<div style="font-style: italic; color: #666; font-size: 13px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;">"${reg.Notes}"</div>` : ''}
+                            </div>
+                        `;
+
+                        const infoWindow = new window.google.maps.InfoWindow({
+                            content: infoContent
+                        });
+
+                        marker.addListener('click', () => {
+                            infoWindow.open(map, marker);
+                        });
+
+                        markersRef.current.push(marker);
+                    });
+
+                    // Fit bounds to show all markers if we have multiple
+                    if (markersRef.current.length > 1) {
+                        const bounds = new window.google.maps.LatLngBounds();
+                        markersRef.current.forEach(marker => {
+                            bounds.extend(marker.getPosition());
+                        });
+                        map.fitBounds(bounds);
+                    }
+                }
+            }, [view, registrations, loading]);
+
+            // Apply filters to markers
+            useEffect(() => {
+                markersRef.current.forEach(marker => {
+                    const shouldShow = 
+                        (marker.metadata.trickOrTreat && activeFilters.trickOrTreat) ||
+                        (marker.metadata.decorations && activeFilters.decorations) ||
+                        (marker.metadata.specialEvent && activeFilters.specialEvent);
+                    
+                    marker.setVisible(shouldShow);
+                });
+            }, [activeFilters]);
 
             const loadRegistrations = async () => {
                 try {
@@ -254,14 +400,55 @@
                                 </div>
 
                                 <div className="bg-white rounded-xl shadow-sm p-4">
-                                    <h2 className="font-bold text-lg mb-3 text-gray-900">Map View</h2>
-                                    <div className="bg-gray-100 rounded-lg h-64 sm:h-96 flex items-center justify-center text-gray-500">
-                                        <div className="text-center p-4">
-                                            <MapPin className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                                            <p className="font-medium">Interactive Map</p>
-                                            <p className="text-xs sm:text-sm">Will show all houses with pins</p>
-                                        </div>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h2 className="font-bold text-lg text-gray-900">Map View</h2>
+                                        <button
+                                            onClick={() => setActiveFilters({ trickOrTreat: true, decorations: true, specialEvent: true })}
+                                            className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+                                        >
+                                            Show All
+                                        </button>
                                     </div>
+                                    
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                        <button
+                                            onClick={() => setActiveFilters(prev => ({ ...prev, trickOrTreat: !prev.trickOrTreat }))}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                                activeFilters.trickOrTreat
+                                                    ? 'bg-orange-100 text-orange-700 border-2 border-orange-400'
+                                                    : 'bg-gray-100 text-gray-500 border-2 border-transparent'
+                                            }`}
+                                        >
+                                            <Home className="w-4 h-4" />
+                                            <span>Trick-or-Treat</span>
+                                        </button>
+                                        
+                                        <button
+                                            onClick={() => setActiveFilters(prev => ({ ...prev, decorations: !prev.decorations }))}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                                activeFilters.decorations
+                                                    ? 'bg-purple-100 text-purple-700 border-2 border-purple-400'
+                                                    : 'bg-gray-100 text-gray-500 border-2 border-transparent'
+                                            }`}
+                                        >
+                                            <Ghost className="w-4 h-4" />
+                                            <span>Decorations</span>
+                                        </button>
+                                        
+                                        <button
+                                            onClick={() => setActiveFilters(prev => ({ ...prev, specialEvent: !prev.specialEvent }))}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                                activeFilters.specialEvent
+                                                    ? 'bg-yellow-100 text-yellow-700 border-2 border-yellow-400'
+                                                    : 'bg-gray-100 text-gray-500 border-2 border-transparent'
+                                            }`}
+                                        >
+                                            <Star className="w-4 h-4" />
+                                            <span>Special Events</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="map" className="rounded-lg h-64 sm:h-96 w-full"></div>
                                 </div>
 
                                 <div className="bg-white rounded-xl shadow-sm p-4">
