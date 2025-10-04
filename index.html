@@ -8,12 +8,13 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgIBD1QfLtQv1w1SfuBAoVjYd0HC3pIUE&libraries=places"></script>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
         const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzyzK9-BbucJ29AXNV9FKkXox3rjF1VNwHY0RDykBh87hAYk8BTtD3kYT0w8HOYRDTI/exec';
 
@@ -59,14 +60,51 @@
                 trickOrTreat: false,
                 decorations: false,
                 specialEvent: false,
-                notes: ''
+                notes: '',
+                lat: null,
+                lng: null
             });
             
             const [registrations, setRegistrations] = useState([]);
+            const addressInputRef = useRef(null);
+            const autocompleteRef = useRef(null);
 
             useEffect(() => {
                 loadRegistrations();
             }, []);
+
+            // Initialize Google Places Autocomplete
+            useEffect(() => {
+                if (view === 'register' && addressInputRef.current && window.google) {
+                    // Create autocomplete instance
+                    autocompleteRef.current = new window.google.maps.places.Autocomplete(
+                        addressInputRef.current,
+                        {
+                            types: ['address'],
+                            componentRestrictions: { country: 'us' },
+                            // Bias results to Las Vegas area
+                            bounds: new window.google.maps.LatLngBounds(
+                                new window.google.maps.LatLng(36.0, -115.3),
+                                new window.google.maps.LatLng(36.3, -115.0)
+                            )
+                        }
+                    );
+
+                    // Listen for place selection
+                    autocompleteRef.current.addListener('place_changed', () => {
+                        const place = autocompleteRef.current.getPlace();
+                        
+                        if (place.geometry) {
+                            setFormData(prev => ({
+                                ...prev,
+                                address: place.formatted_address,
+                                lat: place.geometry.location.lat(),
+                                lng: place.geometry.location.lng()
+                            }));
+                        }
+                    });
+                }
+            }, [view]);
 
             const loadRegistrations = async () => {
                 try {
@@ -105,7 +143,6 @@
                         body: JSON.stringify(formData)
                     });
 
-                    // Wait a moment for the sheet to update
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     await loadRegistrations();
                     
@@ -116,7 +153,9 @@
                         trickOrTreat: false,
                         decorations: false,
                         specialEvent: false,
-                        notes: '' 
+                        notes: '',
+                        lat: null,
+                        lng: null
                     });
                     setView('map');
                 } catch (error) {
@@ -284,13 +323,15 @@
                                                 Your Address *
                                             </label>
                                             <input
+                                                ref={addressInputRef}
                                                 type="text"
                                                 value={formData.address}
                                                 onChange={(e) => setFormData({...formData, address: e.target.value})}
                                                 className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                                                placeholder="123 Main Street"
+                                                placeholder="Start typing your address..."
                                                 disabled={submitting}
                                             />
+                                            <p className="text-xs text-gray-500 mt-1">Start typing and select from suggestions</p>
                                         </div>
 
                                         <div>
