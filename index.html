@@ -9,6 +9,48 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgIBD1QfLtQv1w1SfuBAoVjYd0HC3pIUE&libraries=places"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%);
+        }
+        
+        .bat {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        .cobweb {
+            position: absolute;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
@@ -16,7 +58,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzyzK9-BbucJ29AXNV9FKkXox3rjF1VNwHY0RDykBh87hAYk8BTtD3kYT0w8HOYRDTI/exec';
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyMcohsOIeAaB-0PmZvuVAVqxb28XWfhyTmqgKLHR9rLJOp3jqg0JfXqIXq9mNqFi0/exec';
 
         // Lucide icons as inline SVG components
         const Home = ({ className }) => (
@@ -50,10 +92,20 @@
             </svg>
         );
 
+        function Toast({ message, onClose }) {
+            useEffect(() => {
+                const timer = setTimeout(onClose, 3000);
+                return () => clearTimeout(timer);
+            }, [onClose]);
+
+            return <div className="toast">{message}</div>;
+        }
+
         function App() {
             const [view, setView] = useState('map');
             const [loading, setLoading] = useState(true);
             const [submitting, setSubmitting] = useState(false);
+            const [toast, setToast] = useState(null);
             const [formData, setFormData] = useState({
                 address: '',
                 name: '',
@@ -66,6 +118,10 @@
             });
             
             const [registrations, setRegistrations] = useState([]);
+            const [visitedHouses, setVisitedHouses] = useState(() => {
+                const saved = localStorage.getItem('visitedHouses');
+                return saved ? JSON.parse(saved) : [];
+            });
             const [activeFilters, setActiveFilters] = useState({
                 trickOrTreat: true,
                 decorations: true,
@@ -80,16 +136,26 @@
                 loadRegistrations();
             }, []);
 
+            useEffect(() => {
+                localStorage.setItem('visitedHouses', JSON.stringify(visitedHouses));
+            }, [visitedHouses]);
+
+            const toggleVisited = (address) => {
+                setVisitedHouses(prev => 
+                    prev.includes(address) 
+                        ? prev.filter(a => a !== address)
+                        : [...prev, address]
+                );
+            };
+
             // Initialize Google Places Autocomplete
             useEffect(() => {
                 if (view === 'register' && addressInputRef.current && window.google) {
-                    // Create autocomplete instance
                     autocompleteRef.current = new window.google.maps.places.Autocomplete(
                         addressInputRef.current,
                         {
                             types: ['address'],
                             componentRestrictions: { country: 'us' },
-                            // Bias results to Las Vegas area
                             bounds: new window.google.maps.LatLngBounds(
                                 new window.google.maps.LatLng(36.0, -115.3),
                                 new window.google.maps.LatLng(36.3, -115.0)
@@ -97,7 +163,6 @@
                         }
                     );
 
-                    // Listen for place selection
                     autocompleteRef.current.addListener('place_changed', () => {
                         const place = autocompleteRef.current.getPlace();
                         
@@ -116,20 +181,16 @@
             // Initialize Google Map
             useEffect(() => {
                 if (view === 'map' && window.google && !loading) {
-                    // Clear existing markers
                     markersRef.current.forEach(marker => marker.setMap(null));
                     markersRef.current = [];
 
-                    // Default center (Las Vegas area)
                     let center = { lat: 36.175, lng: -115.136 };
                     let zoom = 13;
 
-                    // If we have registrations with coordinates, center on them
                     if (registrations.length > 0) {
                         const validCoords = registrations.filter(r => r.Latitude && r.Longitude);
                         
                         if (validCoords.length > 0) {
-                            // Calculate center from all points
                             const avgLat = validCoords.reduce((sum, r) => sum + parseFloat(r.Latitude), 0) / validCoords.length;
                             const avgLng = validCoords.reduce((sum, r) => sum + parseFloat(r.Longitude), 0) / validCoords.length;
                             center = { lat: avgLat, lng: avgLng };
@@ -137,44 +198,58 @@
                         }
                     }
 
-                    // Create map
                     const map = new window.google.maps.Map(document.getElementById('map'), {
                         center: center,
                         zoom: zoom,
                         styles: [
+                            { elementType: 'geometry', stylers: [{ color: '#1a0b2e' }] },
+                            { elementType: 'labels.text.stroke', stylers: [{ color: '#1a0b2e' }] },
+                            { elementType: 'labels.text.fill', stylers: [{ color: '#9333ea' }] },
+                            {
+                                featureType: 'road',
+                                elementType: 'geometry',
+                                stylers: [{ color: '#2d1b4e' }]
+                            },
+                            {
+                                featureType: 'road',
+                                elementType: 'geometry.stroke',
+                                stylers: [{ color: '#1a0b2e' }]
+                            },
                             {
                                 featureType: 'poi',
                                 elementType: 'labels',
                                 stylers: [{ visibility: 'off' }]
+                            },
+                            {
+                                featureType: 'water',
+                                elementType: 'geometry',
+                                stylers: [{ color: '#0f0621' }]
                             }
                         ]
                     });
 
                     mapRef.current = map;
 
-                    // Add markers for each registration
                     registrations.forEach(reg => {
                         if (!reg.Latitude || !reg.Longitude) return;
 
                         const lat = parseFloat(reg.Latitude);
                         const lng = parseFloat(reg.Longitude);
 
-                        // Determine marker color based on participation type
-                        let pinColor = '#f97316'; // orange for trick-or-treat
+                        let pinColor = '#f97316';
                         let iconLabel = '🏠';
                         
                         if (reg.SpecialEvent) {
-                            pinColor = '#eab308'; // yellow for special event
+                            pinColor = '#eab308';
                             iconLabel = '⭐';
                         } else if (reg.TrickOrTreat) {
-                            pinColor = '#f97316'; // orange
+                            pinColor = '#f97316';
                             iconLabel = '🏠';
                         } else if (reg.Decorations) {
-                            pinColor = '#a855f7'; // purple
+                            pinColor = '#a855f7';
                             iconLabel = '👻';
                         }
 
-                        // Create custom marker
                         const marker = new window.google.maps.Marker({
                             position: { lat, lng },
                             map: map,
@@ -193,20 +268,17 @@
                             }
                         });
 
-                        // Store metadata for filtering
                         marker.metadata = {
                             trickOrTreat: reg.TrickOrTreat,
                             decorations: reg.Decorations,
                             specialEvent: reg.SpecialEvent
                         };
 
-                        // Build activities list for info window
                         const activities = [];
                         if (reg.TrickOrTreat) activities.push('🏠 Trick-or-Treat');
                         if (reg.Decorations) activities.push('👻 Decorations');
                         if (reg.SpecialEvent) activities.push('⭐ Special Event');
 
-                        // Create info window content
                         const infoContent = `
                             <div style="padding: 8px; max-width: 250px;">
                                 <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">${reg.Address}</div>
@@ -229,7 +301,6 @@
                         markersRef.current.push(marker);
                     });
 
-                    // Fit bounds to show all markers if we have multiple
                     if (markersRef.current.length > 1) {
                         const bounds = new window.google.maps.LatLngBounds();
                         markersRef.current.forEach(marker => {
@@ -240,7 +311,6 @@
                 }
             }, [view, registrations, loading]);
 
-            // Apply filters to markers
             useEffect(() => {
                 markersRef.current.forEach(marker => {
                     const shouldShow = 
@@ -260,7 +330,7 @@
                     setRegistrations(data);
                 } catch (error) {
                     console.error('Error loading registrations:', error);
-                    alert('Could not load registrations. Please refresh the page.');
+                    setToast('Could not load registrations. Please refresh.');
                 } finally {
                     setLoading(false);
                 }
@@ -268,12 +338,12 @@
 
             const handleSubmit = async () => {
                 if (!formData.address) {
-                    alert('Please enter your address');
+                    setToast('Please enter your address');
                     return;
                 }
                 
                 if (!formData.trickOrTreat && !formData.decorations && !formData.specialEvent) {
-                    alert('Please select at least one participation type');
+                    setToast('Please select at least one participation type');
                     return;
                 }
 
@@ -292,7 +362,6 @@
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     await loadRegistrations();
                     
-                    alert('Thanks for registering! Your house is now on the map.');
                     setFormData({ 
                         address: '', 
                         name: '', 
@@ -304,9 +373,10 @@
                         lng: null
                     });
                     setView('map');
+                    setToast('🎃 Your house is now on the map!');
                 } catch (error) {
                     console.error('Error submitting:', error);
-                    alert('Something went wrong. Please try again.');
+                    setToast('Something went wrong. Please try again.');
                 } finally {
                     setSubmitting(false);
                 }
@@ -314,14 +384,14 @@
 
             const getParticipationTypes = (reg) => {
                 const types = [];
-                if (reg.TrickOrTreat) types.push({ icon: Home, label: 'Trick-or-Treat', color: 'text-orange-500' });
-                if (reg.Decorations) types.push({ icon: Ghost, label: 'Decorations', color: 'text-purple-500' });
-                if (reg.SpecialEvent) types.push({ icon: Star, label: 'Special Event', color: 'text-yellow-500' });
+                if (reg.TrickOrTreat) types.push({ icon: Home, label: 'Trick-or-Treat', color: 'text-orange-400' });
+                if (reg.Decorations) types.push({ icon: Ghost, label: 'Decorations', color: 'text-purple-400' });
+                if (reg.SpecialEvent) types.push({ icon: Star, label: 'Special Event', color: 'text-yellow-400' });
                 return types;
             };
 
             const getPrimaryIcon = (reg) => {
-                if (reg.SpecialEvent) return { Icon: Star, color: 'bg-yellow-400' };
+                if (reg.SpecialEvent) return { Icon: Star, color: 'bg-yellow-500' };
                 if (reg.TrickOrTreat) return { Icon: Home, color: 'bg-orange-500' };
                 if (reg.Decorations) return { Icon: Ghost, color: 'bg-purple-500' };
                 return { Icon: MapPin, color: 'bg-gray-400' };
@@ -329,82 +399,104 @@
 
             if (loading) {
                 return (
-                    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-purple-50 flex items-center justify-center">
+                    <div className="min-h-screen flex items-center justify-center">
                         <div className="text-center">
                             <Loader className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
-                            <p className="text-gray-600">Loading Halloween map...</p>
+                            <p className="text-purple-300">Loading Halloween map...</p>
                         </div>
                     </div>
                 );
             }
 
             return (
-                <div className="min-h-screen bg-gradient-to-br from-orange-50 to-purple-50 pb-20">
-                    <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+                <div className="min-h-screen pb-20 relative overflow-hidden">
+                    {/* Decorations */}
+                    <div className="bat" style={{ top: '10%', left: '5%', animationDelay: '0s' }}>🦇</div>
+                    <div className="bat" style={{ top: '15%', right: '8%', animationDelay: '2s' }}>🦇</div>
+                    <div className="bat" style={{ top: '60%', left: '10%', animationDelay: '4s' }}>🦇</div>
+                    <div className="bat" style={{ top: '70%', right: '15%', animationDelay: '1s' }}>🦇</div>
+                    
+                    <svg className="cobweb" style={{ top: 0, left: 0, width: '150px', height: '150px' }}>
+                        <path d="M0,0 L150,0 L75,75 Z M0,0 L0,150 L75,75 Z" fill="none" stroke="white" strokeWidth="1"/>
+                        <path d="M0,30 L45,45 M0,60 L45,60 M0,90 L45,75" stroke="white" strokeWidth="0.5"/>
+                    </svg>
+                    
+                    <svg className="cobweb" style={{ top: 0, right: 0, width: '150px', height: '150px', transform: 'scaleX(-1)' }}>
+                        <path d="M0,0 L150,0 L75,75 Z M0,0 L0,150 L75,75 Z" fill="none" stroke="white" strokeWidth="1"/>
+                        <path d="M0,30 L45,45 M0,60 L45,60 M0,90 L45,75" stroke="white" strokeWidth="0.5"/>
+                    </svg>
+
+                    {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-purple-900 to-orange-900 shadow-lg border-b-2 border-orange-500 sticky top-0 z-10">
                         <div className="max-w-4xl mx-auto px-4 py-4">
-                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">🎃 Halloween 2025</h1>
-                            <p className="text-xs sm:text-sm text-gray-600">Neighborhood Trick-or-Treat Map</p>
+                            <h1 className="text-xl sm:text-2xl font-bold text-orange-400">🎃 Halloween 2025</h1>
+                            <p className="text-xs sm:text-sm text-purple-200">Neighborhood Trick-or-Treat Map</p>
                         </div>
                     </div>
 
+                    {/* Main Content */}
                     <div className="max-w-4xl mx-auto px-4 py-4">
                         {view === 'map' ? (
                             <div className="space-y-4">
-                                <div className="bg-white rounded-xl shadow-sm p-4">
+                                {/* Stats Card */}
+                                <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
                                     <div className="flex items-center justify-between mb-3">
                                         <div>
-                                            <div className="text-2xl font-bold text-gray-900">{registrations.length}</div>
-                                            <div className="text-sm text-gray-600">Houses Participating</div>
+                                            <div className="text-2xl font-bold text-orange-400">{registrations.length}</div>
+                                            <div className="text-sm text-purple-200">Houses Participating</div>
                                         </div>
                                         <div className="flex gap-2">
                                             <div className="flex flex-col items-center">
-                                                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                                                    <Home className="w-5 h-5 text-orange-500" />
+                                                <div className="w-10 h-10 rounded-full bg-orange-500/20 border border-orange-500 flex items-center justify-center">
+                                                    <Home className="w-5 h-5 text-orange-400" />
                                                 </div>
-                                                <div className="text-xs text-gray-600 mt-1">
+                                                <div className="text-xs text-purple-200 mt-1">
                                                     {registrations.filter(r => r.TrickOrTreat).length}
                                                 </div>
                                             </div>
                                             <div className="flex flex-col items-center">
-                                                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                                    <Ghost className="w-5 h-5 text-purple-500" />
+                                                <div className="w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500 flex items-center justify-center">
+                                                    <Ghost className="w-5 h-5 text-purple-400" />
                                                 </div>
-                                                <div className="text-xs text-gray-600 mt-1">
+                                                <div className="text-xs text-purple-200 mt-1">
                                                     {registrations.filter(r => r.Decorations).length}
                                                 </div>
                                             </div>
                                             <div className="flex flex-col items-center">
-                                                <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                                                    <Star className="w-5 h-5 text-yellow-500" />
+                                                <div className="w-10 h-10 rounded-full bg-yellow-500/20 border border-yellow-500 flex items-center justify-center">
+                                                    <Star className="w-5 h-5 text-yellow-400" />
                                                 </div>
-                                                <div className="text-xs text-gray-600 mt-1">
+                                                <div className="text-xs text-purple-200 mt-1">
                                                     {registrations.filter(r => r.SpecialEvent).length}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="text-xs text-gray-500 space-y-1">
+                                    <div className="text-xs text-purple-300 space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <Home className="w-3 h-3 text-orange-500" />
+                                            <Home className="w-3 h-3 text-orange-400" />
                                             <span>Handing out candy</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Ghost className="w-3 h-3 text-purple-500" />
+                                            <Ghost className="w-3 h-3 text-purple-400" />
                                             <span>Cool decorations</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Star className="w-3 h-3 text-yellow-500" />
+                                            <Star className="w-3 h-3 text-yellow-400" />
                                             <span>Special event</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-xl shadow-sm p-4">
+                                {/* Map */}
+                                <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h2 className="font-bold text-lg text-gray-900">Map View</h2>
+                                        <h2 className="font-bold text-lg text-orange-400">Map View</h2>
                                         <button
                                             onClick={() => setActiveFilters({ trickOrTreat: true, decorations: true, specialEvent: true })}
-                                            className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+                                            className="text-xs text-purple-300 hover:text-orange-400 font-medium transition"
                                         >
                                             Show All
                                         </button>
@@ -415,8 +507,8 @@
                                             onClick={() => setActiveFilters(prev => ({ ...prev, trickOrTreat: !prev.trickOrTreat }))}
                                             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
                                                 activeFilters.trickOrTreat
-                                                    ? 'bg-orange-100 text-orange-700 border-2 border-orange-400'
-                                                    : 'bg-gray-100 text-gray-500 border-2 border-transparent'
+                                                    ? 'bg-orange-500/30 text-orange-300 border-2 border-orange-500'
+                                                    : 'bg-purple-800/50 text-purple-400 border-2 border-transparent'
                                             }`}
                                         >
                                             <Home className="w-4 h-4" />
@@ -427,8 +519,8 @@
                                             onClick={() => setActiveFilters(prev => ({ ...prev, decorations: !prev.decorations }))}
                                             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
                                                 activeFilters.decorations
-                                                    ? 'bg-purple-100 text-purple-700 border-2 border-purple-400'
-                                                    : 'bg-gray-100 text-gray-500 border-2 border-transparent'
+                                                    ? 'bg-purple-500/30 text-purple-300 border-2 border-purple-400'
+                                                    : 'bg-purple-800/50 text-purple-400 border-2 border-transparent'
                                             }`}
                                         >
                                             <Ghost className="w-4 h-4" />
@@ -439,8 +531,8 @@
                                             onClick={() => setActiveFilters(prev => ({ ...prev, specialEvent: !prev.specialEvent }))}
                                             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
                                                 activeFilters.specialEvent
-                                                    ? 'bg-yellow-100 text-yellow-700 border-2 border-yellow-400'
-                                                    : 'bg-gray-100 text-gray-500 border-2 border-transparent'
+                                                    ? 'bg-yellow-500/30 text-yellow-300 border-2 border-yellow-400'
+                                                    : 'bg-purple-800/50 text-purple-400 border-2 border-transparent'
                                             }`}
                                         >
                                             <Star className="w-4 h-4" />
@@ -448,42 +540,59 @@
                                         </button>
                                     </div>
                                     
-                                    <div id="map" className="rounded-lg h-64 sm:h-96 w-full"></div>
+                                    <div id="map" className="rounded-lg h-96 sm:h-[500px] w-full border-2 border-purple-700"></div>
                                 </div>
 
-                                <div className="bg-white rounded-xl shadow-sm p-4">
-                                    <h2 className="font-bold text-lg mb-4 text-gray-900">All Houses</h2>
+                                {/* List of Houses */}
+                                <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
+                                    <h2 className="font-bold text-lg mb-4 text-orange-400">All Houses</h2>
                                     {registrations.length === 0 ? (
-                                        <p className="text-gray-500 text-center py-8">No registrations yet. Be the first!</p>
+                                        <p className="text-purple-300 text-center py-8">No registrations yet. Be the first! 👻</p>
                                     ) : (
                                         <div className="space-y-3">
                                             {registrations.map((reg, idx) => {
                                                 const { Icon, color } = getPrimaryIcon(reg);
                                                 const types = getParticipationTypes(reg);
+                                                const isVisited = visitedHouses.includes(reg.Address);
                                                 
                                                 return (
-                                                    <div key={idx} className="border-l-4 border-orange-400 bg-orange-50 rounded-lg p-4">
+                                                    <div key={idx} className={`border-l-4 border-orange-500 rounded-lg p-4 transition ${
+                                                        isVisited 
+                                                            ? 'bg-purple-900/40 opacity-60' 
+                                                            : 'bg-purple-800/40'
+                                                    }`}>
                                                         <div className="flex items-start gap-3">
                                                             <div className={`w-10 h-10 rounded-full ${color} flex items-center justify-center flex-shrink-0`}>
                                                                 <Icon className="w-5 h-5 text-white" />
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <div className="font-semibold text-gray-900 text-base">
-                                                                    {reg.Address}
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="font-semibold text-orange-300 text-base">
+                                                                        {reg.Address}
+                                                                    </div>
+                                                                    <label className="flex items-center gap-1 cursor-pointer">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={isVisited}
+                                                                            onChange={() => toggleVisited(reg.Address)}
+                                                                            className="w-4 h-4"
+                                                                        />
+                                                                        <span className="text-xs text-purple-300">Visited</span>
+                                                                    </label>
                                                                 </div>
                                                                 {reg.Name && (
-                                                                    <div className="text-sm text-gray-600 mt-1">{reg.Name}</div>
+                                                                    <div className="text-sm text-purple-200 mt-1">{reg.Name}</div>
                                                                 )}
                                                                 <div className="flex flex-wrap gap-2 mt-2">
                                                                     {types.map((type, i) => (
                                                                         <div key={i} className="flex items-center gap-1 text-xs">
                                                                             <type.icon className={`w-3 h-3 ${type.color}`} />
-                                                                            <span className="text-gray-700">{type.label}</span>
+                                                                            <span className="text-purple-200">{type.label}</span>
                                                                         </div>
                                                                     ))}
                                                                 </div>
                                                                 {reg.Notes && (
-                                                                    <div className="text-sm text-gray-600 mt-2 italic">
+                                                                    <div className="text-sm text-purple-300 mt-2 italic">
                                                                         "{reg.Notes}"
                                                                     </div>
                                                                 )}
@@ -498,15 +607,15 @@
                             </div>
                         ) : (
                             <div className="max-w-2xl mx-auto">
-                                <div className="bg-white rounded-xl shadow-sm p-6">
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Register Your House</h2>
-                                    <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                                <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-6">
+                                    <h2 className="text-2xl font-bold text-orange-400 mb-2">Register Your House</h2>
+                                    <p className="text-purple-200 mb-6 text-sm sm:text-base">
                                         Let neighbors know how you're participating this Halloween!
                                     </p>
 
                                     <div className="space-y-5">
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                            <label className="block text-sm font-semibold text-orange-300 mb-2">
                                                 Your Address *
                                             </label>
                                             <input
@@ -514,34 +623,34 @@
                                                 type="text"
                                                 value={formData.address}
                                                 onChange={(e) => setFormData({...formData, address: e.target.value})}
-                                                className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                                className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
                                                 placeholder="Start typing your address..."
                                                 disabled={submitting}
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">Start typing and select from suggestions</p>
+                                            <p className="text-xs text-purple-400 mt-1">Start typing and select from suggestions</p>
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                            <label className="block text-sm font-semibold text-orange-300 mb-2">
                                                 Your Name
-                                                <span className="text-gray-400 font-normal ml-1">(optional)</span>
+                                                <span className="text-purple-400 font-normal ml-1">(optional)</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                                className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                                className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
                                                 placeholder="Smith Family"
                                                 disabled={submitting}
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-900 mb-3">
+                                            <label className="block text-sm font-semibold text-orange-300 mb-3">
                                                 How are you participating? *
                                             </label>
                                             <div className="space-y-3">
-                                                <label className="flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:bg-orange-50 cursor-pointer active:bg-orange-100 transition">
+                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-orange-500/10 hover:border-orange-500 cursor-pointer transition">
                                                     <input
                                                         type="checkbox"
                                                         checked={formData.trickOrTreat}
@@ -550,17 +659,17 @@
                                                         disabled={submitting}
                                                     />
                                                     <div className="flex-1">
-                                                        <div className="flex items-center gap-2 font-semibold text-gray-900">
-                                                            <Home className="w-5 h-5 text-orange-500" />
+                                                        <div className="flex items-center gap-2 font-semibold text-orange-300">
+                                                            <Home className="w-5 h-5 text-orange-400" />
                                                             <span>Handing Out Candy</span>
                                                         </div>
-                                                        <div className="text-sm text-gray-600 mt-1">
+                                                        <div className="text-sm text-purple-300 mt-1">
                                                             We'll be home for trick-or-treaters
                                                         </div>
                                                     </div>
                                                 </label>
 
-                                                <label className="flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:bg-purple-50 cursor-pointer active:bg-purple-100 transition">
+                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-purple-500/10 hover:border-purple-400 cursor-pointer transition">
                                                     <input
                                                         type="checkbox"
                                                         checked={formData.decorations}
@@ -569,17 +678,17 @@
                                                         disabled={submitting}
                                                     />
                                                     <div className="flex-1">
-                                                        <div className="flex items-center gap-2 font-semibold text-gray-900">
-                                                            <Ghost className="w-5 h-5 text-purple-500" />
+                                                        <div className="flex items-center gap-2 font-semibold text-purple-300">
+                                                            <Ghost className="w-5 h-5 text-purple-400" />
                                                             <span>Decorations to See</span>
                                                         </div>
-                                                        <div className="text-sm text-gray-600 mt-1">
+                                                        <div className="text-sm text-purple-300 mt-1">
                                                             We have cool decorations worth checking out
                                                         </div>
                                                     </div>
                                                 </label>
 
-                                                <label className="flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:bg-yellow-50 cursor-pointer active:bg-yellow-100 transition">
+                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-yellow-500/10 hover:border-yellow-400 cursor-pointer transition">
                                                     <input
                                                         type="checkbox"
                                                         checked={formData.specialEvent}
@@ -588,11 +697,11 @@
                                                         disabled={submitting}
                                                     />
                                                     <div className="flex-1">
-                                                        <div className="flex items-center gap-2 font-semibold text-gray-900">
-                                                            <Star className="w-5 h-5 text-yellow-500" />
+                                                        <div className="flex items-center gap-2 font-semibold text-yellow-300">
+                                                            <Star className="w-5 h-5 text-yellow-400" />
                                                             <span>Special Event</span>
                                                         </div>
-                                                        <div className="text-sm text-gray-600 mt-1">
+                                                        <div className="text-sm text-purple-300 mt-1">
                                                             Haunted house, games, or other special activity
                                                         </div>
                                                     </div>
@@ -601,14 +710,14 @@
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                            <label className="block text-sm font-semibold text-orange-300 mb-2">
                                                 Additional Details
-                                                <span className="text-gray-400 font-normal ml-1">(optional)</span>
+                                                <span className="text-purple-400 font-normal ml-1">(optional)</span>
                                             </label>
                                             <textarea
                                                 value={formData.notes}
                                                 onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                                                className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                                className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
                                                 rows="3"
                                                 placeholder="E.g., 'Haunted garage opens at 6pm' or 'Full size candy bars!'"
                                                 disabled={submitting}
@@ -618,7 +727,7 @@
                                         <button
                                             onClick={handleSubmit}
                                             disabled={submitting}
-                                            className="w-full bg-orange-500 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-600 active:bg-orange-700 transition shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 transition shadow-lg disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                         >
                                             {submitting ? (
                                                 <>
@@ -626,7 +735,7 @@
                                                     <span>Adding to Map...</span>
                                                 </>
                                             ) : (
-                                                'Add My House to the Map'
+                                                '🎃 Add My House to the Map'
                                             )}
                                         </button>
                                     </div>
@@ -635,14 +744,15 @@
                         )}
                     </div>
 
-                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+                    {/* Fixed Bottom Navigation */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-purple-900 to-orange-900 border-t-2 border-orange-500 shadow-lg">
                         <div className="max-w-4xl mx-auto px-4 py-3 flex gap-2">
                             <button
                                 onClick={() => setView('map')}
                                 className={`flex-1 py-3 rounded-lg font-semibold transition ${
                                     view === 'map'
-                                        ? 'bg-orange-500 text-white shadow-sm'
-                                        : 'bg-gray-100 text-gray-700 active:bg-gray-200'
+                                        ? 'bg-orange-500 text-white shadow-lg'
+                                        : 'bg-purple-800 text-purple-200 hover:bg-purple-700'
                                 }`}
                             >
                                 View Map
@@ -651,13 +761,18 @@
                                 onClick={() => setView('register')}
                                 className={`flex-1 py-3 rounded-lg font-semibold transition ${
                                     view === 'register'
-                                        ? 'bg-orange-500 text-white shadow-sm'
-                                        : 'bg-gray-100 text-gray-700 active:bg-gray-200'
+                                        ? 'bg-orange-500 text-white shadow-lg'
+                                        : 'bg-purple-800 text-purple-200 hover:bg-purple-700'
                                 }`}
                             >
                                 Register
                             </button>
                         </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="text-center py-6 text-purple-300 text-sm">
+                        Questions or issues? Email <a href="mailto:igoran89@gmail.com" className="text-orange-400 hover:text-orange-300 underline">igoran89@gmail.com</a>
                     </div>
                 </div>
             );
