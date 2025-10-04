@@ -459,7 +459,7 @@
                                         </div>
                                         <div>
                                             <div className="text-2xl font-bold text-purple-300">
-                                                {registrations.filter(r => !r.Address).reduce((sum, r) => sum + (parseInt(r.GroupSize) || 0), 0)}
+                                                {registrations.filter(r => r.IsTrickOrTreating).reduce((sum, r) => sum + (parseInt(r.GroupSize) || 0), 0)}
                                             </div>
                                             <div className="text-sm text-purple-200">People Trick-or-Treating</div>
                                         </div>
