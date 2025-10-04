@@ -42,7 +42,6 @@
 
         const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwGLXXe1hN-xeAhpk9pCXVJ91tU2WG8T2pTn7TOTctBzT6d-BOMLuA87Tas3cZ4uZwE/exec';
 
-        // Lucide icons as inline SVG components
         const Home = ({ className }) => (
             <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -122,12 +121,10 @@
                 loadRegistrations();
             }, []);
 
-            // Scroll to top when view changes
             useEffect(() => {
                 window.scrollTo(0, 0);
             }, [view]);
 
-            // Handle header shrinking on scroll
             useEffect(() => {
                 const handleScroll = () => {
                     setHeaderSmall(window.scrollY > 50);
@@ -149,7 +146,6 @@
                 );
             };
 
-            // Initialize Google Places Autocomplete
             useEffect(() => {
                 if (view === 'register' && formData.isDestination && addressInputRef.current && window.google) {
                     autocompleteRef.current = new window.google.maps.places.Autocomplete(
@@ -177,9 +173,8 @@
                         }
                     });
                 }
-            }, [view]);
+            }, [view, formData.isDestination]);
 
-            // Initialize Google Map
             useEffect(() => {
                 if (view === 'map' && window.google && !loading) {
                     markersRef.current.forEach(marker => marker.setMap(null));
@@ -188,7 +183,6 @@
                     let center = { lat: 36.175, lng: -115.136 };
                     let zoom = 13;
 
-                    // Filter to only registrations with addresses
                     const houseRegistrations = registrations.filter(r => r.Address && r.Latitude && r.Longitude);
 
                     if (houseRegistrations.length > 0) {
@@ -335,7 +329,6 @@
             };
 
             const handleSubmit = async () => {
-                // Validation
                 if (!formData.isDestination && !formData.isTrickOrTreating) {
                     setToast('Please select at least one participation type');
                     return;
@@ -428,7 +421,6 @@
                 <div className="min-h-screen pb-20 relative">
                     {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
-                    {/* Header */}
                     <div className={`bg-gradient-to-r from-purple-900 to-orange-900 shadow-lg border-b-2 border-orange-500 sticky top-0 z-10 transition-all duration-300 ${
                         headerSmall ? 'py-2' : 'py-4'
                     }`}>
@@ -442,11 +434,9 @@
                         </div>
                     </div>
 
-                    {/* Main Content */}
                     <div className="max-w-4xl mx-auto px-4 py-4">
                         {view === 'map' ? (
                             <div className="space-y-4">
-                                {/* Date Banner */}
                                 <div className="bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl shadow-lg p-4 text-center">
                                     <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
                                         📅 Saturday, October 25, 2025
@@ -459,7 +449,6 @@
                                     </div>
                                 </div>
 
-                                {/* Stats Card */}
                                 <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
                                     <div className="grid grid-cols-2 gap-4 mb-3">
                                         <div>
@@ -519,7 +508,6 @@
                                     </div>
                                 </div>
 
-                                {/* Map */}
                                 <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
                                     <div className="flex items-center justify-between mb-1">
                                         <h2 className="font-bold text-lg text-orange-400">Map View</h2>
@@ -573,7 +561,6 @@
                                     <div id="map" className="rounded-lg h-96 sm:h-[500px] w-full border-2 border-purple-700"></div>
                                 </div>
 
-                                {/* List of Houses */}
                                 <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
                                     <h2 className="font-bold text-lg mb-1 text-orange-400">All Houses</h2>
                                     <p className="text-xs text-purple-400 mb-4">Tap 🎃 to track your progress</p>
@@ -645,7 +632,6 @@
                                     </p>
 
                                     <div className="space-y-6">
-                                        {/* Participation Type Selection */}
                                         <div>
                                             <h3 className="text-lg font-semibold text-orange-300 mb-4">How are you participating?</h3>
                                             
@@ -688,7 +674,6 @@
                                             </div>
                                         </div>
 
-                                        {/* Conditional: Trick-or-Treating Group Size */}
                                         {formData.isTrickOrTreating && (
                                             <div className="bg-purple-900/40 rounded-lg p-4 border border-purple-600">
                                                 <label className="block text-sm font-semibold text-purple-300 mb-2">
@@ -705,7 +690,6 @@
                                             </div>
                                         )}
 
-                                        {/* Conditional: House Destination Fields */}
                                         {formData.isDestination && (
                                             <div className="bg-orange-900/20 rounded-lg p-4 border border-orange-600 space-y-5">
                                                 <div>
@@ -811,7 +795,6 @@
                                             </div>
                                         )}
 
-                                        {/* Submit Button */}
                                         <button
                                             onClick={handleSubmit}
                                             disabled={submitting}
@@ -830,138 +813,8 @@
                                 </div>
                             </div>
                         )}
-                                        <div>
-                                            <label className="block text-sm font-semibold text-orange-300 mb-2">
-                                                Your Address *
-                                            </label>
-                                            <input
-                                                ref={addressInputRef}
-                                                type="text"
-                                                value={formData.address}
-                                                onChange={(e) => setFormData({...formData, address: e.target.value})}
-                                                className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
-                                                placeholder="Start typing your address..."
-                                                disabled={submitting}
-                                            />
-                                            <p className="text-xs text-purple-400 mt-1">Start typing and select from suggestions</p>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-semibold text-orange-300 mb-2">
-                                                Your Name
-                                                <span className="text-purple-400 font-normal ml-1">(optional)</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                                className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
-                                                placeholder="e.g. The Smith Family"
-                                                disabled={submitting}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-semibold text-orange-300 mb-3">
-                                                How are you participating? *
-                                            </label>
-                                            <div className="space-y-3">
-                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-orange-500/10 hover:border-orange-500 cursor-pointer transition">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.trickOrTreat}
-                                                        onChange={(e) => setFormData({...formData, trickOrTreat: e.target.checked})}
-                                                        className="mt-1 w-5 h-5 flex-shrink-0"
-                                                        disabled={submitting}
-                                                    />
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 font-semibold text-orange-300">
-                                                            <Home className="w-5 h-5 text-orange-400" />
-                                                            <span>Handing Out Candy</span>
-                                                        </div>
-                                                        <div className="text-sm text-purple-300 mt-1">
-                                                            We'll be home for trick-or-treaters
-                                                        </div>
-                                                    </div>
-                                                </label>
-
-                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-purple-500/10 hover:border-purple-400 cursor-pointer transition">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.decorations}
-                                                        onChange={(e) => setFormData({...formData, decorations: e.target.checked})}
-                                                        className="mt-1 w-5 h-5 flex-shrink-0"
-                                                        disabled={submitting}
-                                                    />
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 font-semibold text-purple-300">
-                                                            <Ghost className="w-5 h-5 text-purple-400" />
-                                                            <span>Decorations to See</span>
-                                                        </div>
-                                                        <div className="text-sm text-purple-300 mt-1">
-                                                            We have cool decorations worth checking out
-                                                        </div>
-                                                    </div>
-                                                </label>
-
-                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-yellow-500/10 hover:border-yellow-400 cursor-pointer transition">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.specialEvent}
-                                                        onChange={(e) => setFormData({...formData, specialEvent: e.target.checked})}
-                                                        className="mt-1 w-5 h-5 flex-shrink-0"
-                                                        disabled={submitting}
-                                                    />
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 font-semibold text-yellow-300">
-                                                            <Star className="w-5 h-5 text-yellow-400" />
-                                                            <span>Special Event</span>
-                                                        </div>
-                                                        <div className="text-sm text-purple-300 mt-1">
-                                                            Haunted house, games, or other special activity
-                                                        </div>
-                                                    </div>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-semibold text-orange-300 mb-2">
-                                                Additional Details
-                                                <span className="text-purple-400 font-normal ml-1">(optional)</span>
-                                            </label>
-                                            <textarea
-                                                value={formData.notes}
-                                                onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                                                className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
-                                                rows="3"
-                                                placeholder="E.g., 'Haunted garage opens at 6pm' or 'Full size candy bars!'"
-                                                disabled={submitting}
-                                            />
-                                        </div>
-
-                                        <button
-                                            onClick={handleSubmit}
-                                            disabled={submitting}
-                                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 transition shadow-lg disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                        >
-                                            {submitting ? (
-                                                <>
-                                                    <Loader className="w-5 h-5 animate-spin" />
-                                                    <span>Adding to Map...</span>
-                                                </>
-                                            ) : (
-                                                '🎃 Add My House to the Map'
-                                            )}
-                                        </button>
-                                    </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
                     </div>
 
-                    {/* Fixed Bottom Navigation */}
                     <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-purple-900 to-orange-900 border-t-2 border-orange-500 shadow-lg">
                         <div className="max-w-4xl mx-auto px-4 py-3 flex gap-2">
                             <button
@@ -987,7 +840,6 @@
                         </div>
                     </div>
 
-                    {/* Footer */}
                     <div className="text-center py-6 text-purple-300 text-sm">
                         Questions or issues? Email <a href="mailto:igoran89@gmail.com" className="text-orange-400 hover:text-orange-300 underline">igoran89@gmail.com</a>
                     </div>
