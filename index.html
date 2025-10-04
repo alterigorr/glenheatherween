@@ -89,7 +89,8 @@
             const [submitting, setSubmitting] = useState(false);
             const [toast, setToast] = useState(null);
             const [formData, setFormData] = useState({
-                isDestination: null, // null = not selected, true = house destination, false = just trick-or-treating
+                isDestination: false,
+                isTrickOrTreating: false,
                 groupSize: 2,
                 address: '',
                 name: '',
@@ -150,7 +151,7 @@
 
             // Initialize Google Places Autocomplete
             useEffect(() => {
-                if (view === 'register' && addressInputRef.current && window.google) {
+                if (view === 'register' && formData.isDestination && addressInputRef.current && window.google) {
                     autocompleteRef.current = new window.google.maps.places.Autocomplete(
                         addressInputRef.current,
                         {
@@ -334,21 +335,27 @@
             };
 
             const handleSubmit = async () => {
-                // If just trick-or-treating
-                if (formData.isDestination === false) {
-                    if (!formData.groupSize || formData.groupSize < 1) {
-                        setToast('Please enter how many people in your group');
-                        return;
-                    }
-                } else {
-                    // If hosting at house
+                // Validation
+                if (!formData.isDestination && !formData.isTrickOrTreating) {
+                    setToast('Please select at least one participation type');
+                    return;
+                }
+
+                if (formData.isDestination) {
                     if (!formData.address) {
                         setToast('Please enter your address');
                         return;
                     }
                     
                     if (!formData.trickOrTreat && !formData.decorations && !formData.specialEvent) {
-                        setToast('Please select at least one activity');
+                        setToast('Please select at least one activity for your house');
+                        return;
+                    }
+                }
+
+                if (formData.isTrickOrTreating) {
+                    if (!formData.groupSize || formData.groupSize < 1) {
+                        setToast('Please enter your group size');
                         return;
                     }
                 }
@@ -369,7 +376,8 @@
                     await loadRegistrations();
                     
                     setFormData({ 
-                        isDestination: null,
+                        isDestination: false,
+                        isTrickOrTreating: false,
                         groupSize: 2,
                         address: '', 
                         name: '', 
@@ -381,12 +389,7 @@
                         lng: null
                     });
                     setView('map');
-                    
-                    if (formData.isDestination === false) {
-                        setToast('🎃 Thanks for registering! Happy trick-or-treating!');
-                    } else {
-                        setToast('🎃 Your house is now on the map!');
-                    }
+                    setToast('🎃 Thanks for registering!');
                 } catch (error) {
                     console.error('Error submitting:', error);
                     setToast('Something went wrong. Please try again.');
@@ -628,96 +631,192 @@
                                         Help your neighbors plan their Halloween night!
                                     </p>
 
-                                    {formData.isDestination === null ? (
-                                        // Step 1: Choose participation type
-                                        <div className="space-y-4">
+                                    <div className="space-y-6">
+                                        {/* Participation Type Selection */}
+                                        <div>
                                             <h3 className="text-lg font-semibold text-orange-300 mb-4">How are you participating?</h3>
                                             
-                                            <button
-                                                onClick={() => setFormData({...formData, isDestination: true})}
-                                                className="w-full p-6 border-2 border-purple-700 rounded-xl hover:bg-orange-500/10 hover:border-orange-500 cursor-pointer transition text-left"
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className="text-4xl">🏠</div>
+                                            <div className="space-y-3">
+                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-orange-500/10 cursor-pointer transition">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.isDestination}
+                                                        onChange={(e) => setFormData({...formData, isDestination: e.target.checked})}
+                                                        className="mt-1 w-5 h-5 flex-shrink-0"
+                                                    />
                                                     <div className="flex-1">
-                                                        <div className="font-bold text-lg text-orange-300 mb-1">
-                                                            My house is a destination
+                                                        <div className="flex items-center gap-2 font-semibold text-orange-300">
+                                                            <span className="text-2xl">🏠</span>
+                                                            <span>My house is a destination</span>
                                                         </div>
-                                                        <div className="text-sm text-purple-300">
+                                                        <div className="text-sm text-purple-300 mt-1">
                                                             Handing out candy, have decorations, or hosting a special event
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </button>
+                                                </label>
 
-                                            <button
-                                                onClick={() => setFormData({...formData, isDestination: false})}
-                                                className="w-full p-6 border-2 border-purple-700 rounded-xl hover:bg-purple-500/10 hover:border-purple-400 cursor-pointer transition text-left"
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className="text-4xl">👻</div>
+                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-purple-500/10 cursor-pointer transition">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.isTrickOrTreating}
+                                                        onChange={(e) => setFormData({...formData, isTrickOrTreating: e.target.checked})}
+                                                        className="mt-1 w-5 h-5 flex-shrink-0"
+                                                    />
                                                     <div className="flex-1">
-                                                        <div className="font-bold text-lg text-purple-300 mb-1">
-                                                            Just trick-or-treating
+                                                        <div className="flex items-center gap-2 font-semibold text-purple-300">
+                                                            <span className="text-2xl">👻</span>
+                                                            <span>People from my household will be trick-or-treating</span>
                                                         </div>
-                                                        <div className="text-sm text-purple-300">
-                                                            Walking around the neighborhood getting candy
+                                                        <div className="text-sm text-purple-300 mt-1">
+                                                            Helps candy distributors know how much to buy
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </button>
+                                                </label>
+                                            </div>
                                         </div>
-                                    ) : formData.isDestination === false ? (
-                                        // Step 2a: Just trick-or-treating form
-                                        <div className="space-y-5">
-                                            <button
-                                                onClick={() => setFormData({...formData, isDestination: null})}
-                                                className="text-sm text-purple-300 hover:text-orange-400 mb-4"
-                                            >
-                                                ← Back
-                                            </button>
-                                            
-                                            <div>
-                                                <label className="block text-sm font-semibold text-orange-300 mb-2">
-                                                    How many people in your group?
+
+                                        {/* Conditional: Trick-or-Treating Group Size */}
+                                        {formData.isTrickOrTreating && (
+                                            <div className="bg-purple-900/40 rounded-lg p-4 border border-purple-600">
+                                                <label className="block text-sm font-semibold text-purple-300 mb-2">
+                                                    How many people in your trick-or-treating group?
                                                 </label>
                                                 <input
                                                     type="number"
                                                     min="1"
                                                     value={formData.groupSize}
                                                     onChange={(e) => setFormData({...formData, groupSize: parseInt(e.target.value)})}
-                                                    className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100"
+                                                    className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-purple-100"
                                                     disabled={submitting}
                                                 />
-                                                <p className="text-xs text-purple-400 mt-1">
-                                                    This helps candy distributors know how much to buy
-                                                </p>
                                             </div>
+                                        )}
 
-                                            <button
-                                                onClick={handleSubmit}
-                                                disabled={submitting}
-                                                className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-600 hover:to-purple-700 active:from-purple-700 active:to-purple-800 transition shadow-lg disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                            >
-                                                {submitting ? (
-                                                    <>
-                                                        <Loader className="w-5 h-5 animate-spin" />
-                                                        <span>Registering...</span>
-                                                    </>
-                                                ) : (
-                                                    '👻 Register for Trick-or-Treating'
-                                                )}
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        // Step 2b: House destination form
-                                        <div className="space-y-5">
-                                            <button
-                                                onClick={() => setFormData({...formData, isDestination: null})}
-                                                className="text-sm text-purple-300 hover:text-orange-400 mb-4"
-                                            >
-                                                ← Back
-                                            </button>
+                                        {/* Conditional: House Destination Fields */}
+                                        {formData.isDestination && (
+                                            <div className="bg-orange-900/20 rounded-lg p-4 border border-orange-600 space-y-5">
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-orange-300 mb-2">
+                                                        Your Address *
+                                                    </label>
+                                                    <input
+                                                        ref={addressInputRef}
+                                                        type="text"
+                                                        value={formData.address}
+                                                        onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                                        className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
+                                                        placeholder="Start typing your address..."
+                                                        disabled={submitting}
+                                                    />
+                                                    <p className="text-xs text-purple-400 mt-1">Start typing and select from suggestions</p>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-orange-300 mb-2">
+                                                        Your Name
+                                                        <span className="text-purple-400 font-normal ml-1">(optional)</span>
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={formData.name}
+                                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                                        className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
+                                                        placeholder="e.g. The Smith Family"
+                                                        disabled={submitting}
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-orange-300 mb-3">
+                                                        What activities at your house? *
+                                                    </label>
+                                                    <div className="space-y-3">
+                                                        <label className="flex items-start gap-4 p-3 border-2 border-purple-700 rounded-lg hover:bg-orange-500/10 hover:border-orange-500 cursor-pointer transition">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={formData.trickOrTreat}
+                                                                onChange={(e) => setFormData({...formData, trickOrTreat: e.target.checked})}
+                                                                className="mt-1 w-4 h-4 flex-shrink-0"
+                                                                disabled={submitting}
+                                                            />
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-2 font-semibold text-orange-300 text-sm">
+                                                                    <Home className="w-4 h-4 text-orange-400" />
+                                                                    <span>Handing Out Candy</span>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+
+                                                        <label className="flex items-start gap-4 p-3 border-2 border-purple-700 rounded-lg hover:bg-purple-500/10 hover:border-purple-400 cursor-pointer transition">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={formData.decorations}
+                                                                onChange={(e) => setFormData({...formData, decorations: e.target.checked})}
+                                                                className="mt-1 w-4 h-4 flex-shrink-0"
+                                                                disabled={submitting}
+                                                            />
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-2 font-semibold text-purple-300 text-sm">
+                                                                    <Ghost className="w-4 h-4 text-purple-400" />
+                                                                    <span>Decorations to See</span>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+
+                                                        <label className="flex items-start gap-4 p-3 border-2 border-purple-700 rounded-lg hover:bg-yellow-500/10 hover:border-yellow-400 cursor-pointer transition">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={formData.specialEvent}
+                                                                onChange={(e) => setFormData({...formData, specialEvent: e.target.checked})}
+                                                                className="mt-1 w-4 h-4 flex-shrink-0"
+                                                                disabled={submitting}
+                                                            />
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-2 font-semibold text-yellow-300 text-sm">
+                                                                    <Star className="w-4 h-4 text-yellow-400" />
+                                                                    <span>Special Event</span>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-orange-300 mb-2">
+                                                        Additional Details
+                                                        <span className="text-purple-400 font-normal ml-1">(optional)</span>
+                                                    </label>
+                                                    <textarea
+                                                        value={formData.notes}
+                                                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                                                        className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
+                                                        rows="3"
+                                                        placeholder="E.g., 'Haunted garage opens at 6pm' or 'Full size candy bars!'"
+                                                        disabled={submitting}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Submit Button */}
+                                        <button
+                                            onClick={handleSubmit}
+                                            disabled={submitting}
+                                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 transition shadow-lg disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        >
+                                            {submitting ? (
+                                                <>
+                                                    <Loader className="w-5 h-5 animate-spin" />
+                                                    <span>Registering...</span>
+                                                </>
+                                            ) : (
+                                                '🎃 Register for Glenheatherween'
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                                         <div>
                                             <label className="block text-sm font-semibold text-orange-300 mb-2">
                                                 Your Address *
