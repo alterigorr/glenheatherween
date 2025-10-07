@@ -175,6 +175,12 @@
             box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
         }
 
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -205,6 +211,94 @@
             color: #ff6b35;
         }
 
+        .wizard-step {
+            display: none;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 0;
+        }
+
+        .progress-step:first-child::before {
+            left: 50%;
+        }
+
+        .progress-step:last-child::before {
+            right: 50%;
+        }
+
+        .progress-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            margin: 0 auto;
+        }
+
+        .progress-step.completed .progress-dot,
+        .progress-step.active .progress-dot {
+            background: #ff6b35;
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .choice-btn {
+            flex: 1;
+            max-width: 200px;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .choice-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ff6b35;
+        }
+
+        .choice-btn.selected {
+            background: rgba(255, 107, 53, 0.2);
+            border-color: #ff6b35;
+        }
+
         .form-group {
             margin: 20px 0;
         }
@@ -227,50 +321,6 @@
 
         input::placeholder, textarea::placeholder {
             color: rgba(255, 255, 255, 0.5);
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .checkbox-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .checkbox-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-top: 4px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .checkbox-item-content {
-            flex: 1;
-        }
-
-        .checkbox-item-title {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
-
-        .checkbox-item-desc {
-            opacity: 0.8;
-            font-size: 0.9em;
         }
 
         .activity-checkboxes {
@@ -297,12 +347,31 @@
             cursor: pointer;
         }
 
-        .conditional-section {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
+        .wizard-nav {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .review-section {
             background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
             border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .review-section h4 {
+            color: #ff6b35;
+            margin-bottom: 10px;
         }
 
         .toast {
@@ -336,26 +405,52 @@
             margin: 30px 0;
         }
 
-        .house-option {
-            background: rgba(255, 255, 255, 0.05);
+        .search-input {
+            width: 100%;
             padding: 15px;
-            margin: 10px 0;
+            font-size: 1.1em;
             border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            margin: 15px 0;
+        }
+
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+
+        .search-result-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        .house-option:hover {
+        .search-result-item:hover {
             background: rgba(255, 255, 255, 0.15);
-            transform: translateX(5px);
         }
 
-        .house-option.selected {
+        .search-result-item.selected {
             background: rgba(255, 107, 53, 0.3);
             border: 2px solid #ff6b35;
+        }
+
+        .selected-display {
+            background: rgba(255, 107, 53, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 2px solid #ff6b35;
+            display: none;
+        }
+
+        .selected-display.show {
+            display: block;
         }
 
         .winner-banner {
@@ -391,14 +486,12 @@
             }
         }
 
-        .help-button {
-            display: none;
-        }
-
         @media (max-width: 768px) {
             h1 { font-size: 2em; }
             #map { height: 400px; }
             .header-stats { grid-template-columns: repeat(2, 1fr); }
+            .choice-buttons { flex-direction: column; }
+            .choice-btn { max-width: 100%; }
         }
     </style>
 </head>
@@ -461,12 +554,24 @@
             
             <div class="voting-category">
                 <h3>Best Decorated House</h3>
-                <div id="decorationVotes"></div>
+                <input type="text" 
+                       id="decorationSearch" 
+                       class="search-input" 
+                       placeholder="Type to search for a house..." 
+                       oninput="searchHouses('decoration')">
+                <div class="selected-display" id="decorationSelected"></div>
+                <div class="search-results" id="decorationResults"></div>
             </div>
 
             <div class="voting-category">
                 <h3>Best Special Stop</h3>
-                <div id="specialVotes"></div>
+                <input type="text" 
+                       id="specialSearch" 
+                       class="search-input" 
+                       placeholder="Type to search for a special stop..." 
+                       oninput="searchHouses('special')">
+                <div class="selected-display" id="specialSelected"></div>
+                <div class="search-results" id="specialResults"></div>
             </div>
 
             <div class="form-group">
@@ -487,96 +592,139 @@
     <div id="registerModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('registerModal')">&times;</span>
-            <h2>Join Glenheatherween!</h2>
-            <p style="margin-bottom: 20px; opacity: 0.9;">Help your neighbors plan their Halloween night!</p>
+            <h2 style="text-align: center; margin-bottom: 20px;">Join Glenheatherween!</h2>
             
-            <form id="registerForm">
+            <div class="progress-bar">
+                <div class="progress-step active"><div class="progress-dot">1</div></div>
+                <div class="progress-step"><div class="progress-dot">2</div></div>
+                <div class="progress-step"><div class="progress-dot">3</div></div>
+                <div class="progress-step"><div class="progress-dot">4</div></div>
+            </div>
+
+            <!-- Step 1: Is house a destination? -->
+            <div class="wizard-step active" data-step="1">
+                <h3 style="text-align: center; margin-bottom: 20px;">Is your house a destination?</h3>
+                <p style="text-align: center; opacity: 0.8; margin-bottom: 30px;">Handing out candy, have decorations, or hosting a special event</p>
+                
+                <div class="choice-buttons">
+                    <div class="choice-btn" onclick="selectDestination(true)">
+                        <div style="font-size: 3em; margin-bottom: 10px;">🏠</div>
+                        <div style="font-weight: bold;">Yes</div>
+                    </div>
+                    <div class="choice-btn" onclick="selectDestination(false)">
+                        <div style="font-size: 3em; margin-bottom: 10px;">👋</div>
+                        <div style="font-weight: bold;">No</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2a: Destination details -->
+            <div class="wizard-step" data-step="2a">
+                <h3 style="color: #ff6b35; margin-bottom: 20px;">🏠 Destination House Details</h3>
+                
                 <div class="form-group">
-                    <label>How are you participating?</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="isDestination" onchange="toggleDestinationFields()">
-                            <div class="checkbox-item-content">
-                                <div class="checkbox-item-title">🏠 My house is a destination</div>
-                                <div class="checkbox-item-desc">Handing out candy, have decorations, or hosting a special event</div>
-                            </div>
-                        </div>
-                        
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="isTrickOrTreating" onchange="toggleTrickOrTreatingFields()">
-                            <div class="checkbox-item-content">
-                                <div class="checkbox-item-title">🎃 People from my household will be trick-or-treating</div>
-                                <div class="checkbox-item-desc">Helps candy distributors know how much to buy</div>
-                            </div>
-                        </div>
+                    <label>Your Address *</label>
+                    <input type="text" id="address" placeholder="Start typing your address...">
+                </div>
+
+                <div class="form-group">
+                    <label>What activities at your house? *</label>
+                    <div class="activity-checkboxes">
+                        <label>
+                            <input type="checkbox" name="activity" value="candy">
+                            <span>🍬 Handing Out Candy</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="activity" value="decorations">
+                            <span>🏠 Decorations to See</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="activity" value="special">
+                            <span>🎯 Special Stop</span>
+                        </label>
                     </div>
                 </div>
 
-                <!-- Destination Fields -->
-                <div id="destinationFields" class="conditional-section">
-                    <h3 style="color: #ff6b35; margin-bottom: 15px;">🏠 My house is a destination</h3>
-                    
-                    <div class="form-group">
-                        <label>Your Address *</label>
-                        <input type="text" id="address" placeholder="Start typing your address...">
-                    </div>
-
-                    <div class="form-group">
-                        <label>What activities at your house?</label>
-                        <div class="activity-checkboxes">
-                            <label>
-                                <input type="checkbox" name="activity" value="candy">
-                                <span>🍬 Handing Out Candy</span>
-                            </label>
-                            <label>
-                                <input type="checkbox" name="activity" value="decorations">
-                                <span>🏠 Decorations to See</span>
-                            </label>
-                            <label>
-                                <input type="checkbox" name="activity" value="special">
-                                <span>🎯 Special Stop</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Additional Details (optional)</label>
-                        <textarea id="notes" rows="3" placeholder="E.g., 'Haunted garage opens at 6pm' or 'Full size candy bars!'"></textarea>
-                    </div>
+                <div class="form-group">
+                    <label>Additional Details (optional)</label>
+                    <textarea id="notes" rows="3" placeholder="E.g., 'Haunted garage opens at 6pm' or 'Full size candy bars!'"></textarea>
                 </div>
 
-                <!-- Trick-or-Treating Fields -->
-                <div id="trickOrTreatingFields" class="conditional-section">
-                    <h3 style="color: #ff6b35; margin-bottom: 15px;">🎃 People from my household will be trick-or-treating</h3>
-                    
-                    <div class="form-group">
-                        <label>How many people in your trick-or-treating group? *</label>
-                        <input type="number" id="groupSize" placeholder="2" min="1">
+                <div class="wizard-nav">
+                    <button class="btn-secondary" onclick="previousStep()">← Back</button>
+                    <button onclick="nextStep()">Next →</button>
+                </div>
+            </div>
+
+            <!-- Step 2b: Trick-or-treating? -->
+            <div class="wizard-step" data-step="2b">
+                <h3 style="text-align: center; margin-bottom: 20px;">Will people from your household be trick-or-treating?</h3>
+                <p style="text-align: center; opacity: 0.8; margin-bottom: 30px;">Helps candy distributors know how much to buy</p>
+                
+                <div class="choice-buttons">
+                    <div class="choice-btn" onclick="selectTrickOrTreating(true)">
+                        <div style="font-size: 3em; margin-bottom: 10px;">🎃</div>
+                        <div style="font-weight: bold;">Yes</div>
+                    </div>
+                    <div class="choice-btn" onclick="selectTrickOrTreating(false)">
+                        <div style="font-size: 3em; margin-bottom: 10px;">🏡</div>
+                        <div style="font-weight: bold;">No</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Always Show Fields -->
-                <div class="form-group" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
-                    <label style="opacity: 0.7; font-size: 0.9em; margin-bottom: 15px;">Optional Contact Information</label>
-                    
-                    <div class="form-group">
-                        <label>Your Name (optional)</label>
-                        <input type="text" id="name" placeholder="e.g., The Smith Family">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Phone (optional)</label>
-                        <input type="tel" id="phone" placeholder="702-555-1234">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email (optional)</label>
-                        <input type="email" id="email" placeholder="your@email.com">
-                    </div>
+            <!-- Step 3: Group size -->
+            <div class="wizard-step" data-step="3">
+                <h3 style="color: #ff6b35; margin-bottom: 20px;">🎃 Trick-or-Treating Group</h3>
+                
+                <div class="form-group">
+                    <label>How many people in your trick-or-treating group? *</label>
+                    <input type="number" id="groupSize" placeholder="2" min="1">
                 </div>
 
-                <button type="submit" style="width: 100%; margin-top: 20px;">Register</button>
-            </form>
+                <div class="wizard-nav">
+                    <button class="btn-secondary" onclick="previousStep()">← Back</button>
+                    <button onclick="nextStep()">Next →</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Contact info -->
+            <div class="wizard-step" data-step="4">
+                <h3 style="margin-bottom: 20px;">Optional Contact Information</h3>
+                <p style="opacity: 0.8; margin-bottom: 20px;">Help us reach you if needed</p>
+                
+                <div class="form-group">
+                    <label>Your Name (optional)</label>
+                    <input type="text" id="name" placeholder="e.g., The Smith Family">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone (optional)</label>
+                    <input type="tel" id="phone" placeholder="702-555-1234">
+                </div>
+
+                <div class="form-group">
+                    <label>Email (optional)</label>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+
+                <div class="wizard-nav">
+                    <button class="btn-secondary" onclick="previousStep()">← Back</button>
+                    <button onclick="reviewRegistration()">Review →</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Review -->
+            <div class="wizard-step" data-step="5">
+                <h3 style="text-align: center; margin-bottom: 20px;">Review Your Registration</h3>
+                
+                <div id="reviewContent"></div>
+
+                <div class="wizard-nav">
+                    <button class="btn-secondary" onclick="previousStep()">← Back</button>
+                    <button onclick="submitRegistration()">Submit Registration 🎃</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -602,19 +750,17 @@
     <div id="helpModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('helpModal')">&times;</span>
-            <h2>Spooked by the tech? Call for backup!</h2>
-            <p style="text-align: center; font-size: 1.5em; margin: 30px 0;">
-                <a href="tel:323-401-5380" style="color: #ff6b35; text-decoration: none; font-weight: bold;">
+            <h2 style="text-align: center; margin-bottom: 20px;">Spooked by the tech? Call for backup!</h2>
+            <p style="text-align: center; font-size: 1.8em; margin: 30px 0;">
+                <a href="tel:323-401-5380" style="color: #ff6b35; text-decoration: none; font-weight: bold; display: inline-block; padding: 15px 30px; border: 3px solid #ff6b35; border-radius: 10px; transition: all 0.3s;">
                     📞 323-401-5380
                 </a>
             </p>
-            <p style="text-align: center; opacity: 0.8;">
+            <p style="text-align: center; opacity: 0.8; line-height: 1.6;">
                 Tap to call on mobile, or dial the number for help with registration or any questions!
             </p>
         </div>
     </div>
-
-    <button class="help-button" onclick="openModal('helpModal')">❓</button>
 
     <div id="printable" style="display: none;"></div>
 
@@ -631,27 +777,28 @@
         let markers = [];
         let houses = [];
         let currentFilter = 'all';
-        let selectedDecoration = null;
-        let selectedSpecial = null;
+        let selectedDecorationHouse = null;
+        let selectedSpecialHouse = null;
         let votes = [];
         let autocomplete;
 
-        function toggleDestinationFields() {
-            const checked = document.getElementById('isDestination').checked;
-            document.getElementById('destinationFields').style.display = checked ? 'block' : 'none';
-            
-            if (checked && !autocomplete) {
-                initAutocomplete();
-            }
-        }
-
-        function toggleTrickOrTreatingFields() {
-            const checked = document.getElementById('isTrickOrTreating').checked;
-            document.getElementById('trickOrTreatingFields').style.display = checked ? 'block' : 'none';
-        }
+        // Wizard state
+        let wizardData = {
+            isDestination: false,
+            isTrickOrTreating: false,
+            address: '',
+            activities: [],
+            notes: '',
+            groupSize: 0,
+            name: '',
+            phone: '',
+            email: ''
+        };
 
         function initAutocomplete() {
             const input = document.getElementById('address');
+            if (!input) return;
+            
             const options = {
                 componentRestrictions: { country: 'us' },
                 fields: ['address_components', 'formatted_address'],
@@ -679,35 +826,12 @@
             });
         }
 
-        function checkTimeRestrictions() {
-            const now = new Date();
-            const eventStart = new Date('2025-10-31T15:30:00-07:00');
-            const votingEnd = new Date('2025-11-03T00:00:00-08:00');
-
-            // For now, always show voting for testing
-            // In production, uncomment the time-based logic below
-            
-            /*
-            if (now >= eventStart && now < votingEnd) {
-                document.getElementById('votingSection').style.display = 'block';
-                document.getElementById('votingResults').style.display = 'none';
-            } else if (now >= votingEnd) {
-                document.getElementById('votingSection').style.display = 'none';
-                document.getElementById('votingResults').style.display = 'block';
-                displayWinners();
-            } else {
-                document.getElementById('votingSection').style.display = 'none';
-                document.getElementById('votingResults').style.display = 'none';
-            }
-            */
-        }
-
         async function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 36.1699, lng: -115.1398 },
-                zoom: 15,
-                minZoom: 14,
-                maxZoom: 17,
+                zoom: 16,
+                minZoom: 15,
+                maxZoom: 18,
                 styles: [
                     { elementType: 'geometry', stylers: [{ color: '#1a0b2e' }] },
                     { elementType: 'labels.text.fill', stylers: [{ color: '#ff6b35' }] },
@@ -734,7 +858,6 @@
                 votes = data.votes || [];
                 updateMap();
                 updateStats();
-                updateVotingOptions();
             } catch (error) {
                 console.error('Error loading houses:', error);
                 showToast('Error loading data. Please refresh the page.');
@@ -809,13 +932,11 @@
 
                         markers.push(marker);
 
-                        // Fit map to bounds after last marker
                         if (boundsSet && markers.length === filteredHouses.length) {
                             map.fitBounds(bounds);
-                            // Prevent zooming in too far
                             const listener = google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
-                                if (map.getZoom() > 16) {
-                                    map.setZoom(16);
+                                if (map.getZoom() > 17) {
+                                    map.setZoom(17);
                                 }
                             });
                         }
@@ -837,41 +958,60 @@
             document.getElementById('totalTrickOrTreaters').textContent = treaters;
         }
 
-        function updateVotingOptions() {
-            const decorationDiv = document.getElementById('decorationVotes');
-            const specialDiv = document.getElementById('specialVotes');
+        function searchHouses(category) {
+            const searchTerm = document.getElementById(category + 'Search').value.toLowerCase();
+            const resultsDiv = document.getElementById(category + 'Results');
             
-            decorationDiv.innerHTML = '';
-            specialDiv.innerHTML = '';
-
             const destinations = houses.filter(h => h.isDestination && h.address);
+            const filtered = category === 'special' 
+                ? destinations.filter(h => h.activities.includes('special'))
+                : destinations;
 
-            destinations.forEach((house, index) => {
-                const decorOption = document.createElement('div');
-                decorOption.className = 'house-option';
-                decorOption.innerHTML = `<span>${house.address}</span><span>🎃</span>`;
-                decorOption.onclick = () => selectVote('decoration', index, decorOption);
-                decorationDiv.appendChild(decorOption);
+            const matches = filtered.filter(h => 
+                h.address.toLowerCase().includes(searchTerm)
+            );
 
-                if (house.activities.includes('special')) {
-                    const specialOption = document.createElement('div');
-                    specialOption.className = 'house-option';
-                    specialOption.innerHTML = `<span>${house.address}</span><span>🎯</span>`;
-                    specialOption.onclick = () => selectVote('special', index, specialOption);
-                    specialDiv.appendChild(specialOption);
-                }
-            });
+            if (searchTerm.length === 0) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            resultsDiv.innerHTML = matches.slice(0, 10).map((house, idx) => `
+                <div class="search-result-item" onclick="selectVoteHouse('${category}', '${house.address.replace(/'/g, "\\'")}')">
+                    ${house.address}
+                </div>
+            `).join('');
         }
 
-        function selectVote(category, houseIndex, element) {
-            const container = element.parentElement;
-            container.querySelectorAll('.house-option').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            
+        function selectVoteHouse(category, address) {
             if (category === 'decoration') {
-                selectedDecoration = houseIndex;
+                selectedDecorationHouse = address;
+                document.getElementById('decorationSelected').innerHTML = `
+                    <strong>Selected:</strong> ${address}
+                    <span style="float: right; cursor: pointer;" onclick="clearVoteSelection('decoration')">✕</span>
+                `;
+                document.getElementById('decorationSelected').classList.add('show');
+                document.getElementById('decorationSearch').value = '';
+                document.getElementById('decorationResults').innerHTML = '';
             } else {
-                selectedSpecial = houseIndex;
+                selectedSpecialHouse = address;
+                document.getElementById('specialSelected').innerHTML = `
+                    <strong>Selected:</strong> ${address}
+                    <span style="float: right; cursor: pointer;" onclick="clearVoteSelection('special')">✕</span>
+                `;
+                document.getElementById('specialSelected').classList.add('show');
+                document.getElementById('specialSearch').value = '';
+                document.getElementById('specialResults').innerHTML = '';
+            }
+        }
+
+        function clearVoteSelection(category) {
+            if (category === 'decoration') {
+                selectedDecorationHouse = null;
+                document.getElementById('decorationSelected').classList.remove('show');
+            } else {
+                selectedSpecialHouse = null;
+                document.getElementById('specialSelected').classList.remove('show');
             }
         }
 
@@ -883,17 +1023,15 @@
                 return;
             }
 
-            if (selectedDecoration === null && selectedSpecial === null) {
+            if (!selectedDecorationHouse && !selectedSpecialHouse) {
                 showToast('Please select at least one house to vote for');
                 return;
             }
 
-            const destinations = houses.filter(h => h.isDestination && h.address);
-            
             const voteData = {
                 email: email,
-                decoration: selectedDecoration !== null ? destinations[selectedDecoration].address : '',
-                special: selectedSpecial !== null ? destinations[selectedSpecial].address : '',
+                decoration: selectedDecorationHouse || '',
+                special: selectedSpecialHouse || '',
                 timestamp: new Date().toISOString()
             };
 
@@ -905,9 +1043,8 @@
                 
                 showToast('Vote submitted successfully! 🎉');
                 document.getElementById('voterEmail').value = '';
-                selectedDecoration = null;
-                selectedSpecial = null;
-                document.querySelectorAll('.house-option').forEach(el => el.classList.remove('selected'));
+                clearVoteSelection('decoration');
+                clearVoteSelection('special');
             } catch (error) {
                 showToast('Error submitting vote. Please try again.');
             }
@@ -959,8 +1096,201 @@
             updateMap();
         }
 
+        // Wizard functions
         function openRegister() {
+            wizardData = {
+                isDestination: false,
+                isTrickOrTreating: false,
+                address: '',
+                activities: [],
+                notes: '',
+                groupSize: 0,
+                name: '',
+                phone: '',
+                email: ''
+            };
+            goToStep(1);
             openModal('registerModal');
+        }
+
+        function goToStep(stepNum) {
+            document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
+            document.querySelector(`[data-step="${stepNum}"]`).classList.add('active');
+            
+            document.querySelectorAll('.progress-step').forEach((step, idx) => {
+                step.classList.remove('active', 'completed');
+                if (idx < stepNum - 1) step.classList.add('completed');
+                if (idx === stepNum - 1) step.classList.add('active');
+            });
+        }
+
+        function selectDestination(isYes) {
+            wizardData.isDestination = isYes;
+            if (isYes) {
+                goToStep('2a');
+                setTimeout(initAutocomplete, 100);
+            } else {
+                goToStep('2b');
+            }
+        }
+
+        function selectTrickOrTreating(isYes) {
+            wizardData.isTrickOrTreating = isYes;
+            if (isYes) {
+                goToStep(3);
+            } else {
+                goToStep(4);
+            }
+        }
+
+        function nextStep() {
+            const currentStep = document.querySelector('.wizard-step.active').dataset.step;
+            
+            if (currentStep === '2a') {
+                const address = document.getElementById('address').value.trim();
+                const activities = Array.from(document.querySelectorAll('input[name="activity"]:checked')).map(cb => cb.value);
+                
+                if (!address) {
+                    showToast('Please enter your address');
+                    return;
+                }
+                
+                let validStreet = false;
+                for (const street of VALID_STREETS) {
+                    if (address.includes(street)) {
+                        validStreet = true;
+                        break;
+                    }
+                }
+                
+                if (!validStreet) {
+                    showToast('Please enter an address within Glen Heather Estates');
+                    return;
+                }
+                
+                if (activities.length === 0) {
+                    showToast('Please select at least one activity');
+                    return;
+                }
+                
+                wizardData.address = address;
+                wizardData.activities = activities;
+                wizardData.notes = document.getElementById('notes').value.trim();
+                
+                goToStep('2b');
+            } else if (currentStep === '3') {
+                const groupSize = parseInt(document.getElementById('groupSize').value);
+                if (!groupSize || groupSize <= 0) {
+                    showToast('Please enter your group size');
+                    return;
+                }
+                wizardData.groupSize = groupSize;
+                goToStep(4);
+            }
+        }
+
+        function previousStep() {
+            const currentStep = document.querySelector('.wizard-step.active').dataset.step;
+            
+            if (currentStep === '2a') {
+                goToStep(1);
+            } else if (currentStep === '2b') {
+                if (wizardData.isDestination) {
+                    goToStep('2a');
+                } else {
+                    goToStep(1);
+                }
+            } else if (currentStep === '3') {
+                goToStep('2b');
+            } else if (currentStep === '4') {
+                if (wizardData.isTrickOrTreating) {
+                    goToStep(3);
+                } else {
+                    goToStep('2b');
+                }
+            } else if (currentStep === '5') {
+                goToStep(4);
+            }
+        }
+
+        function reviewRegistration() {
+            wizardData.name = document.getElementById('name').value.trim();
+            wizardData.phone = document.getElementById('phone').value.trim();
+            wizardData.email = document.getElementById('email').value.trim();
+            
+            let reviewHTML = '';
+            
+            if (wizardData.isDestination) {
+                const activities = wizardData.activities.map(a => {
+                    if (a === 'candy') return '🍬 Candy';
+                    if (a === 'decorations') return '🏠 Decorations';
+                    if (a === 'special') return '🎯 Special Stop';
+                    return a;
+                }).join(', ');
+                
+                reviewHTML += `
+                    <div class="review-section">
+                        <h4>🏠 Destination House</h4>
+                        <p><strong>Address:</strong> ${wizardData.address}</p>
+                        <p><strong>Activities:</strong> ${activities}</p>
+                        ${wizardData.notes ? `<p><strong>Details:</strong> ${wizardData.notes}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            if (wizardData.isTrickOrTreating) {
+                reviewHTML += `
+                    <div class="review-section">
+                        <h4>🎃 Trick-or-Treating</h4>
+                        <p><strong>Group Size:</strong> ${wizardData.groupSize} people</p>
+                    </div>
+                `;
+            }
+            
+            if (wizardData.name || wizardData.phone || wizardData.email) {
+                reviewHTML += `
+                    <div class="review-section">
+                        <h4>Contact Information</h4>
+                        ${wizardData.name ? `<p><strong>Name:</strong> ${wizardData.name}</p>` : ''}
+                        ${wizardData.phone ? `<p><strong>Phone:</strong> ${wizardData.phone}</p>` : ''}
+                        ${wizardData.email ? `<p><strong>Email:</strong> ${wizardData.email}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('reviewContent').innerHTML = reviewHTML;
+            goToStep(5);
+        }
+
+        async function submitRegistration() {
+            const registrationData = {
+                timestamp: new Date().toISOString(),
+                address: wizardData.address,
+                name: wizardData.name,
+                trickOrTreat: wizardData.activities.includes('candy'),
+                decorations: wizardData.activities.includes('decorations'),
+                specialEvent: wizardData.activities.includes('special'),
+                notes: wizardData.notes,
+                isDestination: wizardData.isDestination,
+                isTrickOrTreating: wizardData.isTrickOrTreating,
+                groupSize: wizardData.groupSize,
+                phone: wizardData.phone,
+                email: wizardData.email
+            };
+
+            try {
+                await fetch(SHEET_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ type: 'register', data: registrationData })
+                });
+                
+                showToast('Registration successful! 🎃');
+                closeModal('registerModal');
+                await loadHouses();
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error submitting registration. Please try again.');
+            }
         }
 
         function openVolunteer() {
@@ -983,99 +1313,6 @@
             document.getElementById(id).style.display = 'none';
         }
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const isDestination = document.getElementById('isDestination').checked;
-            const isTrickOrTreating = document.getElementById('isTrickOrTreating').checked;
-
-            if (!isDestination && !isTrickOrTreating) {
-                showToast('Please select at least one participation option');
-                return;
-            }
-
-            let address = '';
-            let name = '';
-            let activities = [];
-            let notes = '';
-            let groupSize = 0;
-
-            if (isDestination) {
-                address = document.getElementById('address').value.trim();
-                
-                if (!address) {
-                    showToast('Please enter your address');
-                    return;
-                }
-
-                // Validate address contains one of the valid streets
-                let validStreet = false;
-                for (const street of VALID_STREETS) {
-                    if (address.includes(street)) {
-                        validStreet = true;
-                        break;
-                    }
-                }
-
-                if (!validStreet) {
-                    showToast('Please enter an address within Glen Heather Estates');
-                    return;
-                }
-
-                name = document.getElementById('name').value.trim();
-                activities = Array.from(document.querySelectorAll('input[name="activity"]:checked')).map(cb => cb.value);
-                notes = document.getElementById('notes').value.trim();
-
-                if (activities.length === 0) {
-                    showToast('Please select at least one activity for your destination house');
-                    return;
-                }
-            }
-
-            if (isTrickOrTreating) {
-                groupSize = parseInt(document.getElementById('groupSize').value) || 0;
-                if (groupSize <= 0) {
-                    showToast('Please enter your group size');
-                    return;
-                }
-            }
-
-            const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('email').value.trim();
-
-            const registrationData = {
-                timestamp: new Date().toISOString(),
-                address: address,
-                name: name,
-                trickOrTreat: activities.includes('candy'),
-                decorations: activities.includes('decorations'),
-                specialEvent: activities.includes('special'),
-                notes: notes,
-                isDestination: isDestination,
-                isTrickOrTreating: isTrickOrTreating,
-                groupSize: groupSize,
-                phone: phone,
-                email: email
-            };
-
-            try {
-                await fetch(SHEET_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ type: 'register', data: registrationData })
-                });
-                
-                showToast('Registration successful! 🎃');
-                closeModal('registerModal');
-                document.getElementById('registerForm').reset();
-                document.getElementById('destinationFields').style.display = 'none';
-                document.getElementById('trickOrTreatingFields').style.display = 'none';
-                await loadHouses();
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error submitting registration. Please try again.');
-            }
-        });
-
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -1091,7 +1328,6 @@
             const byStreet = {};
             
             destinations.forEach(house => {
-                // Extract street name from full address
                 let street = '';
                 for (const validStreet of VALID_STREETS) {
                     if (house.address.includes(validStreet)) {
@@ -1108,9 +1344,7 @@
 
             const sortedStreets = Object.keys(byStreet).sort();
 
-            // Build Static Maps API URL showing Glen Heather Estates area
-            // Use a polygon to highlight the neighborhood instead of individual markers (URL length limit)
-            const center = '36.1699,-115.1398'; // Glen Heather center
+            const center = '36.1699,-115.1398';
             const zoom = 15;
             
             const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${center}&zoom=${zoom}&size=800x500&maptype=roadmap&key=AIzaSyDSI_q9gtv9M2gL5fi4acdwjxW_kzbniK4&style=feature:poi|visibility:off`;
@@ -1140,7 +1374,6 @@
                         return a;
                     }).join(', ');
                     
-                    // Show the full address as entered
                     html += `<li style="margin: 10px 0; line-height: 1.5;"><strong>${house.address}</strong> - ${activities}${house.notes ? ` <em>(${house.notes})</em>` : ''}</li>`;
                 });
                 html += '</ul>';
@@ -1151,7 +1384,6 @@
             printContent.innerHTML = html;
             printContent.style.display = 'block';
             
-            // Wait for image to load before printing
             const img = printContent.querySelector('img');
             if (img) {
                 img.onload = () => {
@@ -1159,7 +1391,6 @@
                     printContent.style.display = 'none';
                 };
                 img.onerror = () => {
-                    // If map fails to load, still print the list
                     window.print();
                     printContent.style.display = 'none';
                 };
@@ -1167,6 +1398,28 @@
                 window.print();
                 printContent.style.display = 'none';
             }
+        }
+
+        function checkTimeRestrictions() {
+            // For testing, voting is always visible
+            // Uncomment below for production time-based restrictions
+            /*
+            const now = new Date();
+            const eventStart = new Date('2025-10-31T15:30:00-07:00');
+            const votingEnd = new Date('2025-11-03T00:00:00-08:00');
+
+            if (now >= eventStart && now < votingEnd) {
+                document.getElementById('votingSection').style.display = 'block';
+                document.getElementById('votingResults').style.display = 'none';
+            } else if (now >= votingEnd) {
+                document.getElementById('votingSection').style.display = 'none';
+                document.getElementById('votingResults').style.display = 'block';
+                displayWinners();
+            } else {
+                document.getElementById('votingSection').style.display = 'none';
+                document.getElementById('votingResults').style.display = 'none';
+            }
+            */
         }
 
         window.onclick = function(event) {
