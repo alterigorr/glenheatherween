@@ -392,24 +392,7 @@
         }
 
         .help-button {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #ff6b35;
-            color: white;
-            border: none;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
-            transition: all 0.3s;
-            z-index: 999;
-        }
-
-        .help-button:hover {
-            transform: scale(1.1);
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -469,11 +452,12 @@
             <button onclick="openVolunteer()">🙋 Volunteer</button>
             <button onclick="openPhotos()">📸 Share Photos</button>
             <button onclick="openFeedback()">💭 Give Feedback</button>
+            <button onclick="openModal('helpModal')">❓ Need Help?</button>
         </div>
 
-        <div class="voting-section" id="votingSection" style="display: none;">
-            <h2 style="text-align: center; margin-bottom: 30px;">🏆 Vote for the Best!</h2>
-            <p style="text-align: center; margin-bottom: 20px;">Voting closes November 2nd at midnight</p>
+        <div class="voting-section" id="votingSection">
+            <h2 style="text-align: center; margin-bottom: 10px;">🏆 Vote for the Best!</h2>
+            <p style="text-align: center; margin-bottom: 20px; opacity: 0.8;">Voting opens October 31st at 3:30 PM and closes November 2nd at midnight</p>
             
             <div class="voting-category">
                 <h3>Best Decorated House</h3>
@@ -530,14 +514,11 @@
 
                 <!-- Destination Fields -->
                 <div id="destinationFields" class="conditional-section">
+                    <h3 style="color: #ff6b35; margin-bottom: 15px;">🏠 My house is a destination</h3>
+                    
                     <div class="form-group">
                         <label>Your Address *</label>
                         <input type="text" id="address" placeholder="Start typing your address...">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Your Name (optional)</label>
-                        <input type="text" id="name" placeholder="e.g., The Smith Family">
                     </div>
 
                     <div class="form-group">
@@ -566,6 +547,8 @@
 
                 <!-- Trick-or-Treating Fields -->
                 <div id="trickOrTreatingFields" class="conditional-section">
+                    <h3 style="color: #ff6b35; margin-bottom: 15px;">🎃 People from my household will be trick-or-treating</h3>
+                    
                     <div class="form-group">
                         <label>How many people in your trick-or-treating group? *</label>
                         <input type="number" id="groupSize" placeholder="2" min="1">
@@ -573,14 +556,23 @@
                 </div>
 
                 <!-- Always Show Fields -->
-                <div class="form-group" style="margin-top: 20px;">
-                    <label>Phone (optional)</label>
-                    <input type="tel" id="phone" placeholder="702-555-1234">
-                </div>
+                <div class="form-group" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
+                    <label style="opacity: 0.7; font-size: 0.9em; margin-bottom: 15px;">Optional Contact Information</label>
+                    
+                    <div class="form-group">
+                        <label>Your Name (optional)</label>
+                        <input type="text" id="name" placeholder="e.g., The Smith Family">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Phone (optional)</label>
+                        <input type="tel" id="phone" placeholder="702-555-1234">
+                    </div>
 
-                <div class="form-group">
-                    <label>Email (optional)</label>
-                    <input type="email" id="email" placeholder="your@email.com">
+                    <div class="form-group">
+                        <label>Email (optional)</label>
+                        <input type="email" id="email" placeholder="your@email.com">
+                    </div>
                 </div>
 
                 <button type="submit" style="width: 100%; margin-top: 20px;">Register</button>
@@ -692,19 +684,30 @@
             const eventStart = new Date('2025-10-31T15:30:00-07:00');
             const votingEnd = new Date('2025-11-03T00:00:00-08:00');
 
+            // For now, always show voting for testing
+            // In production, uncomment the time-based logic below
+            
+            /*
             if (now >= eventStart && now < votingEnd) {
                 document.getElementById('votingSection').style.display = 'block';
+                document.getElementById('votingResults').style.display = 'none';
             } else if (now >= votingEnd) {
                 document.getElementById('votingSection').style.display = 'none';
                 document.getElementById('votingResults').style.display = 'block';
                 displayWinners();
+            } else {
+                document.getElementById('votingSection').style.display = 'none';
+                document.getElementById('votingResults').style.display = 'none';
             }
+            */
         }
 
         async function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 36.1699, lng: -115.1398 },
                 zoom: 15,
+                minZoom: 14,
+                maxZoom: 17,
                 styles: [
                     { elementType: 'geometry', stylers: [{ color: '#1a0b2e' }] },
                     { elementType: 'labels.text.fill', stylers: [{ color: '#ff6b35' }] },
@@ -809,6 +812,12 @@
                         // Fit map to bounds after last marker
                         if (boundsSet && markers.length === filteredHouses.length) {
                             map.fitBounds(bounds);
+                            // Prevent zooming in too far
+                            const listener = google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
+                                if (map.getZoom() > 16) {
+                                    map.setZoom(16);
+                                }
+                            });
                         }
                     }
                 });
@@ -1099,52 +1108,65 @@
 
             const sortedStreets = Object.keys(byStreet).sort();
 
-            // Build Static Maps API URL with all markers
-            const center = map.getCenter();
-            const zoom = map.getZoom();
-            let staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${center.lat()},${center.lng()}&zoom=${zoom}&size=800x600&maptype=roadmap&key=AIzaSyDSI_q9gtv9M2gL5fi4acdwjxW_kzbniK4`;
+            // Build Static Maps API URL showing Glen Heather Estates area
+            // Use a polygon to highlight the neighborhood instead of individual markers (URL length limit)
+            const center = '36.1699,-115.1398'; // Glen Heather center
+            const zoom = 15;
             
-            // Add markers for each house
-            destinations.forEach(house => {
-                if (house.address) {
-                    const encodedAddress = encodeURIComponent(`${house.address}, Las Vegas, NV 89102`);
-                    staticMapUrl += `&markers=color:orange|${encodedAddress}`;
-                }
-            });
+            const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${center}&zoom=${zoom}&size=800x500&maptype=roadmap&key=AIzaSyDSI_q9gtv9M2gL5fi4acdwjxW_kzbniK4&style=feature:poi|visibility:off`;
 
             let html = `
                 <div style="padding: 20px; font-family: Arial; color: black; background: white;">
-                    <h1 style="text-align: center;">Glenheatherween 2025</h1>
-                    <p style="text-align: center;">October 31st, 2025</p>
-                    <p style="text-align: center; margin-bottom: 20px;">Total Houses: ${destinations.length}</p>
+                    <h1 style="text-align: center; color: #ff6b35;">Glenheatherween 2025</h1>
+                    <p style="text-align: center;"><strong>October 31st, 2025</strong></p>
+                    <p style="text-align: center; margin-bottom: 20px;">Total Participating Houses: ${destinations.length}</p>
                     
                     <div style="text-align: center; margin: 20px 0;">
-                        <img src="${staticMapUrl}" alt="Halloween Map" style="max-width: 100%; border: 2px solid #ff6b35; border-radius: 10px;">
+                        <img src="${staticMapUrl}" alt="Halloween Map" style="max-width: 100%; border: 3px solid #ff6b35; border-radius: 10px;">
+                        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Glen Heather Estates - See complete house list below</p>
                     </div>
                     
-                    <hr style="margin: 30px 0;">
-                    <h2 style="text-align: center;">House List by Street</h2>
+                    <hr style="margin: 30px 0; border: 2px solid #ff6b35;">
+                    <h2 style="text-align: center; color: #ff6b35; margin-bottom: 20px;">Complete House List by Street</h2>
             `;
 
             sortedStreets.forEach(street => {
-                html += `<h3 style="margin-top: 20px; color: #ff6b35;">${street}</h3><ul>`;
+                html += `<h3 style="margin-top: 20px; color: #ff6b35;">${street}</h3><ul style="margin-left: 20px;">`;
                 byStreet[street].forEach(house => {
                     const activities = house.activities.map(a => {
-                        if (a === 'candy') return 'Candy';
-                        if (a === 'decorations') return 'Decorations';
-                        if (a === 'special') return 'Special Stop';
+                        if (a === 'candy') return '🍬 Candy';
+                        if (a === 'decorations') return '🏠 Decorations';
+                        if (a === 'special') return '🎯 Special Stop';
                         return a;
                     }).join(', ');
-                    html += `<li style="margin: 8px 0;"><strong>${house.address}</strong> - ${activities}${house.notes ? ` (${house.notes})` : ''}</li>`;
+                    
+                    // Show the full address as entered
+                    html += `<li style="margin: 10px 0; line-height: 1.5;"><strong>${house.address}</strong> - ${activities}${house.notes ? ` <em>(${house.notes})</em>` : ''}</li>`;
                 });
                 html += '</ul>';
             });
 
+            html += '<p style="text-align: center; margin-top: 40px; color: #666; font-size: 0.9em;">Happy Halloween! 🎃</p>';
             html += '</div>';
             printContent.innerHTML = html;
             printContent.style.display = 'block';
-            window.print();
-            printContent.style.display = 'none';
+            
+            // Wait for image to load before printing
+            const img = printContent.querySelector('img');
+            if (img) {
+                img.onload = () => {
+                    window.print();
+                    printContent.style.display = 'none';
+                };
+                img.onerror = () => {
+                    // If map fails to load, still print the list
+                    window.print();
+                    printContent.style.display = 'none';
+                };
+            } else {
+                window.print();
+                printContent.style.display = 'none';
+            }
         }
 
         window.onclick = function(event) {
