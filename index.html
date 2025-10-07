@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Glenheatherween 2025</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSI_q9gtv9M2gL5fi4acdwjxW_kzbniK4"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSI_q9gtv9M2gL5fi4acdwjxW_kzbniK4&libraries=places"></script>
     <style>
         * {
             margin: 0;
@@ -50,7 +50,7 @@
 
         header {
             text-align: center;
-            padding: 40px 20px;
+            padding: 40px 20px 30px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 20px;
             margin-bottom: 30px;
@@ -66,11 +66,90 @@
 
         .event-info {
             font-size: 1.1em;
-            margin-top: 15px;
+            margin: 15px 0 20px;
             line-height: 1.6;
         }
 
-        .button-row {
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px 0 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-stat {
+            text-align: center;
+        }
+
+        .header-stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+
+        .header-stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .register-btn {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .register-btn:hover {
+            background: #ff8c5a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-btn.active {
+            background: #ff6b35;
+        }
+
+        #map {
+            height: 600px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .bottom-buttons {
             display: flex;
             gap: 15px;
             justify-content: center;
@@ -96,58 +175,6 @@
             box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
         }
 
-        .filters {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
-
-        .filter-btn {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            font-size: 1em;
-        }
-
-        .filter-btn.active {
-            background: #ff6b35;
-        }
-
-        #map {
-            height: 600px;
-            border-radius: 15px;
-            margin: 30px 0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #ff6b35;
-        }
-
-        .stat-label {
-            font-size: 1em;
-            margin-top: 10px;
-            opacity: 0.9;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -162,7 +189,7 @@
 
         .modal-content {
             background: linear-gradient(135deg, #2d1b4e 0%, #1a0b2e 100%);
-            max-width: 600px;
+            max-width: 800px;
             margin: 50px auto;
             padding: 40px;
             border-radius: 20px;
@@ -224,8 +251,11 @@
         }
 
         .checkbox-item input[type="checkbox"] {
-            width: auto;
+            width: 20px;
+            height: 20px;
             margin-top: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
         .checkbox-item-content {
@@ -241,6 +271,30 @@
         .checkbox-item-desc {
             opacity: 0.8;
             font-size: 0.9em;
+        }
+
+        .activity-checkboxes {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .activity-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .activity-checkboxes input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            cursor: pointer;
         }
 
         .conditional-section {
@@ -314,6 +368,14 @@
             font-weight: bold;
         }
 
+        .form-embed {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 10px;
+            background: white;
+        }
+
         @media print {
             body * {
                 visibility: hidden;
@@ -350,14 +412,10 @@
             transform: scale(1.1);
         }
 
-        .time-restricted {
-            display: none;
-        }
-
         @media (max-width: 768px) {
             h1 { font-size: 2em; }
-            .button-row { flex-direction: column; }
             #map { height: 400px; }
+            .header-stats { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -374,14 +432,28 @@
                 3:30 PM - Sunset: Glen Heather Estates Residents<br>
                 Sunset - 9:00 PM: Everyone Welcome!
             </div>
-        </header>
+            
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="header-stat-number" id="totalHouses">0</div>
+                    <div class="header-stat-label">Participating Houses</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-number" id="candyHouses">0</div>
+                    <div class="header-stat-label">Candy Houses</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-number" id="specialStops">0</div>
+                    <div class="header-stat-label">Special Stops</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-number" id="totalTrickOrTreaters">0</div>
+                    <div class="header-stat-label">Expected Trick-or-Treaters</div>
+                </div>
+            </div>
 
-        <div class="button-row">
-            <button onclick="openRegister()">🏠 Register</button>
-            <button onclick="openVolunteer()">🙋 Volunteer</button>
-            <button onclick="openPhotos()">📸 Share Photos</button>
-            <button onclick="openFeedback()">💭 Give Feedback</button>
-        </div>
+            <button class="register-btn" onclick="openRegister()">🏠 Register Now</button>
+        </header>
 
         <div class="filters">
             <button class="filter-btn active" onclick="filterHouses('all')">🎃 All Houses</button>
@@ -392,30 +464,14 @@
 
         <div id="map"></div>
 
-        <div style="text-align: center; margin: 20px 0;">
+        <div class="bottom-buttons">
             <button onclick="printMap()">🖨️ Print Map</button>
+            <button onclick="openVolunteer()">🙋 Volunteer</button>
+            <button onclick="openPhotos()">📸 Share Photos</button>
+            <button onclick="openFeedback()">💭 Give Feedback</button>
         </div>
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="totalHouses">0</div>
-                <div class="stat-label">Participating Houses</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="candyHouses">0</div>
-                <div class="stat-label">Candy Houses</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="specialStops">0</div>
-                <div class="stat-label">Special Stops</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalTrickOrTreaters">0</div>
-                <div class="stat-label">Expected Trick-or-Treaters</div>
-            </div>
-        </div>
-
-        <div class="voting-section time-restricted" id="votingSection">
+        <div class="voting-section" id="votingSection" style="display: none;">
             <h2 style="text-align: center; margin-bottom: 30px;">🏆 Vote for the Best!</h2>
             <p style="text-align: center; margin-bottom: 20px;">Voting closes November 2nd at midnight</p>
             
@@ -475,23 +531,8 @@
                 <!-- Destination Fields -->
                 <div id="destinationFields" class="conditional-section">
                     <div class="form-group">
-                        <label>Street Address *</label>
-                        <input type="text" id="address" placeholder="123">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Street Name *</label>
-                        <select id="street">
-                            <option value="">Select your street...</option>
-                            <option value="Birch Street">Birch Street</option>
-                            <option value="Bonnie Brae Avenue">Bonnie Brae Avenue</option>
-                            <option value="Bryn Mawr Avenue">Bryn Mawr Avenue</option>
-                            <option value="Glen Heather Way">Glen Heather Way</option>
-                            <option value="Ivanhoe Way">Ivanhoe Way</option>
-                            <option value="Kiltie Way">Kiltie Way</option>
-                            <option value="Kirkland Avenue">Kirkland Avenue</option>
-                            <option value="Loch Lomond Way">Loch Lomond Way</option>
-                        </select>
+                        <label>Your Address *</label>
+                        <input type="text" id="address" placeholder="Start typing your address...">
                     </div>
 
                     <div class="form-group">
@@ -501,15 +542,18 @@
 
                     <div class="form-group">
                         <label>What activities at your house?</label>
-                        <div class="checkbox-group">
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" name="activity" value="candy"> 🍬 Handing Out Candy
+                        <div class="activity-checkboxes">
+                            <label>
+                                <input type="checkbox" name="activity" value="candy">
+                                <span>🍬 Handing Out Candy</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" name="activity" value="decorations"> 🏠 Decorations to See
+                            <label>
+                                <input type="checkbox" name="activity" value="decorations">
+                                <span>🏠 Decorations to See</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" name="activity" value="special"> 🎯 Special Stop
+                            <label>
+                                <input type="checkbox" name="activity" value="special">
+                                <span>🎯 Special Stop</span>
                             </label>
                         </div>
                     </div>
@@ -544,6 +588,24 @@
         </div>
     </div>
 
+    <!-- Volunteer Modal -->
+    <div id="volunteerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('volunteerModal')">&times;</span>
+            <h2>Volunteer Sign-Up</h2>
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe21pDeBbtagh1PoK5lr5x9Nxo9aFG8GqA0HZzeYOoQoyB-Ug/viewform?embedded=true" class="form-embed"></iframe>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('feedbackModal')">&times;</span>
+            <h2>Give Feedback</h2>
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdq282y3shb0u8pmknVYLC1pcsapVamiqMLaaXnI3pSh_nX_Q/viewform?embedded=true" class="form-embed"></iframe>
+        </div>
+    </div>
+
     <!-- Help Modal -->
     <div id="helpModal" class="modal">
         <div class="modal-content">
@@ -566,9 +628,12 @@
 
     <script>
         const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7zk15RRbM5bWB5mWUGVJjfmNwpsks1nF69mWLuvyDJf7K__MU4dmfxblRFgqs-182/exec';
-        const VOLUNTEER_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSe21pDeBbtagh1PoK5lr5x9Nxo9aFG8GqA0HZzeYOoQoyB-Ug/viewform?usp=dialog';
         const PHOTO_FORM = 'https://www.dropbox.com/request/c9yi6rYhNdWrn6ELIN5q';
-        const FEEDBACK_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSdq282y3shb0u8pmknVYLC1pcsapVamiqMLaaXnI3pSh_nX_Q/viewform?usp=dialog';
+        
+        const VALID_STREETS = [
+            'Kiltie Way', 'Loch Lomond Way', 'Ivanhoe Way', 'Birch Street',
+            'Kirkland Avenue', 'Bryn Mawr Avenue', 'Glen Heather Way', 'Bonnie Brae Avenue'
+        ];
         
         let map;
         let markers = [];
@@ -577,15 +642,49 @@
         let selectedDecoration = null;
         let selectedSpecial = null;
         let votes = [];
+        let autocomplete;
 
         function toggleDestinationFields() {
             const checked = document.getElementById('isDestination').checked;
             document.getElementById('destinationFields').style.display = checked ? 'block' : 'none';
+            
+            if (checked && !autocomplete) {
+                initAutocomplete();
+            }
         }
 
         function toggleTrickOrTreatingFields() {
             const checked = document.getElementById('isTrickOrTreating').checked;
             document.getElementById('trickOrTreatingFields').style.display = checked ? 'block' : 'none';
+        }
+
+        function initAutocomplete() {
+            const input = document.getElementById('address');
+            const options = {
+                componentRestrictions: { country: 'us' },
+                fields: ['address_components', 'formatted_address'],
+                types: ['address']
+            };
+
+            autocomplete = new google.maps.places.Autocomplete(input, options);
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place.address_components) return;
+
+                let streetName = '';
+                for (const component of place.address_components) {
+                    if (component.types.includes('route')) {
+                        streetName = component.long_name;
+                        break;
+                    }
+                }
+
+                if (!VALID_STREETS.includes(streetName)) {
+                    showToast('Please select an address within Glen Heather Estates');
+                    input.value = '';
+                }
+            });
         }
 
         function checkTimeRestrictions() {
@@ -605,7 +704,7 @@
         async function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 36.1699, lng: -115.1398 },
-                zoom: 16,
+                zoom: 15,
                 styles: [
                     { elementType: 'geometry', stylers: [{ color: '#1a0b2e' }] },
                     { elementType: 'labels.text.fill', stylers: [{ color: '#ff6b35' }] },
@@ -652,6 +751,9 @@
                 return false;
             });
 
+            const bounds = new google.maps.LatLngBounds();
+            let boundsSet = false;
+
             filteredHouses.forEach(house => {
                 if (!house.address) return;
                 
@@ -660,8 +762,12 @@
                 
                 geocoder.geocode({ address: fullAddress }, (results, status) => {
                     if (status === 'OK') {
+                        const position = results[0].geometry.location;
+                        bounds.extend(position);
+                        boundsSet = true;
+
                         const marker = new google.maps.Marker({
-                            position: results[0].geometry.location,
+                            position: position,
                             map: map,
                             title: house.address,
                             icon: {
@@ -699,6 +805,11 @@
                         });
 
                         markers.push(marker);
+
+                        // Fit map to bounds after last marker
+                        if (boundsSet && markers.length === filteredHouses.length) {
+                            map.fitBounds(bounds);
+                        }
                     }
                 });
             });
@@ -844,7 +955,7 @@
         }
 
         function openVolunteer() {
-            window.open(VOLUNTEER_FORM, '_blank');
+            openModal('volunteerModal');
         }
 
         function openPhotos() {
@@ -852,7 +963,7 @@
         }
 
         function openFeedback() {
-            window.open(FEEDBACK_FORM, '_blank');
+            openModal('feedbackModal');
         }
 
         function openModal(id) {
@@ -881,15 +992,27 @@
             let groupSize = 0;
 
             if (isDestination) {
-                const houseNum = document.getElementById('address').value.trim();
-                const street = document.getElementById('street').value;
+                address = document.getElementById('address').value.trim();
                 
-                if (!houseNum || !street) {
-                    showToast('Please enter your complete address');
+                if (!address) {
+                    showToast('Please enter your address');
                     return;
                 }
 
-                address = `${houseNum} ${street}`;
+                // Validate address contains one of the valid streets
+                let validStreet = false;
+                for (const street of VALID_STREETS) {
+                    if (address.includes(street)) {
+                        validStreet = true;
+                        break;
+                    }
+                }
+
+                if (!validStreet) {
+                    showToast('Please enter an address within Glen Heather Estates');
+                    return;
+                }
+
                 name = document.getElementById('name').value.trim();
                 activities = Array.from(document.querySelectorAll('input[name="activity"]:checked')).map(cb => cb.value);
                 notes = document.getElementById('notes').value.trim();
@@ -959,22 +1082,52 @@
             const byStreet = {};
             
             destinations.forEach(house => {
-                const street = house.address.split(' ').slice(1).join(' ');
-                if (!byStreet[street]) byStreet[street] = [];
-                byStreet[street].push(house);
+                // Extract street name from full address
+                let street = '';
+                for (const validStreet of VALID_STREETS) {
+                    if (house.address.includes(validStreet)) {
+                        street = validStreet;
+                        break;
+                    }
+                }
+                
+                if (street) {
+                    if (!byStreet[street]) byStreet[street] = [];
+                    byStreet[street].push(house);
+                }
             });
 
             const sortedStreets = Object.keys(byStreet).sort();
 
+            // Build Static Maps API URL with all markers
+            const center = map.getCenter();
+            const zoom = map.getZoom();
+            let staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${center.lat()},${center.lng()}&zoom=${zoom}&size=800x600&maptype=roadmap&key=AIzaSyDSI_q9gtv9M2gL5fi4acdwjxW_kzbniK4`;
+            
+            // Add markers for each house
+            destinations.forEach(house => {
+                if (house.address) {
+                    const encodedAddress = encodeURIComponent(`${house.address}, Las Vegas, NV 89102`);
+                    staticMapUrl += `&markers=color:orange|${encodedAddress}`;
+                }
+            });
+
             let html = `
-                <div style="padding: 20px; font-family: Arial;">
-                    <h1 style="text-align: center;">Glenheatherween 2025 - House List</h1>
+                <div style="padding: 20px; font-family: Arial; color: black; background: white;">
+                    <h1 style="text-align: center;">Glenheatherween 2025</h1>
                     <p style="text-align: center;">October 31st, 2025</p>
-                    <hr>
+                    <p style="text-align: center; margin-bottom: 20px;">Total Houses: ${destinations.length}</p>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="${staticMapUrl}" alt="Halloween Map" style="max-width: 100%; border: 2px solid #ff6b35; border-radius: 10px;">
+                    </div>
+                    
+                    <hr style="margin: 30px 0;">
+                    <h2 style="text-align: center;">House List by Street</h2>
             `;
 
             sortedStreets.forEach(street => {
-                html += `<h2>${street}</h2><ul>`;
+                html += `<h3 style="margin-top: 20px; color: #ff6b35;">${street}</h3><ul>`;
                 byStreet[street].forEach(house => {
                     const activities = house.activities.map(a => {
                         if (a === 'candy') return 'Candy';
@@ -982,14 +1135,16 @@
                         if (a === 'special') return 'Special Stop';
                         return a;
                     }).join(', ');
-                    html += `<li>${house.address} - ${activities}${house.notes ? ` (${house.notes})` : ''}</li>`;
+                    html += `<li style="margin: 8px 0;"><strong>${house.address}</strong> - ${activities}${house.notes ? ` (${house.notes})` : ''}</li>`;
                 });
                 html += '</ul>';
             });
 
             html += '</div>';
             printContent.innerHTML = html;
+            printContent.style.display = 'block';
             window.print();
+            printContent.style.display = 'none';
         }
 
         window.onclick = function(event) {
