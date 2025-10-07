@@ -378,10 +378,9 @@
 
         <div class="button-row">
             <button onclick="openRegister()">🏠 Register</button>
-            <button onclick="openVolunteer()" class="time-restricted" id="volunteerBtn">🙋 Volunteer</button>
-            <button onclick="openPhotos()" class="time-restricted" id="photoBtn">📸 Share Photos</button>
-            <button onclick="openFeedback()" class="time-restricted" id="feedbackBtn">💭 Give Feedback</button>
-            <button onclick="printMap()">🖨️ Print Map</button>
+            <button onclick="openVolunteer()">🙋 Volunteer</button>
+            <button onclick="openPhotos()">📸 Share Photos</button>
+            <button onclick="openFeedback()">💭 Give Feedback</button>
         </div>
 
         <div class="filters">
@@ -392,6 +391,10 @@
         </div>
 
         <div id="map"></div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button onclick="printMap()">🖨️ Print Map</button>
+        </div>
 
         <div class="stats">
             <div class="stat-card">
@@ -589,16 +592,6 @@
             const now = new Date();
             const eventStart = new Date('2025-10-31T15:30:00-07:00');
             const votingEnd = new Date('2025-11-03T00:00:00-08:00');
-            
-            if (now >= eventStart) {
-                document.querySelectorAll('.time-restricted').forEach(el => {
-                    if (el.tagName === 'BUTTON') {
-                        el.style.display = 'inline-block';
-                    } else {
-                        el.style.display = 'block';
-                    }
-                });
-            }
 
             if (now >= eventStart && now < votingEnd) {
                 document.getElementById('votingSection').style.display = 'block';
