@@ -3,26 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glenheatherween - Glen Heather Estates Halloween Map</title>
-    
-    <!-- Favicons for all devices -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <meta name="theme-color" content="#2d1a4e">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgIBD1QfLtQv1w1SfuBAoVjYd0HC3pIUE&libraries=places"></script>
+    <title>Glenheatherween 2025</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBUolWv5e0BBu_LXFjLAR-SuVPARhXG7fA"></script>
     <style>
-        body {
-            background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .jack-o-lantern {
+            font-size: 80px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #ff6b35;
+            text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+        }
+
+        .event-info {
+            font-size: 1.1em;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #ff8c5a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+
+        .filter-btn.active {
+            background: #ff6b35;
+        }
+
+        #map {
+            height: 600px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #2d1b4e 0%, #1a0b2e 100%);
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #ff6b35;
+        }
+
+        .form-group {
+            margin: 20px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1em;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .checkbox-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-top: 4px;
+        }
+
+        .checkbox-item-content {
+            flex: 1;
+        }
+
+        .checkbox-item-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .checkbox-item-desc {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .conditional-section {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
         .toast {
             position: fixed;
             top: 20px;
@@ -36,762 +264,748 @@
             z-index: 9999;
             animation: slideDown 0.3s ease-out;
         }
-        
+
         @keyframes slideDown {
             from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
             to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
+
+        .voting-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .voting-category {
+            margin: 30px 0;
+        }
+
+        .house-option {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .house-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .house-option.selected {
+            background: rgba(255, 107, 53, 0.3);
+            border: 2px solid #ff6b35;
+        }
+
+        .winner-banner {
+            background: linear-gradient(90deg, #ff6b35, #ff8c5a);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable, #printable * {
+                visibility: visible;
+            }
+            #printable {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+
+        .help-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .help-button:hover {
+            transform: scale(1.1);
+        }
+
+        .time-restricted {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .button-row { flex-direction: column; }
+            #map { height: 400px; }
+        }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div class="loading">
+        <div class="jack-o-lantern">🎃</div>
+    </div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+    <div class="container">
+        <header>
+            <h1>🎃 Glenheatherween 2025 🎃</h1>
+            <div class="event-info">
+                <strong>Thursday, October 31st</strong><br>
+                3:30 PM - Sunset: Glen Heather Estates Residents<br>
+                Sunset - 9:00 PM: Everyone Welcome!
+            </div>
+        </header>
 
-        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwGLXXe1hN-xeAhpk9pCXVJ91tU2WG8T2pTn7TOTctBzT6d-BOMLuA87Tas3cZ4uZwE/exec';
+        <div class="button-row">
+            <button onclick="openRegister()">🏠 Register</button>
+            <button onclick="openVolunteer()" class="time-restricted" id="volunteerBtn">🙋 Volunteer</button>
+            <button onclick="openPhotos()" class="time-restricted" id="photoBtn">📸 Share Photos</button>
+            <button onclick="openFeedback()" class="time-restricted" id="feedbackBtn">💭 Give Feedback</button>
+            <button onclick="printMap()">🖨️ Print Map</button>
+        </div>
 
-        const Home = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-        );
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterHouses('all')">🎃 All Houses</button>
+            <button class="filter-btn" onclick="filterHouses('candy')">🍬 Candy</button>
+            <button class="filter-btn" onclick="filterHouses('decorations')">🏠 Decorations</button>
+            <button class="filter-btn" onclick="filterHouses('special')">🎯 Special Stops</button>
+        </div>
 
-        const Ghost = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-            </svg>
-        );
+        <div id="map"></div>
 
-        const Star = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-        );
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalHouses">0</div>
+                <div class="stat-label">Participating Houses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="candyHouses">0</div>
+                <div class="stat-label">Candy Houses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="specialStops">0</div>
+                <div class="stat-label">Special Stops</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalTrickOrTreaters">0</div>
+                <div class="stat-label">Expected Trick-or-Treaters</div>
+            </div>
+        </div>
 
-        const MapPin = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-        );
+        <div class="voting-section time-restricted" id="votingSection">
+            <h2 style="text-align: center; margin-bottom: 30px;">🏆 Vote for the Best!</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Voting closes November 2nd at midnight</p>
+            
+            <div class="voting-category">
+                <h3>Best Decorated House</h3>
+                <div id="decorationVotes"></div>
+            </div>
 
-        const Loader = ({ className }) => (
-            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-        );
+            <div class="voting-category">
+                <h3>Best Special Stop</h3>
+                <div id="specialVotes"></div>
+            </div>
 
-        function Toast({ message, onClose }) {
-            useEffect(() => {
-                const timer = setTimeout(onClose, 3000);
-                return () => clearTimeout(timer);
-            }, [onClose]);
+            <div class="form-group">
+                <label>Your Email (required to vote)</label>
+                <input type="email" id="voterEmail" placeholder="your@email.com">
+            </div>
 
-            return <div className="toast">{message}</div>;
+            <button onclick="submitVotes()" style="width: 100%; margin-top: 20px;">Submit Votes</button>
+        </div>
+
+        <div id="votingResults" style="display: none;">
+            <h2 style="text-align: center; margin: 40px 0 20px;">🎉 Winners Announced! 🎉</h2>
+            <div id="winnersDisplay"></div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')">&times;</span>
+            <h2>Join Glenheatherween!</h2>
+            <p style="margin-bottom: 20px; opacity: 0.9;">Help your neighbors plan their Halloween night!</p>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>How are you participating?</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="isDestination" onchange="toggleDestinationFields()">
+                            <div class="checkbox-item-content">
+                                <div class="checkbox-item-title">🏠 My house is a destination</div>
+                                <div class="checkbox-item-desc">Handing out candy, have decorations, or hosting a special event</div>
+                            </div>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="isTrickOrTreating" onchange="toggleTrickOrTreatingFields()">
+                            <div class="checkbox-item-content">
+                                <div class="checkbox-item-title">🎃 People from my household will be trick-or-treating</div>
+                                <div class="checkbox-item-desc">Helps candy distributors know how much to buy</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Destination Fields -->
+                <div id="destinationFields" class="conditional-section">
+                    <div class="form-group">
+                        <label>Street Address *</label>
+                        <input type="text" id="address" placeholder="123">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Street Name *</label>
+                        <select id="street">
+                            <option value="">Select your street...</option>
+                            <option value="Birch Street">Birch Street</option>
+                            <option value="Bonnie Brae Avenue">Bonnie Brae Avenue</option>
+                            <option value="Bryn Mawr Avenue">Bryn Mawr Avenue</option>
+                            <option value="Glen Heather Way">Glen Heather Way</option>
+                            <option value="Ivanhoe Way">Ivanhoe Way</option>
+                            <option value="Kiltie Way">Kiltie Way</option>
+                            <option value="Kirkland Avenue">Kirkland Avenue</option>
+                            <option value="Loch Lomond Way">Loch Lomond Way</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Your Name (optional)</label>
+                        <input type="text" id="name" placeholder="e.g., The Smith Family">
+                    </div>
+
+                    <div class="form-group">
+                        <label>What activities at your house?</label>
+                        <div class="checkbox-group">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" name="activity" value="candy"> 🍬 Handing Out Candy
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" name="activity" value="decorations"> 🏠 Decorations to See
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" name="activity" value="special"> 🎯 Special Stop
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Details (optional)</label>
+                        <textarea id="notes" rows="3" placeholder="E.g., 'Haunted garage opens at 6pm' or 'Full size candy bars!'"></textarea>
+                    </div>
+                </div>
+
+                <!-- Trick-or-Treating Fields -->
+                <div id="trickOrTreatingFields" class="conditional-section">
+                    <div class="form-group">
+                        <label>How many people in your trick-or-treating group? *</label>
+                        <input type="number" id="groupSize" placeholder="2" min="1">
+                    </div>
+                </div>
+
+                <!-- Always Show Fields -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Phone (optional)</label>
+                    <input type="tel" id="phone" placeholder="702-555-1234">
+                </div>
+
+                <div class="form-group">
+                    <label>Email (optional)</label>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+
+                <button type="submit" style="width: 100%; margin-top: 20px;">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('helpModal')">&times;</span>
+            <h2>Spooked by the tech? Call for backup!</h2>
+            <p style="text-align: center; font-size: 1.5em; margin: 30px 0;">
+                <a href="tel:323-401-5380" style="color: #ff6b35; text-decoration: none; font-weight: bold;">
+                    📞 323-401-5380
+                </a>
+            </p>
+            <p style="text-align: center; opacity: 0.8;">
+                Tap to call on mobile, or dial the number for help with registration or any questions!
+            </p>
+        </div>
+    </div>
+
+    <button class="help-button" onclick="openModal('helpModal')">❓</button>
+
+    <div id="printable" style="display: none;"></div>
+
+    <script>
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7zk15RRbM5bWB5mWUGVJjfmNwpsks1nF69mWLuvyDJf7K__MU4dmfxblRFgqs-182/exec';
+        const VOLUNTEER_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSe21pDeBbtagh1PoK5lr5x9Nxo9aFG8GqA0HZzeYOoQoyB-Ug/viewform?usp=dialog';
+        const PHOTO_FORM = 'https://www.dropbox.com/request/c9yi6rYhNdWrn6ELIN5q';
+        const FEEDBACK_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSdq282y3shb0u8pmknVYLC1pcsapVamiqMLaaXnI3pSh_nX_Q/viewform?usp=dialog';
+        
+        let map;
+        let markers = [];
+        let houses = [];
+        let currentFilter = 'all';
+        let selectedDecoration = null;
+        let selectedSpecial = null;
+        let votes = [];
+
+        function toggleDestinationFields() {
+            const checked = document.getElementById('isDestination').checked;
+            document.getElementById('destinationFields').style.display = checked ? 'block' : 'none';
         }
 
-        function App() {
-            const [view, setView] = useState('map');
-            const [loading, setLoading] = useState(true);
-            const [submitting, setSubmitting] = useState(false);
-            const [toast, setToast] = useState(null);
-            const [formData, setFormData] = useState({
-                isDestination: false,
-                isTrickOrTreating: false,
-                groupSize: 2,
-                address: '',
-                name: '',
-                trickOrTreat: false,
-                decorations: false,
-                specialEvent: false,
-                notes: '',
-                lat: null,
-                lng: null
-            });
+        function toggleTrickOrTreatingFields() {
+            const checked = document.getElementById('isTrickOrTreating').checked;
+            document.getElementById('trickOrTreatingFields').style.display = checked ? 'block' : 'none';
+        }
+
+        function checkTimeRestrictions() {
+            const now = new Date();
+            const eventStart = new Date('2025-10-31T15:30:00-07:00');
+            const votingEnd = new Date('2025-11-03T00:00:00-08:00');
             
-            const [registrations, setRegistrations] = useState([]);
-            const [visitedHouses, setVisitedHouses] = useState(() => {
-                const saved = localStorage.getItem('visitedHouses');
-                return saved ? JSON.parse(saved) : [];
-            });
-            const [activeFilters, setActiveFilters] = useState({
-                trickOrTreat: true,
-                decorations: true,
-                specialEvent: true
-            });
-            const [headerSmall, setHeaderSmall] = useState(false);
-            const addressInputRef = useRef(null);
-            const autocompleteRef = useRef(null);
-            const mapRef = useRef(null);
-            const markersRef = useRef([]);
-
-            useEffect(() => {
-                loadRegistrations();
-            }, []);
-
-            useEffect(() => {
-                window.scrollTo(0, 0);
-            }, [view]);
-
-            useEffect(() => {
-                const handleScroll = () => {
-                    setHeaderSmall(window.scrollY > 50);
-                };
-                
-                window.addEventListener('scroll', handleScroll);
-                return () => window.removeEventListener('scroll', handleScroll);
-            }, []);
-
-            useEffect(() => {
-                localStorage.setItem('visitedHouses', JSON.stringify(visitedHouses));
-            }, [visitedHouses]);
-
-            const toggleVisited = (address) => {
-                setVisitedHouses(prev => 
-                    prev.includes(address) 
-                        ? prev.filter(a => a !== address)
-                        : [...prev, address]
-                );
-            };
-
-            useEffect(() => {
-                if (view === 'register' && formData.isDestination && addressInputRef.current && window.google) {
-                    autocompleteRef.current = new window.google.maps.places.Autocomplete(
-                        addressInputRef.current,
-                        {
-                            types: ['address'],
-                            componentRestrictions: { country: 'us' },
-                            bounds: new window.google.maps.LatLngBounds(
-                                new window.google.maps.LatLng(36.0, -115.3),
-                                new window.google.maps.LatLng(36.3, -115.0)
-                            )
-                        }
-                    );
-
-                    autocompleteRef.current.addListener('place_changed', () => {
-                        const place = autocompleteRef.current.getPlace();
-                        
-                        if (place.geometry) {
-                            setFormData(prev => ({
-                                ...prev,
-                                address: place.formatted_address,
-                                lat: place.geometry.location.lat(),
-                                lng: place.geometry.location.lng()
-                            }));
-                        }
-                    });
-                }
-            }, [view, formData.isDestination]);
-
-            useEffect(() => {
-                if (view === 'map' && window.google && !loading) {
-                    markersRef.current.forEach(marker => marker.setMap(null));
-                    markersRef.current = [];
-
-                    let center = { lat: 36.175, lng: -115.136 };
-                    let zoom = 13;
-
-                    const houseRegistrations = registrations.filter(r => r.Address && r.Latitude && r.Longitude);
-
-                    if (houseRegistrations.length > 0) {
-                        const avgLat = houseRegistrations.reduce((sum, r) => sum + parseFloat(r.Latitude), 0) / houseRegistrations.length;
-                        const avgLng = houseRegistrations.reduce((sum, r) => sum + parseFloat(r.Longitude), 0) / houseRegistrations.length;
-                        center = { lat: avgLat, lng: avgLng };
-                        zoom = 15;
+            if (now >= eventStart) {
+                document.querySelectorAll('.time-restricted').forEach(el => {
+                    if (el.tagName === 'BUTTON') {
+                        el.style.display = 'inline-block';
+                    } else {
+                        el.style.display = 'block';
                     }
+                });
+            }
 
-                    const map = new window.google.maps.Map(document.getElementById('map'), {
-                        center: center,
-                        zoom: zoom,
-                        styles: [
-                            { elementType: 'geometry', stylers: [{ color: '#1a0b2e' }] },
-                            { elementType: 'labels.text.stroke', stylers: [{ color: '#1a0b2e' }] },
-                            { elementType: 'labels.text.fill', stylers: [{ color: '#9333ea' }] },
-                            {
-                                featureType: 'road',
-                                elementType: 'geometry',
-                                stylers: [{ color: '#2d1b4e' }]
-                            },
-                            {
-                                featureType: 'road',
-                                elementType: 'geometry.stroke',
-                                stylers: [{ color: '#1a0b2e' }]
-                            },
-                            {
-                                featureType: 'poi',
-                                elementType: 'labels',
-                                stylers: [{ visibility: 'off' }]
-                            },
-                            {
-                                featureType: 'water',
-                                elementType: 'geometry',
-                                stylers: [{ color: '#0f0621' }]
-                            }
-                        ]
-                    });
+            if (now >= eventStart && now < votingEnd) {
+                document.getElementById('votingSection').style.display = 'block';
+            } else if (now >= votingEnd) {
+                document.getElementById('votingSection').style.display = 'none';
+                document.getElementById('votingResults').style.display = 'block';
+                displayWinners();
+            }
+        }
 
-                    mapRef.current = map;
+        async function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 36.1699, lng: -115.1398 },
+                zoom: 16,
+                styles: [
+                    { elementType: 'geometry', stylers: [{ color: '#1a0b2e' }] },
+                    { elementType: 'labels.text.fill', stylers: [{ color: '#ff6b35' }] },
+                    { elementType: 'labels.text.stroke', stylers: [{ color: '#1a0b2e' }] },
+                    {
+                        featureType: 'road',
+                        elementType: 'geometry',
+                        stylers: [{ color: '#2d1b4e' }]
+                    }
+                ]
+            });
 
-                    houseRegistrations.forEach(reg => {
-                        const lat = parseFloat(reg.Latitude);
-                        const lng = parseFloat(reg.Longitude);
+            await loadHouses();
+            checkTimeRestrictions();
+            
+            document.querySelector('.loading').style.display = 'none';
+        }
 
-                        let pinColor = '#f97316';
-                        let iconLabel = '🍬';
-                        
-                        if (reg.SpecialEvent) {
-                            pinColor = '#eab308';
-                            iconLabel = '🎉';
-                        } else if (reg.TrickOrTreat) {
-                            pinColor = '#f97316';
-                            iconLabel = '🍬';
-                        } else if (reg.Decorations) {
-                            pinColor = '#a855f7';
-                            iconLabel = '🎃';
-                        }
+        async function loadHouses() {
+            try {
+                const response = await fetch(SHEET_URL);
+                const data = await response.json();
+                houses = data.houses || [];
+                votes = data.votes || [];
+                updateMap();
+                updateStats();
+                updateVotingOptions();
+            } catch (error) {
+                console.error('Error loading houses:', error);
+                showToast('Error loading data. Please refresh the page.');
+            }
+        }
 
-                        const marker = new window.google.maps.Marker({
-                            position: { lat, lng },
+        function updateMap() {
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+
+            const filteredHouses = houses.filter(house => {
+                if (!house.isDestination) return false;
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'candy') return house.activities.includes('candy');
+                if (currentFilter === 'decorations') return house.activities.includes('decorations');
+                if (currentFilter === 'special') return house.activities.includes('special');
+                return false;
+            });
+
+            filteredHouses.forEach(house => {
+                if (!house.address) return;
+                
+                const geocoder = new google.maps.Geocoder();
+                const fullAddress = `${house.address}, Las Vegas, NV 89102`;
+                
+                geocoder.geocode({ address: fullAddress }, (results, status) => {
+                    if (status === 'OK') {
+                        const marker = new google.maps.Marker({
+                            position: results[0].geometry.location,
                             map: map,
-                            title: reg.Address,
+                            title: house.address,
                             icon: {
-                                path: window.google.maps.SymbolPath.CIRCLE,
-                                scale: 12,
-                                fillColor: pinColor,
-                                fillOpacity: 1,
-                                strokeColor: '#ffffff',
-                                strokeWeight: 2
-                            },
-                            label: {
-                                text: iconLabel,
-                                fontSize: '16px'
+                                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                    <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                                        <text x="20" y="30" font-size="30" text-anchor="middle">🎃</text>
+                                    </svg>
+                                `),
+                                scaledSize: new google.maps.Size(40, 40)
                             }
                         });
 
-                        marker.metadata = {
-                            trickOrTreat: reg.TrickOrTreat,
-                            decorations: reg.Decorations,
-                            specialEvent: reg.SpecialEvent
-                        };
-
-                        const activities = [];
-                        if (reg.TrickOrTreat) activities.push('🍬 Handing Out Candy');
-                        if (reg.Decorations) activities.push('🎃 Decorations');
-                        if (reg.SpecialEvent) activities.push('🎉 Special Event');
+                        const activities = house.activities.map(a => {
+                            if (a === 'candy') return '🍬 Candy';
+                            if (a === 'decorations') return '🏠 Decorations';
+                            if (a === 'special') return '🎯 Special Stop';
+                            return a;
+                        }).join(', ');
 
                         const infoContent = `
-                            <div style="padding: 8px; max-width: 250px;">
-                                <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">${reg.Address}</div>
-                                ${reg.Name ? `<div style="color: #666; font-size: 14px; margin-bottom: 8px;">${reg.Name}</div>` : ''}
-                                <div style="margin-bottom: 4px;">
-                                    ${activities.map(a => `<div style="font-size: 14px; margin: 2px 0;">${a}</div>`).join('')}
-                                </div>
-                                ${reg.Notes ? `<div style="font-style: italic; color: #666; font-size: 13px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;">"${reg.Notes}"</div>` : ''}
+                            <div style="color: #1a0b2e; padding: 10px;">
+                                <h3>${house.address}</h3>
+                                ${house.name ? `<p><strong>${house.name}</strong></p>` : ''}
+                                <p><strong>Offering:</strong> ${activities}</p>
+                                ${house.notes ? `<p><strong>Details:</strong> ${house.notes}</p>` : ''}
                             </div>
                         `;
 
-                        const infoWindow = new window.google.maps.InfoWindow({
+                        const infowindow = new google.maps.InfoWindow({
                             content: infoContent
                         });
 
                         marker.addListener('click', () => {
-                            infoWindow.open(map, marker);
+                            infowindow.open(map, marker);
                         });
 
-                        markersRef.current.push(marker);
-                    });
-
-                    if (markersRef.current.length > 1) {
-                        const bounds = new window.google.maps.LatLngBounds();
-                        markersRef.current.forEach(marker => {
-                            bounds.extend(marker.getPosition());
-                        });
-                        map.fitBounds(bounds);
+                        markers.push(marker);
                     }
-                }
-            }, [view, registrations, loading]);
-
-            useEffect(() => {
-                markersRef.current.forEach(marker => {
-                    const shouldShow = 
-                        (marker.metadata.trickOrTreat && activeFilters.trickOrTreat) ||
-                        (marker.metadata.decorations && activeFilters.decorations) ||
-                        (marker.metadata.specialEvent && activeFilters.specialEvent);
-                    
-                    marker.setVisible(shouldShow);
                 });
-            }, [activeFilters]);
+            });
+        }
 
-            const loadRegistrations = async () => {
-                try {
-                    setLoading(true);
-                    const response = await fetch(SHEET_URL);
-                    const data = await response.json();
-                    setRegistrations(data);
-                } catch (error) {
-                    console.error('Error loading registrations:', error);
-                    setToast('Could not load registrations. Please refresh.');
-                } finally {
-                    setLoading(false);
+        function updateStats() {
+            const destinations = houses.filter(h => h.isDestination);
+            const total = destinations.length;
+            const candy = destinations.filter(h => h.activities.includes('candy')).length;
+            const special = destinations.filter(h => h.activities.includes('special')).length;
+            const treaters = houses.filter(h => h.isTrickOrTreating).reduce((sum, h) => sum + parseInt(h.groupSize || 0), 0);
+
+            document.getElementById('totalHouses').textContent = total;
+            document.getElementById('candyHouses').textContent = candy;
+            document.getElementById('specialStops').textContent = special;
+            document.getElementById('totalTrickOrTreaters').textContent = treaters;
+        }
+
+        function updateVotingOptions() {
+            const decorationDiv = document.getElementById('decorationVotes');
+            const specialDiv = document.getElementById('specialVotes');
+            
+            decorationDiv.innerHTML = '';
+            specialDiv.innerHTML = '';
+
+            const destinations = houses.filter(h => h.isDestination && h.address);
+
+            destinations.forEach((house, index) => {
+                const decorOption = document.createElement('div');
+                decorOption.className = 'house-option';
+                decorOption.innerHTML = `<span>${house.address}</span><span>🎃</span>`;
+                decorOption.onclick = () => selectVote('decoration', index, decorOption);
+                decorationDiv.appendChild(decorOption);
+
+                if (house.activities.includes('special')) {
+                    const specialOption = document.createElement('div');
+                    specialOption.className = 'house-option';
+                    specialOption.innerHTML = `<span>${house.address}</span><span>🎯</span>`;
+                    specialOption.onclick = () => selectVote('special', index, specialOption);
+                    specialDiv.appendChild(specialOption);
                 }
+            });
+        }
+
+        function selectVote(category, houseIndex, element) {
+            const container = element.parentElement;
+            container.querySelectorAll('.house-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            if (category === 'decoration') {
+                selectedDecoration = houseIndex;
+            } else {
+                selectedSpecial = houseIndex;
+            }
+        }
+
+        async function submitVotes() {
+            const email = document.getElementById('voterEmail').value.trim();
+            
+            if (!email) {
+                showToast('Please enter your email to vote');
+                return;
+            }
+
+            if (selectedDecoration === null && selectedSpecial === null) {
+                showToast('Please select at least one house to vote for');
+                return;
+            }
+
+            const destinations = houses.filter(h => h.isDestination && h.address);
+            
+            const voteData = {
+                email: email,
+                decoration: selectedDecoration !== null ? destinations[selectedDecoration].address : '',
+                special: selectedSpecial !== null ? destinations[selectedSpecial].address : '',
+                timestamp: new Date().toISOString()
             };
 
-            const handleSubmit = async () => {
-                if (!formData.isDestination && !formData.isTrickOrTreating) {
-                    setToast('Please select at least one participation type');
+            try {
+                await fetch(SHEET_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ type: 'vote', data: voteData })
+                });
+                
+                showToast('Vote submitted successfully! 🎉');
+                document.getElementById('voterEmail').value = '';
+                selectedDecoration = null;
+                selectedSpecial = null;
+                document.querySelectorAll('.house-option').forEach(el => el.classList.remove('selected'));
+            } catch (error) {
+                showToast('Error submitting vote. Please try again.');
+            }
+        }
+
+        async function displayWinners() {
+            try {
+                const response = await fetch(SHEET_URL);
+                const data = await response.json();
+                const allVotes = data.votes || [];
+
+                const decorationVotes = {};
+                const specialVotes = {};
+
+                allVotes.forEach(vote => {
+                    if (vote.decoration) {
+                        decorationVotes[vote.decoration] = (decorationVotes[vote.decoration] || 0) + 1;
+                    }
+                    if (vote.special) {
+                        specialVotes[vote.special] = (specialVotes[vote.special] || 0) + 1;
+                    }
+                });
+
+                const decorationWinner = Object.entries(decorationVotes).sort((a, b) => b[1] - a[1])[0];
+                const specialWinner = Object.entries(specialVotes).sort((a, b) => b[1] - a[1])[0];
+
+                const winnersDiv = document.getElementById('winnersDisplay');
+                winnersDiv.innerHTML = `
+                    ${decorationWinner ? `
+                        <div class="winner-banner">
+                            🎃 Best Decorated House: ${decorationWinner[0]} (${decorationWinner[1]} votes)
+                        </div>
+                    ` : ''}
+                    ${specialWinner ? `
+                        <div class="winner-banner">
+                            🎯 Best Special Stop: ${specialWinner[0]} (${specialWinner[1]} votes)
+                        </div>
+                    ` : ''}
+                `;
+            } catch (error) {
+                console.error('Error displaying winners:', error);
+            }
+        }
+
+        function filterHouses(type) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateMap();
+        }
+
+        function openRegister() {
+            openModal('registerModal');
+        }
+
+        function openVolunteer() {
+            window.open(VOLUNTEER_FORM, '_blank');
+        }
+
+        function openPhotos() {
+            window.open(PHOTO_FORM, '_blank');
+        }
+
+        function openFeedback() {
+            window.open(FEEDBACK_FORM, '_blank');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const isDestination = document.getElementById('isDestination').checked;
+            const isTrickOrTreating = document.getElementById('isTrickOrTreating').checked;
+
+            if (!isDestination && !isTrickOrTreating) {
+                showToast('Please select at least one participation option');
+                return;
+            }
+
+            let address = '';
+            let name = '';
+            let activities = [];
+            let notes = '';
+            let groupSize = 0;
+
+            if (isDestination) {
+                const houseNum = document.getElementById('address').value.trim();
+                const street = document.getElementById('street').value;
+                
+                if (!houseNum || !street) {
+                    showToast('Please enter your complete address');
                     return;
                 }
 
-                if (formData.isDestination) {
-                    if (!formData.address) {
-                        setToast('Please enter your address');
-                        return;
-                    }
-                    
-                    if (!formData.trickOrTreat && !formData.decorations && !formData.specialEvent) {
-                        setToast('Please select at least one activity for your house');
-                        return;
-                    }
+                address = `${houseNum} ${street}`;
+                name = document.getElementById('name').value.trim();
+                activities = Array.from(document.querySelectorAll('input[name="activity"]:checked')).map(cb => cb.value);
+                notes = document.getElementById('notes').value.trim();
+
+                if (activities.length === 0) {
+                    showToast('Please select at least one activity for your destination house');
+                    return;
                 }
-
-                if (formData.isTrickOrTreating) {
-                    if (!formData.groupSize || formData.groupSize < 1) {
-                        setToast('Please enter your group size');
-                        return;
-                    }
-                }
-
-                try {
-                    setSubmitting(true);
-                    
-                    await fetch(SHEET_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    await loadRegistrations();
-                    
-                    setFormData({ 
-                        isDestination: false,
-                        isTrickOrTreating: false,
-                        groupSize: 2,
-                        address: '', 
-                        name: '', 
-                        trickOrTreat: false,
-                        decorations: false,
-                        specialEvent: false,
-                        notes: '',
-                        lat: null,
-                        lng: null
-                    });
-                    setView('map');
-                    setToast('🎃 Thanks for registering!');
-                } catch (error) {
-                    console.error('Error submitting:', error);
-                    setToast('Something went wrong. Please try again.');
-                } finally {
-                    setSubmitting(false);
-                }
-            };
-
-            const getParticipationTypes = (reg) => {
-                const types = [];
-                if (reg.TrickOrTreat) types.push({ icon: Home, label: 'Trick-or-Treat', color: 'text-orange-400' });
-                if (reg.Decorations) types.push({ icon: Ghost, label: 'Decorations', color: 'text-purple-400' });
-                if (reg.SpecialEvent) types.push({ icon: Star, label: 'Special Event', color: 'text-yellow-400' });
-                return types;
-            };
-
-            const getPrimaryIcon = (reg) => {
-                if (reg.SpecialEvent) return { Icon: Star, color: 'bg-yellow-500' };
-                if (reg.TrickOrTreat) return { Icon: Home, color: 'bg-orange-500' };
-                if (reg.Decorations) return { Icon: Ghost, color: 'bg-purple-500' };
-                return { Icon: MapPin, color: 'bg-gray-400' };
-            };
-
-            if (loading) {
-                return (
-                    <div className="min-h-screen flex items-center justify-center">
-                        <div className="text-center">
-                            <Loader className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
-                            <p className="text-purple-300">Loading Halloween map...</p>
-                        </div>
-                    </div>
-                );
             }
 
-            return (
-                <div className="min-h-screen pb-6 relative">
-                    {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+            if (isTrickOrTreating) {
+                groupSize = parseInt(document.getElementById('groupSize').value) || 0;
+                if (groupSize <= 0) {
+                    showToast('Please enter your group size');
+                    return;
+                }
+            }
 
-                    <div className={`bg-gradient-to-r from-purple-900 to-orange-900 shadow-lg border-b-2 border-orange-500 sticky top-0 z-10 transition-all duration-300 ${
-                        headerSmall ? 'py-2' : 'py-4'
-                    }`}>
-                        <div className="max-w-4xl mx-auto px-4">
-                            <h1 className={`font-bold text-orange-400 transition-all duration-300 ${
-                                headerSmall ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl'
-                            }`}>🎃 Glenheatherween • Oct 25, 6-8pm</h1>
-                            {!headerSmall && (
-                                <p className="text-xs sm:text-sm text-purple-200">Glen Heather Estates Halloween Map</p>
-                            )}
-                        </div>
-                    </div>
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
 
-                    <div className="max-w-4xl mx-auto px-4 py-4">
-                        {view === 'map' ? (
-                            <div className="space-y-4">
-                                <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
-                                    <div className="grid grid-cols-2 gap-4 mb-3">
-                                        <div>
-                                            <div className="text-2xl font-bold text-orange-400">
-                                                {registrations.filter(r => r.Address).length}
-                                            </div>
-                                            <div className="text-sm text-purple-200">Houses Participating</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-2xl font-bold text-purple-300">
-                                                {registrations.filter(r => r.IsTrickOrTreating).reduce((sum, r) => sum + (parseInt(r.GroupSize) || 0), 0)}
-                                            </div>
-                                            <div className="text-sm text-purple-200">People Trick-or-Treating</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex gap-2">
-                                            <div className="flex flex-col items-center">
-                                                <div className="w-10 h-10 rounded-full bg-orange-500/20 border border-orange-500 flex items-center justify-center text-xl">
-                                                    🍬
-                                                </div>
-                                                <div className="text-xs text-purple-200 mt-1">
-                                                    {registrations.filter(r => r.TrickOrTreat).length}
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col items-center">
-                                                <div className="w-10 h-10 rounded-full bg-purple-500/20 border border-purple-500 flex items-center justify-center text-xl">
-                                                    🎃
-                                                </div>
-                                                <div className="text-xs text-purple-200 mt-1">
-                                                    {registrations.filter(r => r.Decorations).length}
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col items-center">
-                                                <div className="w-10 h-10 rounded-full bg-yellow-500/20 border border-yellow-500 flex items-center justify-center text-xl">
-                                                    🎉
-                                                </div>
-                                                <div className="text-xs text-purple-200 mt-1">
-                                                    {registrations.filter(r => r.SpecialEvent).length}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="text-xs text-purple-300 space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <span>🍬</span>
-                                            <span>Handing out candy</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span>🎃</span>
-                                            <span>Cool decorations</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span>🎉</span>
-                                            <span>Special event</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="mt-4 space-y-2">
-                                        <button
-                                            onClick={() => setView('register')}
-                                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-lg font-bold text-base hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 transition shadow-lg"
-                                        >
-                                            👻🎃 Register for Glenheatherween 🦇🍬
-                                        </button>
-                                        
-                                        <button
-                                            onClick={() => {
-                                                if (navigator.share) {
-                                                    navigator.share({
-                                                        title: 'Glenheatherween - Halloween 2025',
-                                                        text: 'Join us for Halloween in Glen Heather Estates! Saturday, Oct 25, 6-8pm',
-                                                        url: window.location.href
-                                                    });
-                                                } else {
-                                                    navigator.clipboard.writeText(window.location.href);
-                                                    setToast('Link copied to clipboard!');
-                                                }
-                                            }}
-                                            className="w-full bg-purple-700 text-purple-200 py-2 rounded-lg font-medium text-sm hover:bg-purple-600 active:bg-purple-800 transition"
-                                        >
-                                            📤 Share with a Neighbor
-                                        </button>
-                                    </div>
-                                </div>
+            const registrationData = {
+                timestamp: new Date().toISOString(),
+                address: address,
+                name: name,
+                trickOrTreat: activities.includes('candy'),
+                decorations: activities.includes('decorations'),
+                specialEvent: activities.includes('special'),
+                notes: notes,
+                isDestination: isDestination,
+                isTrickOrTreating: isTrickOrTreating,
+                groupSize: groupSize,
+                phone: phone,
+                email: email
+            };
 
-                                <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-4">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <h2 className="font-bold text-lg text-orange-400">Map View</h2>
-                                        <button
-                                            onClick={() => setActiveFilters({ trickOrTreat: true, decorations: true, specialEvent: true })}
-                                            className="text-xs text-purple-300 hover:text-orange-400 font-medium transition"
-                                        >
-                                            Show All
-                                        </button>
-                                    </div>
-                                    <p className="text-xs text-purple-400 mb-3">Tap categories to filter map</p>
-                                    
-                                    <div className="flex flex-wrap gap-2 mb-3">
-                                        <button
-                                            onClick={() => setActiveFilters(prev => ({ ...prev, trickOrTreat: !prev.trickOrTreat }))}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
-                                                activeFilters.trickOrTreat
-                                                    ? 'bg-orange-500/30 text-orange-300 border-2 border-orange-500'
-                                                    : 'bg-purple-800/50 text-purple-400 border-2 border-transparent'
-                                            }`}
-                                        >
-                                            <span>🍬</span>
-                                            <span>Candy</span>
-                                        </button>
-                                        
-                                        <button
-                                            onClick={() => setActiveFilters(prev => ({ ...prev, decorations: !prev.decorations }))}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
-                                                activeFilters.decorations
-                                                    ? 'bg-purple-500/30 text-purple-300 border-2 border-purple-400'
-                                                    : 'bg-purple-800/50 text-purple-400 border-2 border-transparent'
-                                            }`}
-                                        >
-                                            <span>🎃</span>
-                                            <span>Decorations</span>
-                                        </button>
-                                        
-                                        <button
-                                            onClick={() => setActiveFilters(prev => ({ ...prev, specialEvent: !prev.specialEvent }))}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
-                                                activeFilters.specialEvent
-                                                    ? 'bg-yellow-500/30 text-yellow-300 border-2 border-yellow-400'
-                                                    : 'bg-purple-800/50 text-purple-400 border-2 border-transparent'
-                                            }`}
-                                        >
-                                            <span>🎉</span>
-                                            <span>Events</span>
-                                        </button>
-                                    </div>
-                                    
-                                    <div id="map" className="rounded-lg h-96 sm:h-[500px] w-full border-2 border-purple-700"></div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="max-w-2xl mx-auto">
-                                <button
-                                    onClick={() => setView('map')}
-                                    className="text-purple-300 hover:text-orange-400 mb-4 flex items-center gap-2"
-                                >
-                                    <span>←</span>
-                                    <span>Back to Map</span>
-                                </button>
-                                <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl shadow-lg border border-purple-700 p-6">
-                                    <h2 className="text-2xl font-bold text-orange-400 mb-2">Join Glenheatherween!</h2>
-                                    <p className="text-purple-200 mb-6 text-sm sm:text-base">
-                                        Help your neighbors plan their Halloween night!
-                                    </p>
+            try {
+                await fetch(SHEET_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ type: 'register', data: registrationData })
+                });
+                
+                showToast('Registration successful! 🎃');
+                closeModal('registerModal');
+                document.getElementById('registerForm').reset();
+                document.getElementById('destinationFields').style.display = 'none';
+                document.getElementById('trickOrTreatingFields').style.display = 'none';
+                await loadHouses();
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error submitting registration. Please try again.');
+            }
+        });
 
-                                    <div className="space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-orange-300 mb-4">How are you participating?</h3>
-                                            
-                                            <div className="space-y-3">
-                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-orange-500/10 cursor-pointer transition">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.isDestination}
-                                                        onChange={(e) => setFormData({...formData, isDestination: e.target.checked})}
-                                                        className="mt-1 w-5 h-5 flex-shrink-0"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 font-semibold text-orange-300">
-                                                            <span className="text-2xl">🏠</span>
-                                                            <span>My house is a destination</span>
-                                                        </div>
-                                                        <div className="text-sm text-purple-300 mt-1">
-                                                            Handing out candy, have decorations, or hosting a special event
-                                                        </div>
-                                                    </div>
-                                                </label>
-
-                                                <label className="flex items-start gap-4 p-4 border-2 border-purple-700 rounded-xl hover:bg-purple-500/10 cursor-pointer transition">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.isTrickOrTreating}
-                                                        onChange={(e) => setFormData({...formData, isTrickOrTreating: e.target.checked})}
-                                                        className="mt-1 w-5 h-5 flex-shrink-0"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 font-semibold text-purple-300">
-                                                            <span className="text-2xl">👻</span>
-                                                            <span>People from my household will be trick-or-treating</span>
-                                                        </div>
-                                                        <div className="text-sm text-purple-300 mt-1">
-                                                            Helps candy distributors know how much to buy
-                                                        </div>
-                                                    </div>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        {formData.isTrickOrTreating && (
-                                            <div className="bg-purple-900/40 rounded-lg p-4 border border-purple-600">
-                                                <label className="block text-sm font-semibold text-purple-300 mb-2">
-                                                    How many people in your trick-or-treating group?
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    value={formData.groupSize}
-                                                    onChange={(e) => setFormData({...formData, groupSize: parseInt(e.target.value)})}
-                                                    className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-purple-100"
-                                                    disabled={submitting}
-                                                />
-                                            </div>
-                                        )}
-
-                                        {formData.isDestination && (
-                                            <div className="bg-orange-900/20 rounded-lg p-4 border border-orange-600 space-y-5">
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-orange-300 mb-2">
-                                                        Your Address *
-                                                    </label>
-                                                    <input
-                                                        ref={addressInputRef}
-                                                        type="text"
-                                                        value={formData.address}
-                                                        onChange={(e) => setFormData({...formData, address: e.target.value})}
-                                                        className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
-                                                        placeholder="Start typing your address..."
-                                                        disabled={submitting}
-                                                    />
-                                                    <p className="text-xs text-purple-400 mt-1">Start typing and select from suggestions</p>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-orange-300 mb-2">
-                                                        Your Name
-                                                        <span className="text-purple-400 font-normal ml-1">(optional)</span>
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        value={formData.name}
-                                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                                        className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
-                                                        placeholder="e.g. The Smith Family"
-                                                        disabled={submitting}
-                                                    />
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-orange-300 mb-3">
-                                                        What activities at your house? *
-                                                    </label>
-                                                    <div className="space-y-3">
-                                                        <label className="flex items-start gap-4 p-3 border-2 border-purple-700 rounded-lg hover:bg-orange-500/10 hover:border-orange-500 cursor-pointer transition">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={formData.trickOrTreat}
-                                                                onChange={(e) => setFormData({...formData, trickOrTreat: e.target.checked})}
-                                                                className="mt-1 w-4 h-4 flex-shrink-0"
-                                                                disabled={submitting}
-                                                            />
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2 font-semibold text-orange-300 text-sm">
-                                                                    <span className="text-lg">🍬</span>
-                                                                    <span>Handing Out Candy</span>
-                                                                </div>
-                                                            </div>
-                                                        </label>
-
-                                                        <label className="flex items-start gap-4 p-3 border-2 border-purple-700 rounded-lg hover:bg-purple-500/10 hover:border-purple-400 cursor-pointer transition">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={formData.decorations}
-                                                                onChange={(e) => setFormData({...formData, decorations: e.target.checked})}
-                                                                className="mt-1 w-4 h-4 flex-shrink-0"
-                                                                disabled={submitting}
-                                                            />
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2 font-semibold text-purple-300 text-sm">
-                                                                    <span className="text-lg">🎃</span>
-                                                                    <span>Decorations to See</span>
-                                                                </div>
-                                                            </div>
-                                                        </label>
-
-                                                        <label className="flex items-start gap-4 p-3 border-2 border-purple-700 rounded-lg hover:bg-yellow-500/10 hover:border-yellow-400 cursor-pointer transition">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={formData.specialEvent}
-                                                                onChange={(e) => setFormData({...formData, specialEvent: e.target.checked})}
-                                                                className="mt-1 w-4 h-4 flex-shrink-0"
-                                                                disabled={submitting}
-                                                            />
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2 font-semibold text-yellow-300 text-sm">
-                                                                    <span className="text-lg">🎉</span>
-                                                                    <span>Special Event</span>
-                                                                </div>
-                                                            </div>
-                                                        </label>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-orange-300 mb-2">
-                                                        Additional Details
-                                                        <span className="text-purple-400 font-normal ml-1">(optional)</span>
-                                                    </label>
-                                                    <textarea
-                                                        value={formData.notes}
-                                                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                                                        className="w-full px-4 py-3 text-base bg-purple-950 border-2 border-purple-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-purple-100 placeholder-purple-400"
-                                                        rows="3"
-                                                        placeholder="E.g., 'Haunted garage opens at 6pm' or 'Full size candy bars!'"
-                                                        disabled={submitting}
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <button
-                                            onClick={handleSubmit}
-                                            disabled={submitting}
-                                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 transition shadow-lg disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                        >
-                                            {submitting ? (
-                                                <>
-                                                    <Loader className="w-5 h-5 animate-spin" />
-                                                    <span>Registering...</span>
-                                                </>
-                                            ) : (
-                                                '🎃 Register for Glenheatherween'
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="text-center py-6 text-purple-300 text-sm">
-                        Questions or issues? Email <a href="mailto:igoran89@gmail.com" className="text-orange-400 hover:text-orange-300 underline">igoran89@gmail.com</a>
-                    </div>
-                </div>
-            );
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+        function printMap() {
+            const printContent = document.getElementById('printable');
+            
+            const destinations = houses.filter(h => h.isDestination && h.address);
+            const byStreet = {};
+            
+            destinations.forEach(house => {
+                const street = house.address.split(' ').slice(1).join(' ');
+                if (!byStreet[street]) byStreet[street] = [];
+                byStreet[street].push(house);
+            });
+
+            const sortedStreets = Object.keys(byStreet).sort();
+
+            let html = `
+                <div style="padding: 20px; font-family: Arial;">
+                    <h1 style="text-align: center;">Glenheatherween 2025 - House List</h1>
+                    <p style="text-align: center;">October 31st, 2025</p>
+                    <hr>
+            `;
+
+            sortedStreets.forEach(street => {
+                html += `<h2>${street}</h2><ul>`;
+                byStreet[street].forEach(house => {
+                    const activities = house.activities.map(a => {
+                        if (a === 'candy') return 'Candy';
+                        if (a === 'decorations') return 'Decorations';
+                        if (a === 'special') return 'Special Stop';
+                        return a;
+                    }).join(', ');
+                    html += `<li>${house.address} - ${activities}${house.notes ? ` (${house.notes})` : ''}</li>`;
+                });
+                html += '</ul>';
+            });
+
+            html += '</div>';
+            printContent.innerHTML = html;
+            window.print();
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        window.onload = initMap;
     </script>
 </body>
 </html>
