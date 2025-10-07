@@ -114,6 +114,14 @@
             box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
         }
 
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
         .filters {
             display: flex;
             gap: 15px;
@@ -452,6 +460,8 @@
             h1 { font-size: 2em; }
             #map { height: 400px; }
             .header-stats { grid-template-columns: repeat(2, 1fr); }
+            .header-buttons { flex-direction: column; }
+            .header-buttons .register-btn { width: 100%; }
             .choice-buttons { flex-direction: column; }
             .choice-btn { max-width: 100%; }
         }
@@ -490,7 +500,18 @@
                 </div>
             </div>
 
-            <button class="register-btn" onclick="openRegister()">🏠 Register Now</button>
+            <div class="header-buttons">
+                <button class="register-btn" onclick="openRegister()">🏠 Register Now</button>
+                <button class="register-btn" onclick="openVolunteer()" style="background: rgba(255, 255, 255, 0.1);">🙋 Volunteer</button>
+                <button class="register-btn" onclick="shareWebsite()" style="background: rgba(255, 255, 255, 0.1);">📤 Share with a Neighbor</button>
+            </div>
+            
+            <div style="background: rgba(255, 107, 53, 0.15); border: 2px solid #ff6b35; border-radius: 15px; padding: 20px; margin-top: 25px; text-align: left;">
+                <h3 style="color: #ff6b35; margin-bottom: 10px; text-align: center;">🎟️ 50/50 Raffle</h3>
+                <p style="margin: 8px 0;"><strong>Buy tickets at:</strong> Shelly's house - 2112 Kirkland Ave</p>
+                <p style="margin: 8px 0;"><strong>Pricing:</strong> $1 each • 6 for $5 • 12 for $10</p>
+                <p style="margin: 8px 0;"><strong>Payment:</strong> Cash or Zelle • <strong>Drawing:</strong> After 9 PM on Halloween 🎃</p>
+            </div>
         </header>
 
         <div class="filters">
@@ -503,7 +524,6 @@
         <div id="map"></div>
 
         <div class="bottom-buttons">
-            <button onclick="openVolunteer()">🙋 Volunteer</button>
             <button onclick="openPhotos()">📸 Share Photos</button>
             <button onclick="openFeedback()">💭 Give Feedback</button>
             <button onclick="openModal('helpModal')">❓ Need Help?</button>
@@ -1281,6 +1301,32 @@
             toast.textContent = message;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function shareWebsite() {
+            const shareData = {
+                title: 'Glenheatherween 2025',
+                text: 'Check out the Glenheatherween map for Halloween trick-or-treating!',
+                url: window.location.href
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(window.location.href);
+                    showToast('Link copied to clipboard! 📋');
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    try {
+                        await navigator.clipboard.writeText(window.location.href);
+                        showToast('Link copied to clipboard! 📋');
+                    } catch (e) {
+                        showToast('Unable to share. Please copy the URL manually.');
+                    }
+                }
+            }
         }
 
         window.onclick = function(event) {
