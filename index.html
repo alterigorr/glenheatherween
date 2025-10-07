@@ -80,8 +80,8 @@
 
         .header-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             margin: 20px 0;
             padding: 20px 0 0;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -92,15 +92,55 @@
         }
 
         .header-stat-number {
-            font-size: 2em;
+            font-size: 2.5em;
             font-weight: bold;
             color: #ff6b35;
         }
 
         .header-stat-label {
-            font-size: 0.9em;
+            font-size: 1em;
             opacity: 0.9;
-            margin-top: 5px;
+            margin-top: 10px;
+        }
+
+        .stat-breakdown {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .stat-breakdown-toggle {
+            font-size: 0.9em;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .stat-breakdown:hover .stat-breakdown-toggle {
+            opacity: 1;
+        }
+
+        .stat-breakdown-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .stat-breakdown-content.expanded {
+            max-height: 100px;
+            margin-top: 10px;
+        }
+
+        .stat-breakdown-arrow {
+            display: inline-block;
+            transition: transform 0.3s;
+        }
+
+        .stat-breakdown-arrow.expanded {
+            transform: rotate(180deg);
         }
 
         .register-btn {
@@ -274,28 +314,31 @@
 
         .tot-header {
             background: rgba(255, 255, 255, 0.05);
-            padding: 15px 20px;
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .tot-filters {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
+            flex: 1;
         }
 
         .tot-filter-btn {
-            padding: 8px 16px;
-            font-size: 0.9em;
+            padding: 8px 12px;
+            font-size: 0.85em;
         }
 
         .tot-exit {
             background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            font-size: 1em;
+            padding: 8px 16px;
+            font-size: 0.9em;
         }
 
         #totMap {
@@ -573,13 +616,14 @@
         @media (max-width: 768px) {
             h1 { font-size: 2em; }
             #map { height: 400px; }
-            .header-stats { grid-template-columns: repeat(2, 1fr); }
+            .header-stats { grid-template-columns: 1fr; }
             .header-buttons { flex-direction: column; }
             .header-buttons .register-btn { width: 100%; }
             .choice-buttons { flex-direction: column; }
             .choice-btn { max-width: 100%; }
             .tot-filters { width: 100%; }
-            .tot-filter-btn { flex: 1; }
+            .tot-filter-btn { flex: 1; font-size: 0.75em; padding: 6px 8px; }
+            .tot-exit { font-size: 0.85em; padding: 6px 12px; }
         }
     </style>
 </head>
@@ -601,18 +645,16 @@
                 <div class="header-stat">
                     <div class="header-stat-number" id="totalHouses">0</div>
                     <div class="header-stat-label">Participating Houses</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-number" id="candyHouses">0</div>
-                    <div class="header-stat-label">Candy Houses</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-number" id="decoratedHouses">0</div>
-                    <div class="header-stat-label">Decorated Houses</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-number" id="specialStops">0</div>
-                    <div class="header-stat-label">Special Stops</div>
+                    <div class="stat-breakdown" onclick="toggleStatBreakdown()">
+                        <div class="stat-breakdown-toggle">
+                            <span class="stat-breakdown-arrow" id="breakdownArrow">▼</span> View Breakdown
+                        </div>
+                        <div class="stat-breakdown-content" id="breakdownContent">
+                            <div style="margin: 5px 0;">🍬 Candy: <strong id="candyHouses">0</strong></div>
+                            <div style="margin: 5px 0;">🏠 Decorated: <strong id="decoratedHouses">0</strong></div>
+                            <div style="margin: 5px 0;">🎯 Special Stops: <strong id="specialStops">0</strong></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="header-stat">
                     <div class="header-stat-number" id="totalTrickOrTreaters">0</div>
@@ -634,7 +676,8 @@
                 <div class="raffle-content" id="raffleContent">
                     <p style="margin: 8px 0;"><strong>Buy tickets at:</strong> Shelly's house - 2112 Kirkland Ave</p>
                     <p style="margin: 8px 0;"><strong>Pricing:</strong> $1 each • 6 for $5 • 12 for $10</p>
-                    <p style="margin: 8px 0;"><strong>Payment:</strong> Cash or Zelle • <strong>Drawing:</strong> After 9 PM on Halloween 🎃</p>
+                    <p style="margin: 8px 0;"><strong>Payment:</strong> Cash or Zelle</p>
+                    <p style="margin: 8px 0;"><strong>Drawing:</strong> After 9 PM on Halloween 🎃</p>
                 </div>
             </div>
         </header>
@@ -922,7 +965,8 @@
             groupSize: 0,
             name: '',
             phone: '',
-            email: ''
+            email: '',
+            confirmedDuplicate: false
         };
 
         function toggleRaffle() {
@@ -930,6 +974,13 @@
             const toggle = document.getElementById('raffleToggle');
             content.classList.toggle('expanded');
             toggle.classList.toggle('expanded');
+        }
+
+        function toggleStatBreakdown() {
+            const content = document.getElementById('breakdownContent');
+            const arrow = document.getElementById('breakdownArrow');
+            content.classList.toggle('expanded');
+            arrow.classList.toggle('expanded');
         }
 
         function initAutocomplete() {
@@ -1339,7 +1390,8 @@
                 groupSize: 0,
                 name: '',
                 phone: '',
-                email: ''
+                email: '',
+                confirmedDuplicate: false
             };
             goToStep(1);
             openModal('registerModal');
@@ -1409,6 +1461,19 @@
                 if (activities.length === 0) {
                     showToast('Please select at least one activity');
                     return;
+                }
+
+                // Check for duplicate address
+                const existingHouse = houses.find(h => 
+                    h.address && h.address.toLowerCase().trim() === address.toLowerCase().trim()
+                );
+                
+                if (existingHouse && !wizardData.confirmedDuplicate) {
+                    if (confirm(`This address (${address}) is already registered. Do you want to update the registration?`)) {
+                        wizardData.confirmedDuplicate = true;
+                    } else {
+                        return;
+                    }
                 }
                 
                 wizardData.address = address;
