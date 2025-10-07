@@ -19,6 +19,10 @@
             color: #fff;
         }
 
+        body.trick-or-treat-mode {
+            overflow: hidden;
+        }
+
         .loading {
             position: fixed;
             top: 0;
@@ -48,6 +52,10 @@
             padding: 20px;
         }
 
+        .container.hidden {
+            display: none;
+        }
+
         header {
             text-align: center;
             padding: 40px 20px 30px;
@@ -72,7 +80,7 @@
 
         .header-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 15px;
             margin: 20px 0;
             padding: 20px 0 0;
@@ -105,7 +113,6 @@
             cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
-            margin-top: 20px;
         }
 
         .register-btn:hover {
@@ -120,6 +127,48 @@
             justify-content: center;
             flex-wrap: wrap;
             margin-top: 20px;
+        }
+
+        .raffle-box {
+            background: rgba(255, 107, 53, 0.15);
+            border: 2px solid #ff6b35;
+            border-radius: 15px;
+            margin-top: 25px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .raffle-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .raffle-header:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .raffle-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 20px;
+        }
+
+        .raffle-content.expanded {
+            max-height: 200px;
+            padding: 0 20px 20px;
+        }
+
+        .raffle-toggle {
+            transition: transform 0.3s;
+        }
+
+        .raffle-toggle.expanded {
+            transform: rotate(180deg);
         }
 
         .filters {
@@ -157,12 +206,29 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
+        .map-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
         .bottom-buttons {
             display: flex;
             gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
             margin: 20px 0;
+        }
+
+        .voting-notice {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         button {
@@ -187,6 +253,54 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+
+        /* Trick-or-Treat Mode */
+        .tot-mode {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5000;
+            background: #1a0b2e;
+        }
+
+        .tot-mode.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tot-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .tot-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tot-filter-btn {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        .tot-exit {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+
+        #totMap {
+            flex: 1;
+            width: 100%;
         }
 
         .modal {
@@ -464,6 +578,8 @@
             .header-buttons .register-btn { width: 100%; }
             .choice-buttons { flex-direction: column; }
             .choice-btn { max-width: 100%; }
+            .tot-filters { width: 100%; }
+            .tot-filter-btn { flex: 1; }
         }
     </style>
 </head>
@@ -472,7 +588,7 @@
         <div class="jack-o-lantern">🎃</div>
     </div>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <header>
             <h1>🎃 Glenheatherween 2025 🎃</h1>
             <div class="event-info">
@@ -491,6 +607,10 @@
                     <div class="header-stat-label">Candy Houses</div>
                 </div>
                 <div class="header-stat">
+                    <div class="header-stat-number" id="decoratedHouses">0</div>
+                    <div class="header-stat-label">Decorated Houses</div>
+                </div>
+                <div class="header-stat">
                     <div class="header-stat-number" id="specialStops">0</div>
                     <div class="header-stat-label">Special Stops</div>
                 </div>
@@ -506,13 +626,22 @@
                 <button class="register-btn" onclick="shareWebsite()" style="background: rgba(255, 255, 255, 0.1);">📤 Share with a Neighbor</button>
             </div>
             
-            <div style="background: rgba(255, 107, 53, 0.15); border: 2px solid #ff6b35; border-radius: 15px; padding: 20px; margin-top: 25px; text-align: left;">
-                <h3 style="color: #ff6b35; margin-bottom: 10px; text-align: center;">🎟️ 50/50 Raffle</h3>
-                <p style="margin: 8px 0;"><strong>Buy tickets at:</strong> Shelly's house - 2112 Kirkland Ave</p>
-                <p style="margin: 8px 0;"><strong>Pricing:</strong> $1 each • 6 for $5 • 12 for $10</p>
-                <p style="margin: 8px 0;"><strong>Payment:</strong> Cash or Zelle • <strong>Drawing:</strong> After 9 PM on Halloween 🎃</p>
+            <div class="raffle-box">
+                <div class="raffle-header" onclick="toggleRaffle()">
+                    <h3 style="color: #ff6b35; margin: 0;">🎟️ 50/50 Raffle</h3>
+                    <span class="raffle-toggle" id="raffleToggle">▼</span>
+                </div>
+                <div class="raffle-content" id="raffleContent">
+                    <p style="margin: 8px 0;"><strong>Buy tickets at:</strong> Shelly's house - 2112 Kirkland Ave</p>
+                    <p style="margin: 8px 0;"><strong>Pricing:</strong> $1 each • 6 for $5 • 12 for $10</p>
+                    <p style="margin: 8px 0;"><strong>Payment:</strong> Cash or Zelle • <strong>Drawing:</strong> After 9 PM on Halloween 🎃</p>
+                </div>
             </div>
         </header>
+
+        <div class="map-controls">
+            <button onclick="enterTrickOrTreatMode()">🎃 Trick-or-Treat Mode</button>
+        </div>
 
         <div class="filters">
             <button class="filter-btn active" onclick="filterHouses('all')">🎃 All Houses</button>
@@ -529,9 +658,14 @@
             <button onclick="openModal('helpModal')">❓ Need Help?</button>
         </div>
 
-        <div class="voting-section" id="votingSection">
+        <div class="voting-notice">
+            <h3 style="color: #ff6b35; margin-bottom: 10px;">🏆 Vote for the Best!</h3>
+            <p>Voting opens October 31st at 3:30 PM and closes November 2nd at midnight</p>
+        </div>
+
+        <div class="voting-section" id="votingSection" style="display: none;">
             <h2 style="text-align: center; margin-bottom: 10px;">🏆 Vote for the Best!</h2>
-            <p style="text-align: center; margin-bottom: 20px; opacity: 0.8;">Voting opens October 31st at 3:30 PM and closes November 2nd at midnight</p>
+            <p style="text-align: center; margin-bottom: 20px; opacity: 0.8;">Voting closes November 2nd at midnight</p>
             
             <div class="voting-category">
                 <h3>Best Decorated House</h3>
@@ -567,6 +701,20 @@
             <h2 style="text-align: center; margin: 40px 0 20px;">🎉 Winners Announced! 🎉</h2>
             <div id="winnersDisplay"></div>
         </div>
+    </div>
+
+    <!-- Trick-or-Treat Mode -->
+    <div class="tot-mode" id="totMode">
+        <div class="tot-header">
+            <div class="tot-filters">
+                <button class="filter-btn tot-filter-btn active" onclick="filterTotHouses('all')">🎃 All</button>
+                <button class="filter-btn tot-filter-btn" onclick="filterTotHouses('candy')">🍬 Candy</button>
+                <button class="filter-btn tot-filter-btn" onclick="filterTotHouses('decorations')">🏠 Decorations</button>
+                <button class="filter-btn tot-filter-btn" onclick="filterTotHouses('special')">🎯 Special</button>
+            </div>
+            <button class="tot-exit" onclick="exitTrickOrTreatMode()">✕ Exit</button>
+        </div>
+        <div id="totMap"></div>
     </div>
 
     <!-- Register Modal -->
@@ -753,13 +901,17 @@
         ];
         
         let map;
+        let totMap;
         let markers = [];
+        let totMarkers = [];
         let houses = [];
         let currentFilter = 'all';
+        let totCurrentFilter = 'all';
         let selectedDecorationHouse = null;
         let selectedSpecialHouse = null;
         let votes = [];
         let autocomplete;
+        let userLocationMarker = null;
 
         let wizardData = {
             isDestination: false,
@@ -772,6 +924,13 @@
             phone: '',
             email: ''
         };
+
+        function toggleRaffle() {
+            const content = document.getElementById('raffleContent');
+            const toggle = document.getElementById('raffleToggle');
+            content.classList.toggle('expanded');
+            toggle.classList.toggle('expanded');
+        }
 
         function initAutocomplete() {
             const input = document.getElementById('address');
@@ -823,6 +982,7 @@
             });
 
             await loadHouses();
+            checkTimeRestrictions();
             
             document.querySelector('.loading').style.display = 'none';
         }
@@ -841,16 +1001,17 @@
             }
         }
 
-        function updateMap() {
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
+        function updateMap(mapInstance = map, markersArray = markers) {
+            markersArray.forEach(marker => marker.setMap(null));
+            markersArray.length = 0;
 
+            const filter = mapInstance === totMap ? totCurrentFilter : currentFilter;
             const filteredHouses = houses.filter(house => {
                 if (!house.isDestination) return false;
-                if (currentFilter === 'all') return true;
-                if (currentFilter === 'candy') return house.activities.includes('candy');
-                if (currentFilter === 'decorations') return house.activities.includes('decorations');
-                if (currentFilter === 'special') return house.activities.includes('special');
+                if (filter === 'all') return true;
+                if (filter === 'candy') return house.activities.includes('candy');
+                if (filter === 'decorations') return house.activities.includes('decorations');
+                if (filter === 'special') return house.activities.includes('special');
                 return false;
             });
 
@@ -871,7 +1032,7 @@
 
                         const marker = new google.maps.Marker({
                             position: position,
-                            map: map,
+                            map: mapInstance,
                             title: house.address,
                             icon: {
                                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
@@ -904,16 +1065,20 @@
                         });
 
                         marker.addListener('click', () => {
-                            infowindow.open(map, marker);
+                            infowindow.open(mapInstance, marker);
                         });
 
-                        markers.push(marker);
+                        if (mapInstance === totMap) {
+                            totMarkers.push(marker);
+                        } else {
+                            markers.push(marker);
+                        }
 
-                        if (boundsSet && markers.length === filteredHouses.length) {
-                            map.fitBounds(bounds);
-                            const listener = google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
-                                if (map.getZoom() > 17) {
-                                    map.setZoom(17);
+                        if (boundsSet && markersArray.length === filteredHouses.length) {
+                            mapInstance.fitBounds(bounds);
+                            const listener = google.maps.event.addListenerOnce(mapInstance, 'bounds_changed', function() {
+                                if (mapInstance.getZoom() > 17) {
+                                    mapInstance.setZoom(17);
                                 }
                             });
                         }
@@ -926,13 +1091,94 @@
             const destinations = houses.filter(h => h.isDestination);
             const total = destinations.length;
             const candy = destinations.filter(h => h.activities.includes('candy')).length;
+            const decorated = destinations.filter(h => h.activities.includes('decorations')).length;
             const special = destinations.filter(h => h.activities.includes('special')).length;
             const treaters = houses.filter(h => h.isTrickOrTreating).reduce((sum, h) => sum + parseInt(h.groupSize || 0), 0);
 
             document.getElementById('totalHouses').textContent = total;
             document.getElementById('candyHouses').textContent = candy;
+            document.getElementById('decoratedHouses').textContent = decorated;
             document.getElementById('specialStops').textContent = special;
             document.getElementById('totalTrickOrTreaters').textContent = treaters;
+        }
+
+        function enterTrickOrTreatMode() {
+            document.getElementById('mainContainer').classList.add('hidden');
+            document.getElementById('totMode').classList.add('active');
+            document.body.classList.add('trick-or-treat-mode');
+
+            if (!totMap) {
+                totMap = new google.maps.Map(document.getElementById('totMap'), {
+                    center: { lat: 36.1699, lng: -115.1398 },
+                    zoom: 16,
+                    minZoom: 15,
+                    maxZoom: 18,
+                    styles: [
+                        { elementType: 'geometry', stylers: [{ color: '#1a0b2e' }] },
+                        { elementType: 'labels.text.fill', stylers: [{ color: '#ff6b35' }] },
+                        { elementType: 'labels.text.stroke', stylers: [{ color: '#1a0b2e' }] },
+                        {
+                            featureType: 'road',
+                            elementType: 'geometry',
+                            stylers: [{ color: '#2d1b4e' }]
+                        }
+                    ]
+                });
+
+                updateMap(totMap, totMarkers);
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.watchPosition((position) => {
+                        const userPos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+
+                        if (userLocationMarker) {
+                            userLocationMarker.setPosition(userPos);
+                        } else {
+                            userLocationMarker = new google.maps.Marker({
+                                position: userPos,
+                                map: totMap,
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 10,
+                                    fillColor: '#4285F4',
+                                    fillOpacity: 1,
+                                    strokeColor: '#ffffff',
+                                    strokeWeight: 3
+                                },
+                                title: 'Your Location'
+                            });
+                        }
+                    }, (error) => {
+                        console.log('Location error:', error);
+                    }, {
+                        enableHighAccuracy: true,
+                        maximumAge: 0
+                    });
+                }
+            }
+        }
+
+        function exitTrickOrTreatMode() {
+            document.getElementById('mainContainer').classList.remove('hidden');
+            document.getElementById('totMode').classList.remove('active');
+            document.body.classList.remove('trick-or-treat-mode');
+        }
+
+        function filterHouses(type) {
+            currentFilter = type;
+            document.querySelectorAll('.filters .filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateMap();
+        }
+
+        function filterTotHouses(type) {
+            totCurrentFilter = type;
+            document.querySelectorAll('.tot-filters .filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateMap(totMap, totMarkers);
         }
 
         function searchHouses(category) {
@@ -1066,11 +1312,21 @@
             }
         }
 
-        function filterHouses(type) {
-            currentFilter = type;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            updateMap();
+        function checkTimeRestrictions() {
+            const now = new Date();
+            const eventStart = new Date('2025-10-31T15:30:00-07:00');
+            const votingEnd = new Date('2025-11-03T00:00:00-08:00');
+
+            if (now >= eventStart && now < votingEnd) {
+                document.getElementById('votingSection').style.display = 'block';
+                document.querySelector('.voting-notice').style.display = 'none';
+                document.getElementById('votingResults').style.display = 'none';
+            } else if (now >= votingEnd) {
+                document.getElementById('votingSection').style.display = 'none';
+                document.querySelector('.voting-notice').style.display = 'none';
+                document.getElementById('votingResults').style.display = 'block';
+                displayWinners();
+            }
         }
 
         function openRegister() {
