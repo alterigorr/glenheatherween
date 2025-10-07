@@ -23,6 +23,24 @@
             overflow: hidden;
         }
 
+        .refresh-indicator {
+            position: fixed;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 107, 53, 0.9);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 0 0 15px 15px;
+            transition: top 0.3s;
+            z-index: 9998;
+            font-weight: bold;
+        }
+
+        .refresh-indicator.visible {
+            top: 0;
+        }
+
         .loading {
             position: fixed;
             top: 0;
@@ -628,6 +646,8 @@
     </style>
 </head>
 <body>
+    <div class="refresh-indicator" id="refreshIndicator">↓ Release to refresh</div>
+    
     <div class="loading">
         <div class="jack-o-lantern">🎃</div>
     </div>
@@ -955,6 +975,49 @@
         let votes = [];
         let autocomplete;
         let userLocationMarker = null;
+        let touchStartY = 0;
+        let pullDistance = 0;
+        let isPulling = false;
+
+        // Pull to refresh
+        document.addEventListener('touchstart', (e) => {
+            if (window.scrollY === 0) {
+                touchStartY = e.touches[0].clientY;
+                isPulling = true;
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isPulling || window.scrollY > 0) return;
+            
+            const touchY = e.touches[0].clientY;
+            pullDistance = touchY - touchStartY;
+            
+            if (pullDistance > 0 && pullDistance < 100) {
+                e.preventDefault();
+                const indicator = document.getElementById('refreshIndicator');
+                indicator.style.top = `${Math.min(pullDistance - 60, 0)}px`;
+                
+                if (pullDistance > 60) {
+                    indicator.textContent = '↑ Release to refresh';
+                    indicator.classList.add('visible');
+                } else {
+                    indicator.textContent = '↓ Pull to refresh';
+                }
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            if (isPulling && pullDistance > 60) {
+                location.reload();
+            }
+            
+            const indicator = document.getElementById('refreshIndicator');
+            indicator.style.top = '-60px';
+            indicator.classList.remove('visible');
+            isPulling = false;
+            pullDistance = 0;
+        });
 
         let wizardData = {
             isDestination: false,
@@ -1464,12 +1527,21 @@
                 }
 
                 // Check for duplicate address
-                const existingHouse = houses.find(h => 
-                    h.address && h.address.toLowerCase().trim() === address.toLowerCase().trim()
-                );
+                console.log('Checking address:', address);
+                console.log('Existing houses:', houses.map(h => h.address));
+                
+                const existingHouse = houses.find(h => {
+                    if (!h.address) return false;
+                    const match = h.address.trim().toLowerCase() === address.trim().toLowerCase();
+                    console.log(`Comparing "${h.address}" with "${address}": ${match}`);
+                    return match;
+                });
+                
+                console.log('Found existing house:', existingHouse);
                 
                 if (existingHouse && !wizardData.confirmedDuplicate) {
-                    if (confirm(`This address (${address}) is already registered. Do you want to update the registration?`)) {
+                    const confirmed = confirm(`This address (${address}) is already registered.\n\nDo you want to update the existing registration?`);
+                    if (confirmed) {
                         wizardData.confirmedDuplicate = true;
                     } else {
                         return;
