@@ -654,11 +654,12 @@
 
     <div class="container" id="mainContainer">
         <header>
-            <h1>🎃 Glenheatherween 2025 🎃</h1>
+            <h1>🎃 Glenheatherween 🎃</h1>
+            <div style="font-size: 1.5em; color: #ff6b35; margin-top: -5px; margin-bottom: 15px;">2025</div>
             <div class="event-info">
                 <strong>Thursday, October 31st</strong><br>
-                3:30 PM - Sunset: Glen Heather Estates Residents<br>
-                Sunset - 9:00 PM: Everyone Welcome!
+                4-6 PM for Glen Heather Residents<br>
+                Regular Halloween after 6PM
             </div>
             
             <div class="header-stats">
@@ -698,6 +699,7 @@
                     <p style="margin: 8px 0;"><strong>Pricing:</strong> $1 each • 6 for $5 • 12 for $10</p>
                     <p style="margin: 8px 0;"><strong>Payment:</strong> Cash or Zelle</p>
                     <p style="margin: 8px 0;"><strong>Drawing:</strong> After 9 PM on Halloween 🎃</p>
+                    <p style="margin: 8px 0; opacity: 0.9;">Winner gets half of the proceeds, neighborhood association keeps the other half.</p>
                 </div>
             </div>
         </header>
@@ -1527,13 +1529,23 @@
                 }
 
                 // Check for duplicate address
-                console.log('Checking address:', address);
+                // Extract just the street number and name for comparison
+                function extractStreetAddress(fullAddress) {
+                    // Remove city, state, zip, country - just get the first part
+                    const parts = fullAddress.split(',')[0].trim().toLowerCase();
+                    // Also normalize spaces
+                    return parts.replace(/\s+/g, ' ');
+                }
+                
+                const inputStreet = extractStreetAddress(address);
+                console.log('Checking address:', address, '-> Normalized:', inputStreet);
                 console.log('Existing houses:', houses.map(h => h.address));
                 
                 const existingHouse = houses.find(h => {
                     if (!h.address) return false;
-                    const match = h.address.trim().toLowerCase() === address.trim().toLowerCase();
-                    console.log(`Comparing "${h.address}" with "${address}": ${match}`);
+                    const houseStreet = extractStreetAddress(h.address);
+                    const match = houseStreet === inputStreet;
+                    console.log(`Comparing "${h.address}" (${houseStreet}) with "${address}" (${inputStreet}): ${match}`);
                     return match;
                 });
                 
