@@ -657,7 +657,7 @@
             <h1>Glenheatherween</h1>
             <div style="font-size: 1.5em; color: #ff6b35; margin-top: -5px; margin-bottom: 15px;">🎃 2025 🎃</div>
             <div class="event-info">
-                <strong>Thursday, October 31st</strong><br>
+                <strong>Friday, October 31st</strong><br>
                 4-6 PM for Glen Heather Residents<br>
                 Regular Halloween after 6PM
             </div>
@@ -983,6 +983,9 @@
 
         // Pull to refresh
         document.addEventListener('touchstart', (e) => {
+            // Disable pull-to-refresh in trick-or-treat mode
+            if (document.body.classList.contains('trick-or-treat-mode')) return;
+            
             if (window.scrollY === 0) {
                 touchStartY = e.touches[0].clientY;
                 isPulling = true;
@@ -990,6 +993,9 @@
         });
 
         document.addEventListener('touchmove', (e) => {
+            // Disable pull-to-refresh in trick-or-treat mode
+            if (document.body.classList.contains('trick-or-treat-mode')) return;
+            
             if (!isPulling || window.scrollY > 0) return;
             
             const touchY = e.touches[0].clientY;
@@ -1010,6 +1016,9 @@
         });
 
         document.addEventListener('touchend', () => {
+            // Disable pull-to-refresh in trick-or-treat mode
+            if (document.body.classList.contains('trick-or-treat-mode')) return;
+            
             if (isPulling && pullDistance > 60) {
                 location.reload();
             }
