@@ -1082,6 +1082,12 @@
                     }
                 }
 
+                // Normalize abbreviations to full names for validation
+                streetName = streetName
+                    .replace(/\bAve\b/i, 'Avenue')
+                    .replace(/\bSt\b/i, 'Street')
+                    .replace(/\bWy\b/i, 'Way');
+
                 if (!VALID_STREETS.includes(streetName)) {
                     showToast('Please select an address within Glen Heather Estates');
                     input.value = '';
