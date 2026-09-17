@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glenheatherween 2025</title>
+    <title>Glenheatherween 2026</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDSI_q9gtv9M2gL5fi4acdwjxW_kzbniK4&libraries=places"></script>
     <style>
         * {
@@ -647,7 +647,7 @@
 </head>
 <body>
     <div class="refresh-indicator" id="refreshIndicator">↓ Release to refresh</div>
-    
+
     <div class="loading">
         <div class="jack-o-lantern">🎃</div>
     </div>
@@ -655,13 +655,13 @@
     <div class="container" id="mainContainer">
         <header>
             <h1>Glenheatherween</h1>
-            <div style="font-size: 1.5em; color: #ff6b35; margin-top: -5px; margin-bottom: 15px;">🎃 2025 🎃</div>
+            <div style="font-size: 1.5em; color: #ff6b35; margin-top: -5px; margin-bottom: 15px;">🎃 2026 🎃</div>
             <div class="event-info">
-                <strong>Friday, October 31st</strong><br>
+                <strong>Saturday, October 31st</strong><br>
                 4-6 PM for Glen Heather Residents<br>
                 Regular Halloween after 6PM
             </div>
-            
+
             <div class="header-stats">
                 <div class="header-stat">
                     <div class="header-stat-number" id="totalHouses">0</div>
@@ -688,7 +688,7 @@
                 <button class="register-btn" onclick="openVolunteer()" style="background: rgba(255, 255, 255, 0.1);">🙋 Volunteer</button>
                 <button class="register-btn" onclick="shareWebsite()" style="background: rgba(255, 255, 255, 0.1);">📤 Share with a Neighbor</button>
             </div>
-            
+
             <div class="raffle-box">
                 <div class="raffle-header" onclick="toggleRaffle()">
                     <h3 style="color: #ff6b35; margin: 0;">🎟️ 50/50 Raffle</h3>
@@ -718,7 +718,6 @@
         <div id="map"></div>
 
         <div class="bottom-buttons">
-            <button onclick="openPhotos()">📸 Share Photos</button>
             <button onclick="openFeedback()">💭 Give Feedback</button>
             <button onclick="openModal('helpModal')">❓ Need Help?</button>
         </div>
@@ -731,13 +730,13 @@
         <div class="voting-section" id="votingSection" style="display: none;">
             <h2 style="text-align: center; margin-bottom: 10px;">🏆 Vote for the Best!</h2>
             <p style="text-align: center; margin-bottom: 20px; opacity: 0.8;">Voting closes November 7th at midnight</p>
-            
+
             <div class="voting-category">
                 <h3>Best Decorated House</h3>
-                <input type="text" 
-                       id="decorationSearch" 
-                       class="search-input" 
-                       placeholder="Type to search for a house..." 
+                <input type="text"
+                       id="decorationSearch"
+                       class="search-input"
+                       placeholder="Type to search for a house..."
                        oninput="searchHouses('decoration')">
                 <div class="selected-display" id="decorationSelected"></div>
                 <div class="search-results" id="decorationResults"></div>
@@ -745,10 +744,10 @@
 
             <div class="voting-category">
                 <h3>Best Special Stop</h3>
-                <input type="text" 
-                       id="specialSearch" 
-                       class="search-input" 
-                       placeholder="Type to search for a special stop..." 
+                <input type="text"
+                       id="specialSearch"
+                       class="search-input"
+                       placeholder="Type to search for a special stop..."
                        oninput="searchHouses('special')">
                 <div class="selected-display" id="specialSelected"></div>
                 <div class="search-results" id="specialResults"></div>
@@ -787,7 +786,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('registerModal')">&times;</span>
             <h2 style="text-align: center; margin-bottom: 20px;">Join Glenheatherween!</h2>
-            
+
             <div class="progress-bar">
                 <div class="progress-step active"><div class="progress-dot">1</div></div>
                 <div class="progress-step"><div class="progress-dot">2</div></div>
@@ -799,7 +798,7 @@
             <div class="wizard-step active" data-step="1">
                 <h3 style="text-align: center; margin-bottom: 20px;">Is your house a destination?</h3>
                 <p style="text-align: center; opacity: 0.8; margin-bottom: 30px;">Handing out candy, have decorations, or hosting a special event</p>
-                
+
                 <div class="choice-buttons">
                     <div class="choice-btn" onclick="selectDestination(true)">
                         <div style="font-size: 3em; margin-bottom: 10px;">🏠</div>
@@ -815,7 +814,7 @@
             <!-- Step 2a: Destination details -->
             <div class="wizard-step" data-step="2a">
                 <h3 style="color: #ff6b35; margin-bottom: 20px;">🏠 Destination House Details</h3>
-                
+
                 <div class="form-group">
                     <label>Your Address *</label>
                     <input type="text" id="address" placeholder="Start typing your address...">
@@ -854,7 +853,7 @@
             <div class="wizard-step" data-step="2b">
                 <h3 style="text-align: center; margin-bottom: 20px;">Will people from your household be trick-or-treating?</h3>
                 <p style="text-align: center; opacity: 0.8; margin-bottom: 30px;">Helps candy distributors know how much to buy</p>
-                
+
                 <div class="choice-buttons">
                     <div class="choice-btn" onclick="selectTrickOrTreating(true)">
                         <div style="font-size: 3em; margin-bottom: 10px;">🎃</div>
@@ -870,7 +869,7 @@
             <!-- Step 3: Group size -->
             <div class="wizard-step" data-step="3">
                 <h3 style="color: #ff6b35; margin-bottom: 20px;">🎃 Trick-or-Treating Group</h3>
-                
+
                 <div class="form-group">
                     <label>How many people in your trick-or-treating group? *</label>
                     <input type="number" id="groupSize" placeholder="2" min="1">
@@ -886,12 +885,12 @@
             <div class="wizard-step" data-step="4">
                 <h3 style="margin-bottom: 20px;">Optional Contact Information</h3>
                 <p style="opacity: 0.8; margin-bottom: 20px;">Help us reach you if needed</p>
-                
+
                 <div class="form-group">
                     <label>Your Name (optional)</label>
                     <input type="text" id="name" placeholder="e.g., The Smith Family">
                 </div>
-                
+
                 <div class="form-group">
                     <label>Phone (optional)</label>
                     <input type="tel" id="phone" placeholder="702-555-1234">
@@ -911,7 +910,7 @@
             <!-- Step 5: Review -->
             <div class="wizard-step" data-step="5">
                 <h3 style="text-align: center; margin-bottom: 20px;">Review Your Registration</h3>
-                
+
                 <div id="reviewContent"></div>
 
                 <div class="wizard-nav">
@@ -958,14 +957,13 @@
 
     <script>
         const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7zk15RRbM5bWB5mWUGVJjfmNwpsks1nF69mWLuvyDJf7K__MU4dmfxblRFgqs-182/exec';
-        const PHOTO_FORM = 'https://www.dropbox.com/request/c9yi6rYhNdWrn6ELIN5q';
-        
+
         const VALID_STREETS = [
             'Kiltie Way', 'Loch Lomond Way', 'Ivanhoe Way', 'Birch Street',
             'Kirkland Avenue', 'Bryn Mawr Avenue', 'Glen Heather Way', 'Bonnie Brae Avenue',
             'Inverness Avenue'
         ];
-        
+
         let map;
         let totMap;
         let markers = [];
@@ -986,7 +984,7 @@
         document.addEventListener('touchstart', (e) => {
             // Disable pull-to-refresh in trick-or-treat mode
             if (document.body.classList.contains('trick-or-treat-mode')) return;
-            
+
             if (window.scrollY === 0) {
                 touchStartY = e.touches[0].clientY;
                 isPulling = true;
@@ -996,17 +994,17 @@
         document.addEventListener('touchmove', (e) => {
             // Disable pull-to-refresh in trick-or-treat mode
             if (document.body.classList.contains('trick-or-treat-mode')) return;
-            
+
             if (!isPulling || window.scrollY > 0) return;
-            
+
             const touchY = e.touches[0].clientY;
             pullDistance = touchY - touchStartY;
-            
+
             if (pullDistance > 0 && pullDistance < 100) {
                 e.preventDefault();
                 const indicator = document.getElementById('refreshIndicator');
                 indicator.style.top = `${Math.min(pullDistance - 60, 0)}px`;
-                
+
                 if (pullDistance > 60) {
                     indicator.textContent = '↑ Release to refresh';
                     indicator.classList.add('visible');
@@ -1019,11 +1017,11 @@
         document.addEventListener('touchend', () => {
             // Disable pull-to-refresh in trick-or-treat mode
             if (document.body.classList.contains('trick-or-treat-mode')) return;
-            
+
             if (isPulling && pullDistance > 60) {
                 location.reload();
             }
-            
+
             const indicator = document.getElementById('refreshIndicator');
             indicator.style.top = '-60px';
             indicator.classList.remove('visible');
@@ -1061,7 +1059,7 @@
         function initAutocomplete() {
             const input = document.getElementById('address');
             if (!input) return;
-            
+
             const options = {
                 componentRestrictions: { country: 'us' },
                 fields: ['address_components', 'formatted_address'],
@@ -1115,7 +1113,7 @@
 
             await loadHouses();
             checkTimeRestrictions();
-            
+
             document.querySelector('.loading').style.display = 'none';
         }
 
@@ -1152,10 +1150,10 @@
 
             filteredHouses.forEach(house => {
                 if (!house.address) return;
-                
+
                 const geocoder = new google.maps.Geocoder();
                 const fullAddress = `${house.address}, Las Vegas, NV 89102`;
-                
+
                 geocoder.geocode({ address: fullAddress }, (results, status) => {
                     if (status === 'OK') {
                         const position = results[0].geometry.location;
@@ -1316,13 +1314,13 @@
         function searchHouses(category) {
             const searchTerm = document.getElementById(category + 'Search').value.toLowerCase();
             const resultsDiv = document.getElementById(category + 'Results');
-            
+
             const destinations = houses.filter(h => h.isDestination && h.address);
-            const filtered = category === 'special' 
+            const filtered = category === 'special'
                 ? destinations.filter(h => h.activities.includes('special'))
                 : destinations;
 
-            const matches = filtered.filter(h => 
+            const matches = filtered.filter(h =>
                 h.address.toLowerCase().includes(searchTerm)
             );
 
@@ -1372,7 +1370,7 @@
 
         async function submitVotes() {
             const email = document.getElementById('voterEmail').value.trim();
-            
+
             if (!email) {
                 showToast('Please enter your email to vote');
                 return;
@@ -1395,7 +1393,7 @@
                     method: 'POST',
                     body: JSON.stringify({ type: 'vote', data: voteData })
                 });
-                
+
                 showToast('Vote submitted successfully! 🎉');
                 document.getElementById('voterEmail').value = '';
                 clearVoteSelection('decoration');
@@ -1446,8 +1444,8 @@
 
         function checkTimeRestrictions() {
             const now = new Date();
-            const eventStart = new Date('2025-10-31T15:30:00-07:00');
-            const votingEnd = new Date('2025-11-08T00:00:00-08:00');
+            const eventStart = new Date('2026-10-31T15:30:00-07:00');
+            const votingEnd = new Date('2026-11-08T00:00:00-08:00');
 
             if (now >= eventStart && now < votingEnd) {
                 document.getElementById('votingSection').style.display = 'block';
@@ -1481,13 +1479,13 @@
         function goToStep(stepNum) {
             document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
             document.querySelector(`[data-step="${stepNum}"]`).classList.add('active');
-            
+
             let progressStep = 1;
             if (stepNum === 1) progressStep = 1;
             else if (stepNum === '2a' || stepNum === '2b' || stepNum === 3) progressStep = 2;
             else if (stepNum === 4) progressStep = 3;
             else if (stepNum === 5) progressStep = 4;
-            
+
             document.querySelectorAll('.progress-step').forEach((step, idx) => {
                 step.classList.remove('active', 'completed');
                 if (idx < progressStep - 1) step.classList.add('completed');
@@ -1516,16 +1514,16 @@
 
         function nextStep() {
             const currentStep = document.querySelector('.wizard-step.active').dataset.step;
-            
+
             if (currentStep === '2a') {
                 const address = document.getElementById('address').value.trim();
                 const activities = Array.from(document.querySelectorAll('input[name="activity"]:checked')).map(cb => cb.value);
-                
+
                 if (!address) {
                     showToast('Please enter your address');
                     return;
                 }
-                
+
                 let validStreet = false;
                 for (const street of VALID_STREETS) {
                     if (address.includes(street)) {
@@ -1533,12 +1531,12 @@
                         break;
                     }
                 }
-                
+
                 if (!validStreet) {
                     showToast('Please enter an address within Glen Heather Estates');
                     return;
                 }
-                
+
                 if (activities.length === 0) {
                     showToast('Please select at least one activity');
                     return;
@@ -1552,21 +1550,15 @@
                     // Also normalize spaces
                     return parts.replace(/\s+/g, ' ');
                 }
-                
+
                 const inputStreet = extractStreetAddress(address);
-                console.log('Checking address:', address, '-> Normalized:', inputStreet);
-                console.log('Existing houses:', houses.map(h => h.address));
-                
+
                 const existingHouse = houses.find(h => {
                     if (!h.address) return false;
                     const houseStreet = extractStreetAddress(h.address);
-                    const match = houseStreet === inputStreet;
-                    console.log(`Comparing "${h.address}" (${houseStreet}) with "${address}" (${inputStreet}): ${match}`);
-                    return match;
+                    return houseStreet === inputStreet;
                 });
-                
-                console.log('Found existing house:', existingHouse);
-                
+
                 if (existingHouse && !wizardData.confirmedDuplicate) {
                     const confirmed = confirm(`This address (${address}) is already registered.\n\nDo you want to update the existing registration?`);
                     if (confirmed) {
@@ -1575,11 +1567,11 @@
                         return;
                     }
                 }
-                
+
                 wizardData.address = address;
                 wizardData.activities = activities;
                 wizardData.notes = document.getElementById('notes').value.trim();
-                
+
                 goToStep('2b');
             } else if (currentStep === '3') {
                 const groupSize = parseInt(document.getElementById('groupSize').value);
@@ -1594,7 +1586,7 @@
 
         function previousStep() {
             const currentStep = document.querySelector('.wizard-step.active').dataset.step;
-            
+
             if (currentStep === '2a') {
                 goToStep(1);
             } else if (currentStep === '2b') {
@@ -1620,9 +1612,9 @@
             wizardData.name = document.getElementById('name').value.trim();
             wizardData.phone = document.getElementById('phone').value.trim();
             wizardData.email = document.getElementById('email').value.trim();
-            
+
             let reviewHTML = '';
-            
+
             if (wizardData.isDestination) {
                 const activities = wizardData.activities.map(a => {
                     if (a === 'candy') return '🍬 Candy';
@@ -1630,7 +1622,7 @@
                     if (a === 'special') return '🎯 Special Stop';
                     return a;
                 }).join(', ');
-                
+
                 reviewHTML += `
                     <div class="review-section">
                         <h4>🏠 Destination House</h4>
@@ -1640,7 +1632,7 @@
                     </div>
                 `;
             }
-            
+
             if (wizardData.isTrickOrTreating) {
                 reviewHTML += `
                     <div class="review-section">
@@ -1649,7 +1641,7 @@
                     </div>
                 `;
             }
-            
+
             if (wizardData.name || wizardData.phone || wizardData.email) {
                 reviewHTML += `
                     <div class="review-section">
@@ -1660,7 +1652,7 @@
                     </div>
                 `;
             }
-            
+
             document.getElementById('reviewContent').innerHTML = reviewHTML;
             goToStep(5);
         }
@@ -1686,7 +1678,7 @@
                     method: 'POST',
                     body: JSON.stringify({ type: 'register', data: registrationData })
                 });
-                
+
                 showToast('Registration successful! 🎃');
                 closeModal('registerModal');
                 await loadHouses();
@@ -1698,10 +1690,6 @@
 
         function openVolunteer() {
             openModal('volunteerModal');
-        }
-
-        function openPhotos() {
-            window.open(PHOTO_FORM, '_blank');
         }
 
         function openFeedback() {
@@ -1726,7 +1714,7 @@
 
         async function shareWebsite() {
             const shareData = {
-                title: 'Glenheatherween 2025',
+                title: 'Glenheatherween 2026',
                 text: 'Check out the Glenheatherween map for Halloween trick-or-treating!',
                 url: window.location.href
             };
