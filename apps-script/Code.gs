@@ -16,6 +16,8 @@
  * Admin (glenheatherween.com/admin): event date, times and raffle details are saved in
  * Script Properties under SETTINGS. Saving needs the PIN stored in Script Properties under
  * ADMIN_PIN (Project Settings > Script Properties). The PIN is never in this file, which is public.
+ * After a save, the backend asks GitHub to rebuild flyer.pdf right away, using a fine-grained
+ * token (this repo only, Actions: read and write) stored in Script Properties as GITHUB_TOKEN.
  */
 
 var TAB = 'rsvps';
@@ -231,7 +233,29 @@ function saveSettings_(d) {
   };
   PropertiesService.getScriptProperties().setProperty('SETTINGS', JSON.stringify(settings));
   CacheService.getScriptCache().remove(CACHE_KEY);
-  return { ok: true, settings: settings };
+  return { ok: true, settings: settings, flyerRebuilding: triggerFlyerRebuild_() };
+}
+
+// Start the "Rebuild flyer" GitHub workflow now instead of waiting for its 15-minute schedule.
+// Returns false (and the schedule catches up later) if the token is missing or GitHub says no.
+function triggerFlyerRebuild_() {
+  var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!token) return false;
+  try {
+    var res = UrlFetchApp.fetch(
+      'https://api.github.com/repos/alterigorr/glenheatherween/actions/workflows/flyer.yml/dispatches', {
+        method: 'post',
+        contentType: 'application/json',
+        headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+        payload: JSON.stringify({ ref: 'main' }),
+        muteHttpExceptions: true
+      });
+    if (res.getResponseCode() === 204) return true;
+    console.warn('Flyer rebuild request failed: ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 300));
+  } catch (err) {
+    console.warn('Flyer rebuild request failed: ' + err);
+  }
+  return false;
 }
 
 /* ------------------------------------------------------------- helpers */
@@ -300,4 +324,12 @@ function json_(obj) {
  */
 function testGeocode() {
   console.log(JSON.stringify(geocode_('2112 Kirkland Avenue')));
+}
+
+/**
+ * Run once from the editor (select testFlyerRebuild, click Run) to approve the "connect to an
+ * external service" permission and check the GitHub token. Logs true when GitHub accepted it.
+ */
+function testFlyerRebuild() {
+  console.log('Flyer rebuild started: ' + triggerFlyerRebuild_());
 }

@@ -116,7 +116,7 @@
         <a class="btn btn-secondary" href="../" target="_blank" rel="noopener">View the site</a>
         <a class="btn btn-secondary" href="../?flyer" target="_blank" rel="noopener">View the flyer</a>
       </div>
-      <p class="muted">The site and on-screen flyer update right away. The printable PDF catches up within about 15 minutes.</p>
+      <p class="muted">The site and on-screen flyer update right away. The printable PDF follows a couple of minutes later.</p>
     </section>
   </form>
 </main>
@@ -264,7 +264,9 @@ $('#settingsForm').addEventListener('submit', async ev => {
   btn.disabled = false; btn.textContent = 'Save changes';
   if (res.ok) {
     fill(res.settings);
-    show(msg, 'Saved. The site shows your changes now.', 'ok');
+    show(msg, res.flyerRebuilding
+      ? 'Saved. The site shows your changes now, and the printable flyer updates in about 2 minutes.'
+      : 'Saved. The site shows your changes now. The printable flyer catches up within about 15 minutes.', 'ok');
   } else {
     show(msg, res.error || "That didn't save. Try again.", 'err');
     if (res.badPin || res.locked) $('#lockBtn').click();
