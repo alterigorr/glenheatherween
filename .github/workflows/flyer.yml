@@ -1,10 +1,11 @@
 # Rebuilds flyer.pdf from the live site whenever the admin page's settings change.
-# Checks every 15 minutes (GitHub may run scheduled jobs a little late); can also be run by hand.
+# Checks every 15 minutes, off the busy :00/:15/:30/:45 slots (GitHub may still run a little late).
+# Can also be run by hand.
 name: Rebuild flyer
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '7,22,37,52 * * * *'   # off the busy top-of-the-quarter-hour slots
   workflow_dispatch:
 
 permissions:
