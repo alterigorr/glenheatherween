@@ -182,15 +182,15 @@ function geocode_(address) {
 /* ---------------------------------------------------------------- admin */
 
 // Returns an error answer if the PIN is wrong (or locked out), or null when it's right.
-// Five wrong tries lock the admin for 15 minutes.
+// Five wrong tries lock the admin for 5 minutes.
 function checkPin_(pin) {
   var cache = CacheService.getScriptCache();
   var fails = Number(cache.get('pin-fails') || 0);
-  if (fails >= 5) return { ok: false, locked: true, error: 'Too many wrong PINs. Try again in 15 minutes.' };
+  if (fails >= 5) return { ok: false, locked: true, error: 'Too many wrong PINs. Try again in 5 minutes.' };
   var real = PropertiesService.getScriptProperties().getProperty('ADMIN_PIN');
   if (!real) return { ok: false, error: 'The admin PIN hasn\'t been set up yet (Script Properties > ADMIN_PIN).' };
   if (String(pin == null ? '' : pin) !== String(real)) {
-    cache.put('pin-fails', String(fails + 1), 900);
+    cache.put('pin-fails', String(fails + 1), 300);
     return { ok: false, badPin: true, error: "That PIN isn't right." };
   }
   cache.remove('pin-fails');
