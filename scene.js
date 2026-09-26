@@ -1,5 +1,4 @@
-// Halloween scene: bats flying across the sky, figures in the windows, and a werewolf
-// that rises against the moon when it's tapped. Purely decorative.
+// Halloween scene: bats flying across the sky and figures in the windows. Purely decorative.
 // Motion only runs while the scene is on screen, and not at all for reduced-motion users.
 (() => {
   const scene = document.querySelector('.scene');
@@ -8,13 +7,10 @@
   const NS = 'http://www.w3.org/2000/svg';
   const svg = scene.querySelector('.skyline');
   const batLayer = scene.querySelector('.bats');
-  const burstLayer = scene.querySelector('.burst');
-  const moon = scene.querySelector('.moon');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = list => list[Math.floor(Math.random() * list.length)];
-  const wait = ms => new Promise(r => setTimeout(r, ms));
 
   let onScreen = true;
   new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }).observe(scene);
@@ -92,29 +88,6 @@
       }));
     }
     return Promise.all(trips);
-  }
-
-  // Bats scattering out of the moon toward the viewer.
-  function burstFromMoon() {
-    const s = scene.getBoundingClientRect();
-    const m = moon.getBoundingClientRect();
-    const cx = m.left - s.left + m.width / 2, cy = m.top - s.top + m.height / 2;
-    const count = 5;
-    for (let i = 0; i < count; i++) {
-      const el = makeBat(1);
-      burstLayer.append(el);
-      const half = el.offsetWidth / 2;
-      const angle = (-160 + (i / (count - 1)) * 140 + rand(-12, 12)) * Math.PI / 180;
-      const dist = rand(260, 420);
-      const tx = cx + Math.cos(angle) * dist, ty = cy + Math.sin(angle) * dist * .45 + rand(-10, 30);
-      const mx = cx + Math.cos(angle) * dist * .4, my = cy + Math.sin(angle) * dist * .2 - rand(10, 30);
-      el.animate([
-        { transform: `translate(${cx - half}px, ${cy - 10}px) scale(.15)`, opacity: 0 },
-        { transform: `translate(${mx - half}px, ${my}px) scale(.7)`, opacity: 1, offset: .35 },
-        { transform: `translate(${tx - half}px, ${ty}px) scale(1.25)`, opacity: .95 }
-      ], { duration: rand(1500, 2200), delay: i * 90, easing: 'cubic-bezier(.3, .1, .6, 1)', fill: 'backwards' })
-        .finished.then(() => el.remove());
-    }
   }
 
   /* -------------------------------------------------------- window figures */
@@ -215,20 +188,6 @@
     await g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' }).finished;
     g.remove();
   }
-
-  /* -------------------------------------------------------------- werewolf */
-
-  let howling = false;
-  moon.addEventListener('click', async () => {
-    if (howling) return;
-    howling = true;
-    moon.classList.add('howl');
-    if (!reduce.matches) setTimeout(burstFromMoon, 1300);
-    await wait(4600);
-    moon.classList.remove('howl');
-    await wait(1100);
-    howling = false;
-  });
 
   /* ------------------------------------------------------------- schedule */
 
