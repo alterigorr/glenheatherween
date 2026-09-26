@@ -532,10 +532,9 @@ const CONFIG = {
   volunteer: { name: 'Shelly', phone: '702-491-9979' },
   siteUrl: 'https://glenheatherween.com',
   shareText: 'Glenheatherween is Saturday, Oct 31 (4–6 PM for Glen Heather residents). Put your house on the map and see who is handing out candy:',
-  // Names as they appear on the street signs. Birch and Kirkland are each two different streets.
   streets: [
-    'N Birch St', 'S Birch St', 'W Bonnie Brae Ave', 'S Bryn Mawr Ave', 'W Glen Heather Way',
-    'S Inverness Ave', 'W Ivanhoe Way', 'Kiltie Way', 'S Kirkland Ave', 'W Kirkland Ave', 'S Loch Lomond Way'
+    'Birch Street', 'Bonnie Brae Avenue', 'Bryn Mawr Avenue', 'Glen Heather Way', 'Inverness Avenue',
+    'Ivanhoe Way', 'Kiltie Way', 'Kirkland Avenue', 'Loch Lomond Way'
   ],
   // Oakey Blvd to Glen Heather Way, Bryn Mawr to the freeway.
   map: { bounds: [[36.1471, -115.1738], [36.1521, -115.1656]] },
@@ -547,35 +546,34 @@ const CONFIG = {
    Apps Script backend in the real build.
    ========================================================================= */
 const STREET_POINTS = {   // rough midpoints, used to place new mock RSVPs
-  'N Birch St': [36.1512, -115.1691], 'S Birch St': [36.1494, -115.1692],
-  'W Bonnie Brae Ave': [36.1507, -115.1708], 'S Bryn Mawr Ave': [36.1497, -115.1724],
-  'W Glen Heather Way': [36.1477, -115.1700], 'S Inverness Ave': [36.1488, -115.1703],
-  'W Ivanhoe Way': [36.1494, -115.1682], 'Kiltie Way': [36.1507, -115.1673],
-  'S Kirkland Ave': [36.1483, -115.1717], 'W Kirkland Ave': [36.1497, -115.1700],
-  'S Loch Lomond Way': [36.1496, -115.1675]
+  'Birch Street': [36.1500, -115.1692], 'Bonnie Brae Avenue': [36.1507, -115.1708],
+  'Bryn Mawr Avenue': [36.1497, -115.1724], 'Glen Heather Way': [36.1477, -115.1700],
+  'Inverness Avenue': [36.1488, -115.1703], 'Ivanhoe Way': [36.1494, -115.1682],
+  'Kiltie Way': [36.1507, -115.1673], 'Kirkland Avenue': [36.1497, -115.1700],
+  'Loch Lomond Way': [36.1496, -115.1675]
 };
 
 let households = [
   { num: '1804', street: 'Kiltie Way', candy: true, decorated: true, special: false, kids: 2, lat: 36.15138, lng: -115.16731 },
   { num: '1812', street: 'Kiltie Way', candy: true, decorated: false, special: false, kids: 0, lat: 36.15044, lng: -115.16732 },
-  { num: '1900', street: 'S Loch Lomond Way', candy: true, decorated: true, special: true, note: 'Haunted garage 5–6 PM 👻', name: 'The Parks', kids: 3, lat: 36.14904, lng: -115.16795 },
-  { num: '1921', street: 'S Loch Lomond Way', candy: true, kids: 0, lat: 36.14835, lng: -115.16856 },
-  { num: '1710', street: 'W Ivanhoe Way', candy: true, decorated: true, kids: 1, lat: 36.14932, lng: -115.16827 },
-  { num: '2001', street: 'N Birch St', candy: true, kids: 2, lat: 36.15100, lng: -115.16920 },
-  { num: '2017', street: 'S Birch St', candy: true, decorated: true, name: 'The Garcias', kids: 0, lat: 36.15043, lng: -115.16926 },
-  { num: '2112', street: 'W Kirkland Ave', candy: true, special: true, note: 'Raffle tickets sold here 🎟️', name: "Shelly's", kids: 0, lat: 36.14928, lng: -115.17137 },
-  { num: '2124', street: 'W Kirkland Ave', candy: true, kids: 2, lat: 36.14880, lng: -115.17176 },
-  { num: '1601', street: 'S Bryn Mawr Ave', candy: true, decorated: true, kids: 0, lat: 36.15104, lng: -115.17237 },
-  { num: '1633', street: 'S Bryn Mawr Ave', candy: true, special: true, note: 'Drinks for the grown-ups 🍷', kids: 2, lat: 36.14892, lng: -115.17241 },
-  { num: '2205', street: 'W Bonnie Brae Ave', candy: true, kids: 1, lat: 36.15071, lng: -115.17080 },
-  { num: '2231', street: 'W Bonnie Brae Ave', decorated: true, kids: 0, lat: 36.15073, lng: -115.17190 },
-  { num: '1809', street: 'S Inverness Ave', candy: true, decorated: true, kids: 4, lat: 36.14930, lng: -115.17030 },
-  { num: '1825', street: 'S Inverness Ave', candy: true, kids: 0, lat: 36.14836, lng: -115.17024 },
+  { num: '1900', street: 'Loch Lomond Way', candy: true, decorated: true, special: true, note: 'Haunted garage 5–6 PM 👻', name: 'The Parks', kids: 3, lat: 36.14904, lng: -115.16795 },
+  { num: '1921', street: 'Loch Lomond Way', candy: true, kids: 0, lat: 36.14835, lng: -115.16856 },
+  { num: '1710', street: 'Ivanhoe Way', candy: true, decorated: true, kids: 1, lat: 36.14932, lng: -115.16827 },
+  { num: '2001', street: 'Birch Street', candy: true, kids: 2, lat: 36.15100, lng: -115.16920 },
+  { num: '2017', street: 'Birch Street', candy: true, decorated: true, name: 'The Garcias', kids: 0, lat: 36.15043, lng: -115.16926 },
+  { num: '2112', street: 'Kirkland Avenue', candy: true, special: true, note: 'Raffle tickets sold here 🎟️', name: "Shelly's", kids: 0, lat: 36.14928, lng: -115.17137 },
+  { num: '2124', street: 'Kirkland Avenue', candy: true, kids: 2, lat: 36.14880, lng: -115.17176 },
+  { num: '1601', street: 'Bryn Mawr Avenue', candy: true, decorated: true, kids: 0, lat: 36.15104, lng: -115.17237 },
+  { num: '1633', street: 'Bryn Mawr Avenue', candy: true, special: true, note: 'Drinks for the grown-ups 🍷', kids: 2, lat: 36.14892, lng: -115.17241 },
+  { num: '2205', street: 'Bonnie Brae Avenue', candy: true, kids: 1, lat: 36.15071, lng: -115.17080 },
+  { num: '2231', street: 'Bonnie Brae Avenue', decorated: true, kids: 0, lat: 36.15073, lng: -115.17190 },
+  { num: '1809', street: 'Inverness Avenue', candy: true, decorated: true, kids: 4, lat: 36.14930, lng: -115.17030 },
+  { num: '1825', street: 'Inverness Avenue', candy: true, kids: 0, lat: 36.14836, lng: -115.17024 },
   // Kids-only households (not on the map, but counted)
-  { num: '1820', street: 'Kiltie Way', kids: 3 }, { num: '2009', street: 'S Birch St', kids: 2 },
-  { num: '1605', street: 'S Bryn Mawr Ave', kids: 4 }, { num: '1817', street: 'S Inverness Ave', kids: 2 },
-  { num: '2215', street: 'W Bonnie Brae Ave', kids: 3 }, { num: '1915', street: 'S Loch Lomond Way', kids: 2 },
-  { num: '2130', street: 'S Kirkland Ave', kids: 5 }, { num: '1705', street: 'W Glen Heather Way', kids: 2 }, { num: '1722', street: 'W Ivanhoe Way', kids: 2 }
+  { num: '1820', street: 'Kiltie Way', kids: 3 }, { num: '2009', street: 'Birch Street', kids: 2 },
+  { num: '1605', street: 'Bryn Mawr Avenue', kids: 4 }, { num: '1817', street: 'Inverness Avenue', kids: 2 },
+  { num: '2215', street: 'Bonnie Brae Avenue', kids: 3 }, { num: '1915', street: 'Loch Lomond Way', kids: 2 },
+  { num: '2130', street: 'Kirkland Avenue', kids: 5 }, { num: '1705', street: 'Glen Heather Way', kids: 2 }, { num: '1722', street: 'Ivanhoe Way', kids: 2 }
 ];
 
 const api = {
@@ -844,6 +842,10 @@ function prefillIfExisting() {
   syncForm();
 }
 
+function openDialog(d) {
+  try { d.showModal(); } catch (e) { d.setAttribute('open', ''); }
+}
+
 function openRsvp() {
   $('#rsvpForm').reset();
   kidsCount = 1;
@@ -851,7 +853,7 @@ function openRsvp() {
   $('#rsvpForm').classList.remove('hidden');
   $('#rsvpDone').classList.add('hidden');
   syncForm();
-  $('#rsvp').showModal();
+  openDialog($('#rsvp'));
 }
 
 async function submitRsvp(ev) {
@@ -909,7 +911,7 @@ document.addEventListener('click', ev => {
   const t = ev.target.closest('[data-open],[data-close],[data-action],[data-theme-pick],[data-step]');
   if (!t) return;
   if (t.dataset.open === 'rsvp') openRsvp();
-  else if (t.dataset.open) $('#' + t.dataset.open).showModal();
+  else if (t.dataset.open) openDialog($('#' + t.dataset.open));
   else if (t.hasAttribute('data-close')) t.closest('dialog').close();
   else if (t.dataset.themePick) { setPref(t.dataset.themePick); applyTheme(); }
   else if (t.dataset.step) { kidsCount = Math.min(20, Math.max(1, kidsCount + Number(t.dataset.step))); syncForm(); }
