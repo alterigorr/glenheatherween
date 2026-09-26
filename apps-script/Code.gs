@@ -30,8 +30,16 @@ var AREA = { south: 36.1462, west: -115.1750, north: 36.1530, east: -115.1645 };
 var CACHE_KEY = 'public-v1';
 var CACHE_SECONDS = 30;
 
-function doGet() {
+function doGet(e) {
   var cache = CacheService.getScriptCache();
+
+  // ?rid=<receipt>: the page asking what happened to a save whose reply it couldn't read.
+  var rid = e && e.parameter && e.parameter.rid;
+  if (rid) {
+    var receipt = validRid_(rid) ? cache.get('rid:' + rid) : null;
+    return json_(receipt ? JSON.parse(receipt) : { ok: false, pending: true });
+  }
+
   var hit = cache.get(CACHE_KEY);
   if (hit) return json_(JSON.parse(hit));
 
@@ -42,23 +50,36 @@ function doGet() {
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
+  var rid = null;
+  var result;
   try {
     lock.waitLock(15000);
     var payload = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-    if (payload.type !== 'rsvp') return json_({ ok: false, error: 'Unknown request.' });
-
-    var entry = clean_(payload.data || {});
-    if (entry.error) return json_({ ok: false, error: entry.error });
-
-    var result = saveRsvp_(entry);
-    CacheService.getScriptCache().remove(CACHE_KEY);
-    return json_(result);
+    rid = validRid_(payload.rid) ? payload.rid : null;
+    if (payload.type !== 'rsvp') {
+      result = { ok: false, error: 'Unknown request.' };
+    } else {
+      var entry = clean_(payload.data || {});
+      if (entry.error) {
+        result = { ok: false, error: entry.error };
+      } else {
+        result = saveRsvp_(entry);
+        CacheService.getScriptCache().remove(CACHE_KEY);
+      }
+    }
   } catch (err) {
     console.error(err);
-    return json_({ ok: false, error: 'Something went wrong. Please try again.' });
+    result = { ok: false, error: 'Something went wrong. Please try again.' };
   } finally {
     lock.releaseLock();
   }
+  // Keep the outcome for 6 hours so the page can look it up by receipt if the reply gets lost.
+  if (rid) CacheService.getScriptCache().put('rid:' + rid, JSON.stringify(result), 21600);
+  return json_(result);
+}
+
+function validRid_(rid) {
+  return typeof rid === 'string' && /^[A-Za-z0-9-]{16,64}$/.test(rid);
 }
 
 /* ---------------------------------------------------------------- reads */

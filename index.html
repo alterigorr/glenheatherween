@@ -337,7 +337,7 @@
   .done { text-align: center; padding: 32px 20px 24px; display: grid; gap: 16px; }
   .done { position: relative; overflow: hidden; }
   .done .big { font-size: 4rem; line-height: 1; }
-  .candy-bit { position: absolute; left: 50%; top: 64px; font-size: 26px; pointer-events: none; }
+  .candy-bit { position: absolute; left: 50%; top: 64px; width: 30px; margin-left: -15px; text-align: center; font-size: 26px; pointer-events: none; }
 
   .share-list { display: grid; gap: 12px; }
   .share-list .btn { justify-content: flex-start; font-size: 1.15rem; min-height: 64px; }
@@ -759,9 +759,27 @@ let api = {
     return body;
   },
   async rsvp(entry) {
+    // A random receipt number lets us confirm the save even if the reply can't be read.
+    const rid = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`).replace(/[^a-z0-9-]/gi, '');
     // A plain-text body keeps this a "simple" request, which Apps Script accepts without CORS preflight.
-    const r = await fetch(CONFIG.sheetUrl, { method: 'POST', body: JSON.stringify({ type: 'rsvp', data: entry }) });
-    return r.json();
+    const body = JSON.stringify({ type: 'rsvp', rid, data: entry });
+    try {
+      const r = await fetch(CONFIG.sheetUrl, { method: 'POST', body });
+      return await r.json();
+    } catch (e) {
+      // Some phone browsers (in-app browsers especially) save fine but can't read Google's reply.
+      // Ask the backend what happened to this receipt before reporting a failure.
+      for (let i = 0; i < 5; i++) {
+        await wait(1500);
+        try {
+          const r = await fetch(`${CONFIG.sheetUrl}?rid=${encodeURIComponent(rid)}`, { cache: 'no-store' });
+          const b = await r.json();
+          // Only a receipt answer counts (older backends reply with the house list instead).
+          if ('updated' in b || 'removed' in b || b.error) return b;
+        } catch (e2) { /* try again */ }
+      }
+      throw e;
+    }
   }
 };
 
@@ -1072,24 +1090,26 @@ async function submitRsvp(ev) {
 
   const btn = $('#submitBtn');
   btn.disabled = true; btn.textContent = 'Saving…';
+  let res;
   try {
-    const res = await api.rsvp(e);
-    if (!res || !res.ok) return fail((res && res.error) || "Sorry, that didn't save. Please try again, or text " + CONFIG.helpPhone + ' for help.');
-    await refresh();
-    const stop = e.candy || e.decorated || e.special;
-    $('#doneTitle').textContent = res.removed ? "You're off the list" : (res.updated ? 'RSVP updated!' : "You're all set!");
-    $('#doneText').textContent = res.removed
-      ? `${e.num} ${e.street} has been taken off. You can RSVP again any time.`
-      : stop ? `${e.num} ${e.street} is on the map. Thanks for joining in! 🎃`
-             : `Thanks! We've counted ${e.kids} trick-or-treater${e.kids === 1 ? '' : 's'} from ${e.num} ${e.street}.`;
-    $('#rsvpForm').classList.add('hidden');
-    $('#rsvpDone').classList.remove('hidden');
-    if (!res.removed) candyBurst($('#rsvpDone'));
+    res = await api.rsvp(e);
   } catch (x) {
-    fail("Sorry, that didn't save. Please try again, or text " + CONFIG.helpPhone + ' for help.');
-  } finally {
-    btn.disabled = false; syncForm();
+    res = null;
   }
+  btn.disabled = false; syncForm();
+  if (!res || !res.ok) return fail((res && res.error) || "Sorry, that didn't save. Please try again, or text " + CONFIG.helpPhone + ' for help.');
+
+  // Saved. Nothing below can turn that into an error message.
+  const stop = e.candy || e.decorated || e.special;
+  $('#doneTitle').textContent = res.removed ? "You're off the list" : (res.updated ? 'RSVP updated!' : "You're all set!");
+  $('#doneText').textContent = res.removed
+    ? `${e.num} ${e.street} has been taken off. You can RSVP again any time.`
+    : stop ? `${e.num} ${e.street} is on the map. Thanks for joining in! 🎃`
+           : `Thanks! We've counted ${e.kids} trick-or-treater${e.kids === 1 ? '' : 's'} from ${e.num} ${e.street}.`;
+  $('#rsvpForm').classList.add('hidden');
+  $('#rsvpDone').classList.remove('hidden');
+  if (!res.removed) { try { candyBurst($('#rsvpDone')); } catch (x) { /* decoration only */ } }
+  refresh();
 }
 
 // A quick, small shower of treats from the pumpkin. Skipped for reduced motion.
@@ -1104,9 +1124,9 @@ function candyBurst(box) {
     const dx = Math.cos(angle) * dist, dy = Math.sin(angle) * dist;
     const spin = (Math.random() - .5) * 540;
     bit.animate([
-      { transform: 'translate(-50%, 0) scale(.4) rotate(0)', opacity: 0 },
-      { transform: `translate(calc(-50% + ${dx * .8}px), ${dy * .8}px) scale(1) rotate(${spin * .6}deg)`, opacity: 1, offset: .35 },
-      { transform: `translate(calc(-50% + ${dx}px), ${dy + 160}px) scale(.9) rotate(${spin}deg)`, opacity: 0 }
+      { transform: 'translate(0, 0) scale(.4) rotate(0deg)', opacity: 0 },
+      { transform: `translate(${dx * .8}px, ${dy * .8}px) scale(1) rotate(${spin * .6}deg)`, opacity: 1, offset: .35 },
+      { transform: `translate(${dx}px, ${dy + 160}px) scale(.9) rotate(${spin}deg)`, opacity: 0 }
     ], { duration: 1300 + Math.random() * 500, easing: 'cubic-bezier(.2, .7, .4, 1)', delay: Math.random() * 120 })
       .finished.then(() => bit.remove());
   }
