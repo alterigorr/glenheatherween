@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glenheatherween 2026</title>
+<meta name="description" content="Glen Heather Estates Halloween: RSVP your house and see who's handing out candy.">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  // Apply the saved look before first paint so the page never flashes the wrong theme.
+  (function () {
+    var pref = 'auto';
+    try { pref = localStorage.getItem('ghw-theme') || 'auto'; } catch (e) {}
+    var h = new Date().getHours() + new Date().getMinutes() / 60;
+    var night = h >= 17.5 || h < 6;
+    document.documentElement.dataset.theme = pref === 'auto' ? (night ? 'dark' : 'light') : pref;
+  })();
+</script>
+<style>
+  :root[data-theme="light"] {
+    --bg: #FBF6EE;
+    --surface: #FFFFFF;
+    --surface-2: #F4ECE1;
+    --ink: #1F1A17;
+    --muted: #5E554D;
+    --line: #E4D8C9;
+    --accent: #C2410C;
+    --accent-hover: #A93A0B;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #FDE7D6;
+    --danger: #B91C1C;
+    --focus: #1D4ED8;
+    --shadow: 0 1px 2px rgba(31, 26, 23, .06), 0 10px 28px rgba(31, 26, 23, .08);
+    --banner: #FEF3C7;
+    --banner-ink: #713F12;
+  }
+  :root[data-theme="dark"] {
+    --bg: #141116;
+    --surface: #1F1B23;
+    --surface-2: #29232E;
+    --ink: #F6F1EA;
+    --muted: #C3B9AF;
+    --line: #3A3340;
+    --accent: #FF8A3D;
+    --accent-hover: #FFA05F;
+    --accent-ink: #1B1210;
+    --accent-soft: #3B2519;
+    --danger: #F87171;
+    --focus: #93C5FD;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+    --banner: #3A2E12;
+    --banner-ink: #FDE68A;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 19px/1.55 'Atkinson Hyperlegible', system-ui, sans-serif;
+    transition: background .3s, color .3s;
+  }
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; line-height: 1.15; margin: 0; }
+  h2 { font-size: 1.6rem; font-weight: 800; }
+  h3 { font-size: 1.2rem; font-weight: 600; }
+  p { margin: 0; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+  section { margin: 40px 0; }
+  .section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 16px; }
+  .muted { color: var(--muted); }
+
+  .mock-banner {
+    background: var(--banner); color: var(--banner-ink);
+    text-align: center; font-size: .85rem; font-weight: 700; padding: 8px 16px;
+  }
+
+  /* Buttons: big, labelled, never icon-only */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 56px; padding: 12px 24px;
+    border: 2px solid transparent; border-radius: 14px;
+    font: 700 1.05rem/1.2 'Atkinson Hyperlegible', system-ui, sans-serif;
+    text-decoration: none; cursor: pointer;
+    transition: background .15s, border-color .15s, transform .1s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .btn-secondary:hover { border-color: var(--accent); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-block { width: 100%; }
+  .btn[disabled] { opacity: .6; cursor: progress; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  /* Top bar */
+  .topbar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 14px 0; }
+  .wordmark { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: 1.1rem; }
+  .look { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--muted); }
+  .seg { display: inline-flex; background: var(--surface-2); border-radius: 12px; padding: 4px; }
+  .seg button {
+    border: 0; background: transparent; color: var(--ink);
+    font: 700 .9rem 'Atkinson Hyperlegible', sans-serif;
+    padding: 8px 12px; min-height: 40px; border-radius: 9px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow); }
+
+  /* Hero */
+  .hero { padding: 24px 0 8px; }
+  .hero h1 { font-size: clamp(2.6rem, 9vw, 4.4rem); font-weight: 800; letter-spacing: -.02em; }
+  .hero h1 span { color: var(--accent); }
+  .when { margin: 20px 0 28px; display: grid; gap: 6px; font-size: 1.15rem; }
+  .when strong { font-size: 1.35rem; }
+  .when .row { display: flex; gap: 12px; }
+  .when .row b { min-width: 7.5em; }
+
+  /* Tally */
+  .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
+  .stat .num { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: 3rem; line-height: 1; color: var(--accent); }
+  .stat .label { font-weight: 700; margin-top: 8px; }
+  .breakdown { margin-top: 14px; color: var(--muted); }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px; box-shadow: var(--shadow); }
+  .raffle { border: 2px solid var(--accent); background: var(--accent-soft); }
+  .raffle dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; margin: 16px 0 0; }
+  .raffle dt { font-weight: 700; }
+  .raffle dd { margin: 0; }
+
+  /* Map */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: .95rem; }
+  .map-wrap { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); background: var(--surface-2); }
+  #map { height: 480px; }
+  .map-tools { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+  .map-bar { display: none; }
+  .map-wrap.is-full { position: fixed; inset: 0; z-index: 1500; border-radius: 0; border: 0; display: flex; flex-direction: column; }
+  .map-wrap.is-full .map-bar { display: flex; gap: 10px; padding: 10px 12px; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .map-wrap.is-full .map-bar .btn { flex: 1; min-height: 52px; padding: 8px 12px; }
+  .map-wrap.is-full #map { flex: 1; height: auto; }
+  body.no-scroll { overflow: hidden; }
+  .map-msg { margin-top: 10px; color: var(--muted); }
+
+  :root[data-theme="dark"] .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.6); }
+  .pin-wrap { background: none; border: 0; }
+  .pin {
+    position: absolute; left: 0; top: 0; transform: translate(-50%, -100%);
+    background: #fff; color: #1F1A17; border: 3px solid #C2410C; border-radius: 999px;
+    padding: 2px 8px; font-size: 20px; line-height: 1.3; white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .35);
+  }
+  .pin::after {
+    content: ''; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%);
+    border: 7px solid transparent; border-top-color: #C2410C; border-bottom: 0;
+  }
+  .you-dot { width: 20px; height: 20px; border-radius: 50%; background: #2563EB; border: 4px solid #fff; box-shadow: 0 0 0 2px #2563EB55, 0 2px 6px rgba(0,0,0,.4); }
+  .leaflet-popup-content { font: 400 17px/1.45 'Atkinson Hyperlegible', sans-serif; margin: 14px 16px; }
+  .leaflet-popup-content h3 { font-size: 1.15rem; margin-bottom: 4px; }
+  .leaflet-container a.leaflet-popup-close-button { width: 32px; height: 32px; font-size: 26px; }
+
+  /* Street list */
+  .streets { display: grid; gap: 16px; }
+  .street h3 { display: flex; justify-content: space-between; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .street h3 small { font: 400 .95rem 'Atkinson Hyperlegible', sans-serif; color: var(--muted); }
+  .street ul { list-style: none; margin: 0; padding: 0; }
+  .street li { display: grid; grid-template-columns: 4.2em 1fr; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .street li:last-child { border-bottom: 0; }
+  .street .num { font-weight: 700; font-size: 1.1rem; }
+  .street .what { font-weight: 700; }
+  .street .who, .street .note { grid-column: 2; color: var(--muted); }
+  .street .note { font-style: italic; }
+  .empty { color: var(--muted); }
+
+  /* Volunteer + footer */
+  .volunteer p { margin: 8px 0 18px; }
+  footer { border-top: 1px solid var(--line); padding: 32px 0 120px; color: var(--muted); }
+
+  /* Floating help */
+  .help-fab {
+    position: fixed; right: 16px; bottom: 16px; z-index: 1200;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .25); border-radius: 999px; padding: 12px 22px;
+  }
+  .help-fab .q { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent-ink); color: var(--accent); font-weight: 800; }
+
+  /* Dialogs */
+  dialog {
+    width: min(620px, calc(100vw - 24px)); max-height: calc(100dvh - 24px);
+    border: 0; border-radius: 22px; padding: 0;
+    background: var(--surface); color: var(--ink); box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
+  }
+  dialog::backdrop { background: rgba(10, 8, 12, .6); }
+  .dlg-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .dlg-body { padding: 20px; display: grid; gap: 22px; }
+  .dlg-close { min-height: 48px; padding: 8px 16px; }
+
+  fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 12px; }
+  legend { font-weight: 700; font-size: 1.1rem; padding: 0; margin-bottom: 4px; }
+  legend small, label small { display: block; font-weight: 400; color: var(--muted); font-size: .95rem; }
+  .field { display: grid; gap: 6px; }
+  .field > label { font-weight: 700; }
+  .addr { display: grid; grid-template-columns: 7.5em 1fr; gap: 12px; }
+  input[type="text"], input[type="tel"], select, textarea {
+    width: 100%; min-height: 56px; padding: 12px 14px;
+    font: 400 1.1rem 'Atkinson Hyperlegible', sans-serif;
+    color: var(--ink); background: var(--bg);
+    border: 2px solid var(--line); border-radius: 12px;
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
+
+  .check-card {
+    display: grid; grid-template-columns: 32px 1fr; gap: 14px; align-items: start;
+    padding: 16px; border: 2px solid var(--line); border-radius: 14px; cursor: pointer; background: var(--bg);
+  }
+  .check-card:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .check-card input { width: 28px; height: 28px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+  .check-card .t { font-weight: 700; font-size: 1.1rem; }
+  .sub { margin: -4px 0 4px 18px; padding-left: 16px; border-left: 3px solid var(--accent); }
+
+  .stepper { display: inline-flex; align-items: center; gap: 0; border: 2px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .stepper button { width: 60px; min-height: 56px; border: 0; background: var(--surface-2); color: var(--ink); font: 800 1.6rem sans-serif; cursor: pointer; }
+  .stepper output { min-width: 64px; text-align: center; font-weight: 800; font-size: 1.5rem; }
+
+  .note-box { padding: 14px 16px; border-radius: 12px; background: var(--accent-soft); border: 1px solid var(--accent); }
+  .error { color: var(--danger); font-weight: 700; }
+  .done { text-align: center; padding: 32px 20px 24px; display: grid; gap: 16px; }
+  .done .big { font-size: 4rem; line-height: 1; }
+
+  .share-list { display: grid; gap: 12px; }
+  .share-list .btn { justify-content: flex-start; font-size: 1.15rem; min-height: 64px; }
+  .share-list .btn .ico { font-size: 1.5rem; width: 1.6em; text-align: center; }
+  .qr-block { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding-top: 8px; border-top: 1px solid var(--line); }
+  .qr { background: #fff; padding: 10px; border-radius: 10px; width: 140px; height: 140px; }
+  .qr img, .qr canvas { width: 120px !important; height: 120px !important; }
+
+  .help-big { font-size: 1.6rem; min-height: 72px; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    body { font-size: 18px; }
+    .stat { padding: 16px; }
+    .stat .num { font-size: 2.4rem; }
+    .hero .btn-row .btn { width: 100%; }
+    .map-tools .btn { flex: 1; }
+    #map { height: 420px; }
+    .look > span { display: none; }
+    .raffle dl { grid-template-columns: 1fr; gap: 2px; }
+    .raffle dd { margin-bottom: 8px; }
+    .addr { grid-template-columns: 6.5em 1fr; }
+    .dlg-head h2 { font-size: 1.35rem; }
+  }
+
+  /* ---------- Print: street lists and flyer ---------- */
+  .print-only { display: none; }
+  @media print {
+    @page { margin: 0.6in; }
+    body { background: #fff; color: #000; font-size: 13pt; }
+    body > *:not(.print-only) { display: none !important; }
+    body[data-print="lists"] #printLists,
+    body[data-print="flyer"] #printFlyer { display: block !important; }
+    .p-street { page-break-after: always; break-after: page; }
+    .p-street:last-child { page-break-after: auto; break-after: auto; }
+    .p-street h1 { font-size: 26pt; margin-bottom: 4pt; }
+    .p-street .p-sub { margin-bottom: 14pt; }
+    .p-street table { width: 100%; border-collapse: collapse; }
+    .p-street th, .p-street td { text-align: left; padding: 9pt 6pt; border-bottom: 1px solid #999; vertical-align: top; }
+    .p-street td.box { width: 30pt; font-size: 18pt; }
+    .p-street td.n { width: 60pt; font-weight: 700; }
+    .p-foot { margin-top: 16pt; font-size: 11pt; }
+    #printFlyer { text-align: center; }
+    #printFlyer h1 { font-size: 54pt; margin: 0.3in 0 8pt; }
+    #printFlyer .f-date { font-size: 24pt; font-weight: 700; }
+    #printFlyer .f-hours { font-size: 16pt; margin: 6pt 0 24pt; }
+    #printFlyer .f-qr { display: inline-block; padding: 12pt; border: 3px solid #000; border-radius: 12pt; }
+    #printFlyer .f-qr img, #printFlyer .f-qr canvas { width: 3in !important; height: 3in !important; }
+    #printFlyer .f-cta { font-size: 20pt; font-weight: 700; margin: 20pt 0 6pt; }
+    #printFlyer .f-url { font-size: 22pt; }
+    #printFlyer .f-help { font-size: 14pt; margin-top: 24pt; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mock-banner">MOCKUP: these are sample houses, and nothing you enter is saved</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="look">
+      <span id="lookLabel">Look:</span>
+      <div class="seg" role="group" aria-labelledby="lookLabel">
+        <button type="button" data-theme-pick="light">☀️ Day</button>
+        <button type="button" data-theme-pick="dark">🌙 Night</button>
+        <button type="button" data-theme-pick="auto">Auto</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <h1>Glenheather<span>ween</span> <span id="year"></span></h1>
+    <div class="when">
+      <strong id="dateLong"></strong>
+      <div id="hours"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" type="button" data-open="rsvp"><span aria-hidden="true">🏠</span> RSVP my house</button>
+      <button class="btn btn-secondary" type="button" data-open="share"><span aria-hidden="true">📣</span> Tell a neighbor</button>
+    </div>
+  </header>
+
+  <section aria-labelledby="tallyTitle">
+    <h2 id="tallyTitle" class="hidden">Who's coming</h2>
+    <div class="tally">
+      <div class="stat">
+        <div class="num" id="statHouses">0</div>
+        <div class="label">houses on the map</div>
+      </div>
+      <div class="stat">
+        <div class="num" id="statKids">0</div>
+        <div class="label">trick-or-treaters coming</div>
+      </div>
+    </div>
+    <p class="breakdown" id="breakdown"></p>
+  </section>
+
+  <section aria-labelledby="raffleTitle">
+    <div class="card raffle">
+      <h2 id="raffleTitle">🎟️ 50/50 Raffle</h2>
+      <p id="raffleIntro" style="margin-top:8px"></p>
+      <dl id="raffleList"></dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="mapTitle">
+    <div class="section-head">
+      <h2 id="mapTitle">The map</h2>
+      <span class="muted">Tap a pin to see what's there</span>
+    </div>
+    <div class="legend" aria-label="What the pins mean">
+      <span class="chip">🍬 Candy</span>
+      <span class="chip">🎃 Decorated</span>
+      <span class="chip">⭐ Special stop</span>
+    </div>
+    <div class="map-wrap" id="mapWrap">
+      <div class="map-bar">
+        <button class="btn btn-secondary" type="button" data-action="locate"><span aria-hidden="true">📍</span> Show where I am</button>
+        <button class="btn btn-primary" type="button" data-action="fullscreen"><span aria-hidden="true">✕</span> Close big map</button>
+      </div>
+      <div id="map" role="region" aria-label="Map of houses"></div>
+    </div>
+    <div class="map-tools">
+      <button class="btn btn-secondary" type="button" data-action="locate"><span aria-hidden="true">📍</span> Show where I am</button>
+      <button class="btn btn-secondary" type="button" data-action="fullscreen"><span aria-hidden="true">⛶</span> Make map bigger</button>
+    </div>
+    <p class="map-msg" id="mapMsg" role="status"></p>
+  </section>
+
+  <section aria-labelledby="listTitle">
+    <div class="section-head">
+      <h2 id="listTitle">Street by street</h2>
+      <button class="btn btn-secondary" type="button" data-action="print-lists"><span aria-hidden="true">🖨️</span> Print street lists</button>
+    </div>
+    <div class="streets" id="streets"></div>
+  </section>
+
+  <section aria-labelledby="volTitle">
+    <div class="card volunteer">
+      <h2 id="volTitle">🙋 Want to help out?</h2>
+      <p id="volText"></p>
+      <div class="btn-row">
+        <a class="btn btn-primary" id="volSms"><span aria-hidden="true">💬</span> Text Shelly</a>
+        <a class="btn btn-secondary" id="volCall"><span aria-hidden="true">📞</span> Call Shelly</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p id="footHelp"></p>
+    <p style="margin-top:8px">Made by neighbors, for neighbors · Glen Heather Estates, Las Vegas</p>
+  </footer>
+</div>
+
+<button class="btn btn-primary help-fab" type="button" data-open="help"><span class="q" aria-hidden="true">?</span> Help</button>
+
+<!-- RSVP -->
+<dialog id="rsvp" aria-labelledby="rsvpTitle">
+  <div class="dlg-head">
+    <h2 id="rsvpTitle">RSVP your house</h2>
+    <button class="btn btn-secondary dlg-close" type="button" data-close><span aria-hidden="true">✕</span> Close</button>
+  </div>
+  <form id="rsvpForm" class="dlg-body" novalidate>
+    <fieldset>
+      <legend>Your address</legend>
+      <div class="addr">
+        <div class="field">
+          <label for="fNum">House #</label>
+          <input id="fNum" type="text" inputmode="numeric" autocomplete="off" pattern="[0-9]*" maxlength="5" >
+        </div>
+        <div class="field">
+          <label for="fStreet">Street</label>
+          <select id="fStreet"></select>
+        </div>
+      </div>
+      <p class="note-box hidden" id="existingNote" role="status">You've already RSVP'd. Saving will <b>update</b> your house.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>What's happening at your house?<small>Check all that apply</small></legend>
+
+      <label class="check-card"><input type="checkbox" id="fCandy">
+        <span><span class="t">🍬 Handing out candy</span><small>Your house goes on the map</small></span></label>
+
+      <label class="check-card"><input type="checkbox" id="fDecorated">
+        <span><span class="t">🎃 We're decorated</span><small>Come take a look</small></span></label>
+
+      <label class="check-card"><input type="checkbox" id="fSpecial">
+        <span><span class="t">⭐ Special stop</span><small>Something extra: a haunted garage, a photo spot, drinks for the grown-ups…</small></span></label>
+      <div class="sub field hidden" id="specialMore">
+        <label for="fNote">What's special? <small>Optional, shown on the map</small></label>
+        <textarea id="fNote" maxlength="140" placeholder="e.g. Haunted garage 5–6 PM · Photo booth · Drinks for the grown-ups 🍷"></textarea>
+      </div>
+
+      <label class="check-card"><input type="checkbox" id="fKids">
+        <span><span class="t">🧒 Our kids are trick-or-treating</span><small>Helps neighbors know how much candy to buy</small></span></label>
+      <div class="sub field hidden" id="kidsMore">
+        <span style="font-weight:700" id="kidsLabel">How many kids?</span>
+        <div class="stepper" role="group" aria-labelledby="kidsLabel">
+          <button type="button" data-step="-1" aria-label="One fewer">−</button>
+          <output id="fKidsCount" aria-live="polite">1</output>
+          <button type="button" data-step="1" aria-label="One more">+</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <label for="fName">Name on the map <small>Optional, like "The Smiths"</small></label>
+      <input id="fName" type="text" maxlength="40" autocomplete="off">
+    </div>
+
+    <p class="error hidden" id="formError" role="alert"></p>
+    <button class="btn btn-primary btn-block" type="submit" id="submitBtn">RSVP my house 🎃</button>
+  </form>
+  <div class="done hidden" id="rsvpDone">
+    <div class="big">🎃</div>
+    <h2 id="doneTitle">You're all set!</h2>
+    <p id="doneText"></p>
+    <button class="btn btn-primary btn-block" type="button" data-close>Done</button>
+  </div>
+</dialog>
+
+<!-- Share -->
+<dialog id="share" aria-labelledby="shareTitle">
+  <div class="dlg-head">
+    <h2 id="shareTitle">Tell a neighbor</h2>
+    <button class="btn btn-secondary dlg-close" type="button" data-close><span aria-hidden="true">✕</span> Close</button>
+  </div>
+  <div class="dlg-body">
+    <div class="share-list">
+      <a class="btn btn-primary" id="shareSms"><span class="ico">💬</span> Send it in a text message</a>
+      <a class="btn btn-secondary" id="shareEmail"><span class="ico">✉️</span> Send it in an email</a>
+      <button class="btn btn-secondary" type="button" id="shareCopy"><span class="ico">🔗</span> <span>Copy the link</span></button>
+      <button class="btn btn-secondary hidden" type="button" id="shareMore"><span class="ico">⋯</span> More ways to share</button>
+    </div>
+    <div class="qr-block">
+      <div class="qr" id="qrSmall" aria-label="QR code for the website"></div>
+      <div>
+        <p><b>Standing next to them?</b> They can point their phone camera at this code.</p>
+        <button class="btn btn-secondary" type="button" data-action="print-flyer" style="margin-top:12px"><span aria-hidden="true">🖨️</span> Print a flyer</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Help -->
+<dialog id="help" aria-labelledby="helpTitle">
+  <div class="dlg-head">
+    <h2 id="helpTitle">Need a hand?</h2>
+    <button class="btn btn-secondary dlg-close" type="button" data-close><span aria-hidden="true">✕</span> Close</button>
+  </div>
+  <div class="dlg-body">
+    <p style="font-size:1.15rem">Stuck on anything? Send us a text and a neighbor will help you out.</p>
+    <a class="btn btn-primary btn-block help-big" id="helpSms"></a>
+    <p class="muted" id="helpCallLine"></p>
+  </div>
+</dialog>
+
+<!-- Print-only layouts -->
+<div class="print-only" id="printLists"></div>
+<div class="print-only" id="printFlyer">
+  <h1>Glenheatherween <span class="f-year"></span></h1>
+  <div class="f-date"></div>
+  <div class="f-hours"></div>
+  <div class="f-qr" id="qrFlyer"></div>
+  <div class="f-cta">Scan to RSVP your house and see the map</div>
+  <div class="f-url"></div>
+  <div class="f-help"></div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG: everything that changes year to year.
+   ========================================================================= */
+const CONFIG = {
+  year: 2026,
+  dateLong: 'Saturday, October 31',
+  hours: [
+    { when: '4 – 6 PM', what: 'Glen Heather residents' },
+    { when: 'After 6 PM', what: 'Regular Halloween' }
+  ],
+  raffle: {
+    intro: 'Winner gets half of the pot. The neighborhood association keeps the other half.',
+    rows: [
+      ['Buy tickets at', "Shelly's house, 2112 Kirkland Ave"],
+      ['Price', '$1 each · 6 for $5 · 12 for $10'],
+      ['Pay with', 'Cash or Zelle'],
+      ['Drawing', 'After 9 PM on Halloween']
+    ]
+  },
+  helpPhone: '323-401-5380',
+  volunteer: { name: 'Shelly', phone: '702-491-9979' },
+  siteUrl: 'https://glenheatherween.com',
+  shareText: 'Glenheatherween is Saturday, Oct 31 (4–6 PM for Glen Heather residents). Put your house on the map and see who is handing out candy:',
+  streets: [
+    'Birch Street', 'Bonnie Brae Avenue', 'Bryn Mawr Avenue', 'Glen Heather Way', 'Inverness Avenue',
+    'Ivanhoe Way', 'Kiltie Way', 'Kirkland Avenue', 'Loch Lomond Way'
+  ],
+  map: { center: [36.1500, -115.1697], zoom: 17 },
+  night: { from: 17.5, to: 6 }   // "Auto" look switches to Night between 5:30 PM and 6 AM
+};
+
+/* =========================================================================
+   MOCK DATA: sample households for the mockup only. Replaced by the
+   Apps Script backend in the real build.
+   ========================================================================= */
+const STREET_POINTS = {   // rough midpoints (OpenStreetMap), used to place new mock RSVPs
+  'Birch Street': [36.1508, -115.1692], 'Bonnie Brae Avenue': [36.1507, -115.1708],
+  'Bryn Mawr Avenue': [36.1497, -115.1724], 'Glen Heather Way': [36.1492, -115.1690],
+  'Inverness Avenue': [36.1488, -115.1703], 'Ivanhoe Way': [36.1494, -115.1682],
+  'Kiltie Way': [36.1507, -115.1673], 'Kirkland Avenue': [36.1491, -115.1715],
+  'Loch Lomond Way': [36.1496, -115.1675]
+};
+
+let households = [
+  { num: '1804', street: 'Kiltie Way', candy: true, decorated: true, special: false, kids: 2, lat: 36.15138, lng: -115.16731 },
+  { num: '1812', street: 'Kiltie Way', candy: true, decorated: false, special: false, kids: 0, lat: 36.15044, lng: -115.16732 },
+  { num: '1900', street: 'Loch Lomond Way', candy: true, decorated: true, special: true, note: 'Haunted garage 5–6 PM 👻', name: 'The Parks', kids: 3, lat: 36.14904, lng: -115.16795 },
+  { num: '1921', street: 'Loch Lomond Way', candy: true, kids: 0, lat: 36.14835, lng: -115.16856 },
+  { num: '1710', street: 'Ivanhoe Way', candy: true, decorated: true, kids: 1, lat: 36.14932, lng: -115.16827 },
+  { num: '2001', street: 'Birch Street', candy: true, kids: 2, lat: 36.15100, lng: -115.16920 },
+  { num: '2017', street: 'Birch Street', candy: true, decorated: true, name: 'The Garcias', kids: 0, lat: 36.15043, lng: -115.16926 },
+  { num: '2112', street: 'Kirkland Avenue', candy: true, special: true, note: 'Raffle tickets sold here 🎟️', name: "Shelly's", kids: 0, lat: 36.14928, lng: -115.17137 },
+  { num: '2124', street: 'Kirkland Avenue', candy: true, kids: 2, lat: 36.14880, lng: -115.17176 },
+  { num: '1601', street: 'Bryn Mawr Avenue', candy: true, decorated: true, kids: 0, lat: 36.15104, lng: -115.17237 },
+  { num: '1633', street: 'Bryn Mawr Avenue', candy: true, special: true, note: 'Drinks for the grown-ups 🍷', kids: 2, lat: 36.14892, lng: -115.17241 },
+  { num: '2205', street: 'Bonnie Brae Avenue', candy: true, kids: 1, lat: 36.15071, lng: -115.17080 },
+  { num: '2231', street: 'Bonnie Brae Avenue', decorated: true, kids: 0, lat: 36.15073, lng: -115.17190 },
+  { num: '1809', street: 'Inverness Avenue', candy: true, decorated: true, kids: 4, lat: 36.14930, lng: -115.17030 },
+  { num: '1825', street: 'Inverness Avenue', candy: true, kids: 0, lat: 36.14836, lng: -115.17024 },
+  // Kids-only households (not on the map, but counted)
+  { num: '1820', street: 'Kiltie Way', kids: 3 }, { num: '2009', street: 'Birch Street', kids: 2 },
+  { num: '1605', street: 'Bryn Mawr Avenue', kids: 4 }, { num: '1817', street: 'Inverness Avenue', kids: 2 },
+  { num: '2215', street: 'Bonnie Brae Avenue', kids: 3 }, { num: '1915', street: 'Loch Lomond Way', kids: 2 },
+  { num: '2130', street: 'Kirkland Avenue', kids: 5 }, { num: '1722', street: 'Ivanhoe Way', kids: 2 }
+];
+
+const api = {
+  async load() {
+    await wait(250);
+    return households.map(h => ({ ...h }));
+  },
+  async rsvp(entry) {
+    await wait(700);
+    const i = households.findIndex(h => sameHouse(h, entry));
+    const isStop = entry.candy || entry.decorated || entry.special;
+    if (!isStop && !entry.kids) {
+      if (i >= 0) households.splice(i, 1);
+      return { ok: true, removed: true };
+    }
+    const prev = i >= 0 ? households[i] : null;
+    const base = prev && prev.lat ? [prev.lat, prev.lng] : jitter(STREET_POINTS[entry.street]);
+    const row = { ...entry, lat: base[0], lng: base[1] };
+    if (i >= 0) households[i] = row; else households.push(row);
+    return { ok: true, updated: !!prev };
+  }
+};
+
+/* =========================================================================
+   App
+   ========================================================================= */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const jitter = ([a, b]) => [a + (Math.random() - .5) * .0008, b + (Math.random() - .5) * .0008];
+const sameHouse = (a, b) => a.num === b.num && a.street === b.street;
+const isStop = h => h.candy || h.decorated || h.special;
+const telDigits = p => p.replace(/\D/g, '');
+
+// Tiny DOM builder: all user text goes through textContent, never innerHTML.
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v; else el.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : String(c));
+  return el;
+}
+
+function icons(x) { return [x.candy && '🍬', x.decorated && '🎃', x.special && '⭐'].filter(Boolean).join(' '); }
+function words(x) { return [x.candy && 'Candy', x.decorated && 'Decorated', x.special && 'Special stop'].filter(Boolean).join(' · '); }
+
+let data = [];
+let map, tiles, markerLayer, youMarker, watchId = null;
+
+/* ---- Static content from CONFIG ---- */
+function renderStatic() {
+  $('#year').textContent = CONFIG.year;
+  $('#dateLong').textContent = CONFIG.dateLong;
+  $('#hours').replaceChildren(...CONFIG.hours.map(r => h('div', { class: 'row' }, h('b', null, r.when), h('span', null, r.what))));
+
+  $('#raffleIntro').textContent = CONFIG.raffle.intro;
+  $('#raffleList').replaceChildren(...CONFIG.raffle.rows.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]));
+
+  const v = CONFIG.volunteer;
+  $('#volText').textContent = `We can always use an extra hand with setup, the raffle or cleanup. Call or text ${v.name} at ${v.phone}.`;
+  $('#volSms').href = `sms:${telDigits(v.phone)}`;
+  $('#volCall').href = `tel:${telDigits(v.phone)}`;
+
+  $('#helpSms').href = `sms:${telDigits(CONFIG.helpPhone)}`;
+  $('#helpSms').textContent = `💬 Text ${CONFIG.helpPhone}`;
+  $('#helpCallLine').replaceChildren('Rather talk? You can also call ', h('a', { href: `tel:${telDigits(CONFIG.helpPhone)}` }, CONFIG.helpPhone), '.');
+  $('#footHelp').replaceChildren('Questions? Text ', h('a', { href: `sms:${telDigits(CONFIG.helpPhone)}` }, CONFIG.helpPhone), '.');
+
+  $('#fStreet').replaceChildren(h('option', { value: '' }, 'Choose your street…'), ...CONFIG.streets.map(s => h('option', { value: s }, s)));
+
+  const msg = `${CONFIG.shareText} ${CONFIG.siteUrl}`;
+  $('#shareSms').href = `sms:?&body=${encodeURIComponent(msg)}`;
+  $('#shareEmail').href = `mailto:?subject=${encodeURIComponent(`Glenheatherween ${CONFIG.year}: ${CONFIG.dateLong}`)}&body=${encodeURIComponent(msg)}`;
+  if (navigator.share) $('#shareMore').classList.remove('hidden');
+
+  $('#printFlyer .f-year').textContent = CONFIG.year;
+  $('#printFlyer .f-date').textContent = CONFIG.dateLong;
+  $('#printFlyer .f-hours').textContent = CONFIG.hours.map(r => `${r.when}: ${r.what}`).join('  ·  ');
+  $('#printFlyer .f-url').textContent = CONFIG.siteUrl.replace(/^https?:\/\//, '');
+  $('#printFlyer .f-help').textContent = `Questions? Text ${CONFIG.helpPhone}`;
+
+  if (window.QRCode) {
+    const opts = { text: CONFIG.siteUrl, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M };
+    new QRCode($('#qrSmall'), { ...opts, width: 240, height: 240 });
+    new QRCode($('#qrFlyer'), { ...opts, width: 600, height: 600 });
+  } else {
+    $('.qr-block').classList.add('hidden');
+  }
+}
+
+/* ---- Tally ---- */
+function renderTally() {
+  const stops = data.filter(isStop);
+  const kids = data.reduce((n, x) => n + (Number(x.kids) || 0), 0);
+  $('#statHouses').textContent = stops.length;
+  $('#statKids').textContent = kids;
+  const c = k => stops.filter(x => x[k]).length;
+  $('#breakdown').textContent = `🍬 ${c('candy')} handing out candy  ·  🎃 ${c('decorated')} decorated  ·  ⭐ ${c('special')} special stops`;
+}
+
+/* ---- Map ---- */
+function initMap() {
+  if (!window.L) { $('#mapMsg').textContent = "The map couldn't load. The street list below has everything."; return; }
+  map = L.map('map', { center: CONFIG.map.center, zoom: CONFIG.map.zoom, minZoom: 15, maxZoom: 19, scrollWheelZoom: false });
+  // OpenStreetMap's own tiles: free, no key. Night mode darkens them with a CSS filter.
+  tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+  markerLayer = L.layerGroup().addTo(map);
+}
+
+function renderMap() {
+  if (!map) return;
+  markerLayer.clearLayers();
+  const pts = [];
+  data.filter(x => isStop(x) && x.lat).forEach(x => {
+    const icon = L.divIcon({ className: 'pin-wrap', iconSize: [0, 0], html: `<span class="pin">${icons(x)}</span>` });
+    const pop = h('div', null,
+      h('h3', null, `${x.num} ${x.street}`),
+      x.name && h('div', null, h('b', null, x.name)),
+      h('div', null, `${icons(x)}  ${words(x)}`),
+      x.note && h('div', { style: 'margin-top:6px;font-style:italic' }, x.note));
+    L.marker([x.lat, x.lng], { icon, title: `${x.num} ${x.street}`, keyboard: true }).bindPopup(pop, { offset: [0, -34] }).addTo(markerLayer);
+    pts.push([x.lat, x.lng]);
+  });
+  if (pts.length) map.fitBounds(pts, { padding: [40, 40], maxZoom: 17 });
+}
+
+function toggleFullMap() {
+  const wrap = $('#mapWrap');
+  const on = !wrap.classList.contains('is-full');
+  wrap.classList.toggle('is-full', on);
+  document.body.classList.toggle('no-scroll', on);
+  if (map) setTimeout(() => map.invalidateSize(), 60);
+}
+
+function toggleLocate() {
+  const msg = $('#mapMsg');
+  const buttons = $$('[data-action="locate"]');
+  if (watchId != null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    if (youMarker) { youMarker.remove(); youMarker = null; }
+    buttons.forEach(b => b.textContent = '📍 Show where I am');
+    msg.textContent = '';
+    return;
+  }
+  if (!navigator.geolocation || !map) { msg.textContent = "Sorry, this phone or browser can't share its location."; return; }
+  msg.textContent = 'Finding you… your phone may ask for permission.';
+  let first = true;
+  watchId = navigator.geolocation.watchPosition(pos => {
+    const ll = [pos.coords.latitude, pos.coords.longitude];
+    if (!youMarker) youMarker = L.marker(ll, { icon: L.divIcon({ className: 'pin-wrap', iconSize: [20, 20], html: '<div class="you-dot"></div>' }), title: 'You are here', zIndexOffset: 1000 }).addTo(map);
+    else youMarker.setLatLng(ll);
+    if (first) { map.setView(ll, 18); first = false; }
+    msg.textContent = 'The blue dot is you.';
+    buttons.forEach(b => b.textContent = '📍 Stop showing me');
+  }, () => {
+    msg.textContent = "Couldn't find your location. Check that location is turned on for your browser.";
+    watchId = null;
+  }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 });
+}
+
+/* ---- Street list ---- */
+function byStreet(rows) {
+  return CONFIG.streets
+    .map(s => ({ street: s, houses: rows.filter(x => x.street === s).sort((a, b) => parseInt(a.num) - parseInt(b.num)) }))
+    .filter(g => g.houses.length);
+}
+
+function renderStreets() {
+  const groups = byStreet(data.filter(isStop));
+  const box = $('#streets');
+  if (!groups.length) { box.replaceChildren(h('p', { class: 'empty' }, 'No houses yet. Be the first to RSVP!')); return; }
+  box.replaceChildren(...groups.map(g => h('div', { class: 'card street' },
+    h('h3', null, g.street, h('small', null, `${g.houses.length} ${g.houses.length === 1 ? 'house' : 'houses'}`)),
+    h('ul', null, g.houses.map(x => h('li', null,
+      h('span', { class: 'num' }, x.num),
+      h('span', { class: 'what' }, `${icons(x)}  ${words(x)}`),
+      x.name && h('span', { class: 'who' }, x.name),
+      x.note && h('span', { class: 'note' }, x.note)
+    )))
+  )));
+}
+
+function buildPrintLists() {
+  const groups = byStreet(data.filter(isStop));
+  $('#printLists').replaceChildren(...groups.map(g => h('div', { class: 'p-street' },
+    h('h1', null, g.street),
+    h('p', { class: 'p-sub' }, `Glenheatherween ${CONFIG.year} · ${CONFIG.dateLong} · ${CONFIG.hours[0].when}`),
+    h('table', null,
+      h('thead', null, h('tr', null, h('th', null, ''), h('th', null, 'House'), h('th', null, "What's there"))),
+      h('tbody', null, g.houses.map(x => h('tr', null,
+        h('td', { class: 'box' }, '☐'),
+        h('td', { class: 'n' }, x.num),
+        h('td', null, words(x), x.name ? ` (${x.name})` : '', x.note ? h('div', null, h('i', null, x.note)) : '')
+      )))),
+    h('p', { class: 'p-foot' }, `Live map: ${CONFIG.siteUrl.replace(/^https?:\/\//, '')} · Questions? Text ${CONFIG.helpPhone}`)
+  )));
+}
+
+function printMode(mode) {
+  if (mode === 'lists') buildPrintLists();
+  document.body.dataset.print = mode;
+  window.print();
+}
+window.addEventListener('afterprint', () => { delete document.body.dataset.print; });
+
+/* ---- Theme picker ---- */
+function getPref() { try { return localStorage.getItem('ghw-theme') || 'auto'; } catch (e) { return 'auto'; } }
+function setPref(p) { try { localStorage.setItem('ghw-theme', p); } catch (e) {} }
+function resolveTheme(pref) {
+  if (pref !== 'auto') return pref;
+  const d = new Date(), hr = d.getHours() + d.getMinutes() / 60;
+  return (hr >= CONFIG.night.from || hr < CONFIG.night.to) ? 'dark' : 'light';
+}
+function applyTheme() {
+  const pref = getPref();
+  const theme = resolveTheme(pref);
+  document.documentElement.dataset.theme = theme;
+  $$('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === pref)));
+}
+
+/* ---- RSVP form ---- */
+let kidsCount = 1;
+function formEntry() {
+  return {
+    num: $('#fNum').value.replace(/\D/g, ''),
+    street: $('#fStreet').value,
+    candy: $('#fCandy').checked,
+    decorated: $('#fDecorated').checked,
+    special: $('#fSpecial').checked,
+    note: $('#fSpecial').checked ? $('#fNote').value.trim() : '',
+    kids: $('#fKids').checked ? kidsCount : 0,
+    name: $('#fName').value.trim()
+  };
+}
+
+function syncForm() {
+  $('#specialMore').classList.toggle('hidden', !$('#fSpecial').checked);
+  $('#kidsMore').classList.toggle('hidden', !$('#fKids').checked);
+  $('#fKidsCount').textContent = kidsCount;
+
+  const e = formEntry();
+  const existing = e.num && e.street && data.find(x => sameHouse(x, e));
+  $('#existingNote').classList.toggle('hidden', !existing);
+  const nothing = !e.candy && !e.decorated && !e.special && !e.kids;
+  const btn = $('#submitBtn');
+  if (existing && nothing) { btn.textContent = 'Take my house off the list'; btn.className = 'btn btn-danger btn-block'; }
+  else { btn.textContent = existing ? 'Update my RSVP 🎃' : 'RSVP my house 🎃'; btn.className = 'btn btn-primary btn-block'; }
+}
+
+// When someone picks an address that's already registered, pre-fill what we know.
+function prefillIfExisting() {
+  const e = formEntry();
+  const x = e.num && e.street && data.find(r => sameHouse(r, e));
+  if (x) {
+    $('#fCandy').checked = !!x.candy;
+    $('#fDecorated').checked = !!x.decorated;
+    $('#fSpecial').checked = !!x.special;
+    $('#fNote').value = x.note || '';
+    $('#fName').value = x.name || '';
+  }
+  syncForm();
+}
+
+function openRsvp() {
+  $('#rsvpForm').reset();
+  kidsCount = 1;
+  $('#formError').classList.add('hidden');
+  $('#rsvpForm').classList.remove('hidden');
+  $('#rsvpDone').classList.add('hidden');
+  syncForm();
+  $('#rsvp').showModal();
+}
+
+async function submitRsvp(ev) {
+  ev.preventDefault();
+  const e = formEntry();
+  const err = $('#formError');
+  const fail = (m, focusEl) => { err.textContent = m; err.classList.remove('hidden'); if (focusEl) focusEl.focus(); };
+  err.classList.add('hidden');
+
+  if (!e.num) return fail('Please enter your house number.', $('#fNum'));
+  if (!e.street) return fail('Please choose your street.', $('#fStreet'));
+  const existing = data.find(x => sameHouse(x, e));
+  if (!existing && !e.candy && !e.decorated && !e.special && !e.kids) {
+    return fail('Please check at least one box: candy, decorated, special stop, or kids trick-or-treating.');
+  }
+
+  const btn = $('#submitBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const res = await api.rsvp(e);
+    if (!res.ok) throw new Error(res.error || 'Save failed');
+    await refresh();
+    const stop = e.candy || e.decorated || e.special;
+    $('#doneTitle').textContent = res.removed ? "You're off the list" : (res.updated ? 'RSVP updated!' : "You're all set!");
+    $('#doneText').textContent = res.removed
+      ? `${e.num} ${e.street} has been taken off. You can RSVP again any time.`
+      : stop ? `${e.num} ${e.street} is on the map. Thanks for joining in! 🎃`
+             : `Thanks! We've counted ${e.kids} trick-or-treater${e.kids === 1 ? '' : 's'} from ${e.num} ${e.street}.`;
+    $('#rsvpForm').classList.add('hidden');
+    $('#rsvpDone').classList.remove('hidden');
+  } catch (x) {
+    fail("Sorry, that didn't save. Please try again, or text " + CONFIG.helpPhone + ' for help.');
+  } finally {
+    btn.disabled = false; syncForm();
+  }
+}
+
+/* ---- Share ---- */
+async function copyLink() {
+  const label = $('#shareCopy span:last-child');
+  try { await navigator.clipboard.writeText(CONFIG.siteUrl); label.textContent = 'Copied! Now paste it in a message'; }
+  catch (e) { label.textContent = CONFIG.siteUrl; }
+  setTimeout(() => { label.textContent = 'Copy the link'; }, 4000);
+}
+
+/* ---- Wiring ---- */
+async function refresh() {
+  data = await api.load();
+  renderTally();
+  renderMap();
+  renderStreets();
+}
+
+document.addEventListener('click', ev => {
+  const t = ev.target.closest('[data-open],[data-close],[data-action],[data-theme-pick],[data-step]');
+  if (!t) return;
+  if (t.dataset.open === 'rsvp') openRsvp();
+  else if (t.dataset.open) $('#' + t.dataset.open).showModal();
+  else if (t.hasAttribute('data-close')) t.closest('dialog').close();
+  else if (t.dataset.themePick) { setPref(t.dataset.themePick); applyTheme(); }
+  else if (t.dataset.step) { kidsCount = Math.min(20, Math.max(1, kidsCount + Number(t.dataset.step))); syncForm(); }
+  else if (t.dataset.action === 'fullscreen') toggleFullMap();
+  else if (t.dataset.action === 'locate') toggleLocate();
+  else if (t.dataset.action === 'print-lists') printMode('lists');
+  else if (t.dataset.action === 'print-flyer') { $('#share').close(); printMode('flyer'); }
+});
+
+// Clicking the dim backdrop closes a dialog.
+$$('dialog').forEach(d => d.addEventListener('click', ev => { if (ev.target === d) d.close(); }));
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('#mapWrap').classList.contains('is-full')) toggleFullMap(); });
+
+$('#rsvpForm').addEventListener('submit', submitRsvp);
+$('#rsvpForm').addEventListener('input', syncForm);
+$('#fNum').addEventListener('change', prefillIfExisting);
+$('#fStreet').addEventListener('change', prefillIfExisting);
+$('#shareCopy').addEventListener('click', copyLink);
+$('#shareMore').addEventListener('click', () => navigator.share({ title: `Glenheatherween ${CONFIG.year}`, text: CONFIG.shareText, url: CONFIG.siteUrl }).catch(() => {}));
+
+renderStatic();
+applyTheme();
+setInterval(() => { if (getPref() === 'auto') applyTheme(); }, 60000);
+initMap();
+refresh();
+</script>
+</body>
+</html>
