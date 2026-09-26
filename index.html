@@ -753,7 +753,6 @@ const CONFIG = {
   },
   helpPhone: '323-401-5380',
   volunteer: { name: 'Shelly', phone: '702-491-9979', email: 'sdwalters@cox.net' },
-  helpName: 'Igor',
   siteUrl: 'https://glenheatherween.com',
   sheetUrl: 'https://script.google.com/macros/s/AKfycbx7zk15RRbM5bWB5mWUGVJjfmNwpsks1nF69mWLuvyDJf7K__MU4dmfxblRFgqs-182/exec',
   shareText: 'Glenheatherween is Saturday, Oct 31 (4–6 PM for Glen Heather residents). Put your house on the map and see who is handing out candy:',
@@ -888,8 +887,7 @@ function buildFlyer() {
     `Tickets at ${r['Buy tickets at']} · ${r['Pay with']}`, h('br'),
     r['Price']);
   $('.f-contacts', f).replaceChildren(
-    'Event questions? Text or call ', h('b', null, `${v.name} at ${v.phone}`), v.email ? ` · ${v.email}` : '', h('br'),
-    'Website help? Text or call ', h('b', null, `${CONFIG.helpName} at ${CONFIG.helpPhone}`));
+    'Questions? Text or call ', h('b', null, `${v.name} at ${v.phone}`), v.email ? ` · ${v.email}` : '');
   // Same skyline as the page, without any window figures that happen to be showing.
   const sky = $('.scene .skyline');
   if (sky) {
