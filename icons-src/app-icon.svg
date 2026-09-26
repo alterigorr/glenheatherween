@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Glenheatherween app icon: the site's house on a moonlit night. Full-bleed; phones round the corners.
+       Everything important sits inside the central 80% so Android's round masks don't clip it. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#17111F"/>
+      <stop offset=".75" stop-color="#352848"/>
+    </linearGradient>
+    <radialGradient id="moonGlow">
+      <stop offset=".55" stop-color="#F6E7C8" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#F6E7C8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <g fill="#FFFFFF" opacity=".55">
+    <circle cx="120" cy="96" r="2.4"/><circle cx="196" cy="62" r="1.8"/><circle cx="86" cy="178" r="1.6"/>
+    <circle cx="232" cy="118" r="1.4"/><circle cx="430" cy="244" r="1.8"/><circle cx="154" cy="146" r="1.2"/>
+  </g>
+  <circle cx="360" cy="150" r="92" fill="url(#moonGlow)"/>
+  <circle cx="360" cy="150" r="46" fill="#F6E7C8"/>
+  <circle cx="345" cy="138" r="8" fill="#E6D2AC"/><circle cx="372" cy="166" r="11" fill="#E6D2AC"/><circle cx="378" cy="132" r="5" fill="#E6D2AC"/>
+  <!-- a bat crossing the moon -->
+  <path transform="translate(300 116) scale(.5) translate(-50 -26)" fill="#0E0B11"
+        d="M47 24C40 15 24 10 3 16C8 20 10 25 9 30C14 26 19 26 22 31C25 26 30 26 33 32C36 27 42 27 47 32ZM53 24C60 15 76 10 97 16C92 20 90 25 91 30C86 26 81 26 78 31C75 26 70 26 67 32C64 27 58 27 53 32ZM45.4 31a4.6 8.5 0 1 0 9.2 0a4.6 8.5 0 1 0-9.2 0ZM45.8 22.5a4.2 4.2 0 1 0 8.4 0a4.2 4.2 0 1 0-8.4 0ZM46.6 21L45.2 13.2L48.8 19ZM53.4 21L54.8 13.2L51.2 19Z"/>
+  <!-- window glow -->
+  <g fill="#FF9F2E" filter="url(#glow)" opacity=".85">
+    <circle cx="256" cy="222" r="16"/><rect x="178" y="282" width="40" height="38"/><rect x="294" y="282" width="40" height="38"/>
+    <rect x="178" y="346" width="40" height="38"/><rect x="236" y="342" width="40" height="80"/>
+  </g>
+  <!-- house -->
+  <g fill="#0E0B11">
+    <rect x="318" y="176" width="26" height="70"/>
+    <rect x="150" y="252" width="212" height="172"/>
+    <path d="M126 258L256 146L386 258Z"/>
+  </g>
+  <g fill="#FFB347">
+    <circle cx="256" cy="222" r="15"/>
+    <rect x="180" y="284" width="36" height="34" rx="3"/><rect x="296" y="284" width="36" height="34" rx="3"/>
+    <rect x="180" y="348" width="36" height="34" rx="3"/><rect x="238" y="344" width="36" height="78" rx="3"/>
+  </g>
+  <g fill="#0E0B11"><rect x="196" y="284" width="4" height="34"/><rect x="180" y="299" width="36" height="4"/><rect x="312" y="284" width="4" height="34"/><rect x="296" y="299" width="36" height="4"/><rect x="196" y="348" width="4" height="34"/><rect x="180" y="363" width="36" height="4"/></g>
+  <!-- porch pumpkin -->
+  <ellipse cx="338" cy="428" rx="30" ry="23" fill="#F07A1F"/>
+  <rect x="335" y="398" width="7" height="11" rx="2" fill="#4A5E26"/>
+  <path d="M322 425l6-9 6 9zM342 425l6-9 6 9zM321 434c8 9 26 9 34 0l-5 2-3-3-4 4-4-4-4 4-4-4-3 3z" fill="#FFD166"/>
+  <!-- ground -->
+  <path d="M0 422C90 412 180 418 256 422C340 426 430 414 512 420V512H0Z" fill="#0E0B11"/>
+</svg>

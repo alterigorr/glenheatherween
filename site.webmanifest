@@ -1,19 +1,12 @@
 {
-  "name": "GlenHeatherWeen",
-  "short_name": "GlenHeatherWeen",
+  "name": "Glenheatherween",
+  "short_name": "Glenheatherween",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2B2139",
+  "background_color": "#2B2139",
   "icons": [
-    {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "theme_color": "#ff6600",
-  "background_color": "#ffffff",
-  "display": "standalone"
+    { "src": "/android-chrome-192x192.png?v=2026", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/android-chrome-512x512.png?v=2026", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
 }
