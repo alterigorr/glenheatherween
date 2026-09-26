@@ -952,6 +952,15 @@ function initMap() {
 function renderMap() {
   if (!map) return;
   markerLayer.clearLayers();
+  // Houses Google could only place at street level share one point; spread those so none hide.
+  const seen = {};
+  const spread = x => {
+    const key = `${(+x.lat).toFixed(6)},${(+x.lng).toFixed(6)}`;
+    const n = seen[key] = (seen[key] || 0) + 1;
+    if (n === 1) return [x.lat, x.lng];
+    const angle = n * 2.4, r = 0.00007 * Math.sqrt(n);
+    return [+x.lat + r * Math.sin(angle), +x.lng + r * Math.cos(angle) * 1.24];
+  };
   data.filter(x => isStop(x) && x.lat).forEach(x => {
     const icon = L.divIcon({ className: 'pin-wrap', iconSize: [0, 0], html: `<span class="pin">${icons(x)}</span>` });
     const pop = h('div', null,
@@ -959,7 +968,7 @@ function renderMap() {
       x.name && h('div', null, h('b', null, x.name)),
       h('div', null, `${icons(x)}  ${words(x)}`),
       x.note && h('div', { style: 'margin-top:6px;font-style:italic' }, x.note));
-    L.marker([x.lat, x.lng], { icon, title: `${x.num} ${x.street}`, keyboard: true }).bindPopup(pop, { offset: [0, -34] }).addTo(markerLayer);
+    L.marker(spread(x), { icon, title: `${x.num} ${x.street}`, keyboard: true }).bindPopup(pop, { offset: [0, -34] }).addTo(markerLayer);
   });
 }
 
@@ -1208,9 +1217,12 @@ async function copyLink() {
 }
 
 /* ---- Wiring ---- */
+let loadSeq = 0;
 async function refresh() {
+  const seq = ++loadSeq;
   try {
     const body = await api.load();
+    if (seq !== loadSeq) return; // a newer refresh is on its way
     data = body.houses || [];
     totals = body.totals || { houses: data.length, kids: 0 };
     if (applySettings(body.settings)) { deriveEvent(); renderEvent(); }
