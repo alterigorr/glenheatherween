@@ -1007,7 +1007,7 @@ function buildPrintLists() {
         h('td', { class: 'n' }, x.num),
         h('td', null, words(x), x.name ? ` (${x.name})` : '', x.note ? h('div', null, h('i', null, x.note)) : '')
       )))),
-    h('p', { class: 'p-foot' }, `Live map: ${CONFIG.siteUrl.replace(/^https?:\/\//, '')} · Questions? Text ${CONFIG.helpPhone}`)
+    h('p', { class: 'p-foot' }, `Live map: ${CONFIG.siteUrl.replace(/^https?:\/\//, '')}`)
   )));
 }
 
