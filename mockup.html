@@ -532,11 +532,13 @@ const CONFIG = {
   volunteer: { name: 'Shelly', phone: '702-491-9979' },
   siteUrl: 'https://glenheatherween.com',
   shareText: 'Glenheatherween is Saturday, Oct 31 (4–6 PM for Glen Heather residents). Put your house on the map and see who is handing out candy:',
+  // Names as they appear on the street signs. Birch and Kirkland are each two different streets.
   streets: [
-    'Birch Street', 'Bonnie Brae Avenue', 'Bryn Mawr Avenue', 'Glen Heather Way', 'Inverness Avenue',
-    'Ivanhoe Way', 'Kiltie Way', 'Kirkland Avenue', 'Loch Lomond Way'
+    'N Birch St', 'S Birch St', 'W Bonnie Brae Ave', 'S Bryn Mawr Ave', 'W Glen Heather Way',
+    'S Inverness Ave', 'W Ivanhoe Way', 'Kiltie Way', 'S Kirkland Ave', 'W Kirkland Ave', 'S Loch Lomond Way'
   ],
-  map: { center: [36.1500, -115.1697], zoom: 17 },
+  // Oakey Blvd to Glen Heather Way, Bryn Mawr to the freeway.
+  map: { bounds: [[36.1471, -115.1738], [36.1521, -115.1656]] },
   night: { from: 17.5, to: 6 }   // "Auto" look switches to Night between 5:30 PM and 6 AM
 };
 
@@ -544,35 +546,36 @@ const CONFIG = {
    MOCK DATA: sample households for the mockup only. Replaced by the
    Apps Script backend in the real build.
    ========================================================================= */
-const STREET_POINTS = {   // rough midpoints (OpenStreetMap), used to place new mock RSVPs
-  'Birch Street': [36.1508, -115.1692], 'Bonnie Brae Avenue': [36.1507, -115.1708],
-  'Bryn Mawr Avenue': [36.1497, -115.1724], 'Glen Heather Way': [36.1492, -115.1690],
-  'Inverness Avenue': [36.1488, -115.1703], 'Ivanhoe Way': [36.1494, -115.1682],
-  'Kiltie Way': [36.1507, -115.1673], 'Kirkland Avenue': [36.1491, -115.1715],
-  'Loch Lomond Way': [36.1496, -115.1675]
+const STREET_POINTS = {   // rough midpoints, used to place new mock RSVPs
+  'N Birch St': [36.1512, -115.1691], 'S Birch St': [36.1494, -115.1692],
+  'W Bonnie Brae Ave': [36.1507, -115.1708], 'S Bryn Mawr Ave': [36.1497, -115.1724],
+  'W Glen Heather Way': [36.1477, -115.1700], 'S Inverness Ave': [36.1488, -115.1703],
+  'W Ivanhoe Way': [36.1494, -115.1682], 'Kiltie Way': [36.1507, -115.1673],
+  'S Kirkland Ave': [36.1483, -115.1717], 'W Kirkland Ave': [36.1497, -115.1700],
+  'S Loch Lomond Way': [36.1496, -115.1675]
 };
 
 let households = [
   { num: '1804', street: 'Kiltie Way', candy: true, decorated: true, special: false, kids: 2, lat: 36.15138, lng: -115.16731 },
   { num: '1812', street: 'Kiltie Way', candy: true, decorated: false, special: false, kids: 0, lat: 36.15044, lng: -115.16732 },
-  { num: '1900', street: 'Loch Lomond Way', candy: true, decorated: true, special: true, note: 'Haunted garage 5–6 PM 👻', name: 'The Parks', kids: 3, lat: 36.14904, lng: -115.16795 },
-  { num: '1921', street: 'Loch Lomond Way', candy: true, kids: 0, lat: 36.14835, lng: -115.16856 },
-  { num: '1710', street: 'Ivanhoe Way', candy: true, decorated: true, kids: 1, lat: 36.14932, lng: -115.16827 },
-  { num: '2001', street: 'Birch Street', candy: true, kids: 2, lat: 36.15100, lng: -115.16920 },
-  { num: '2017', street: 'Birch Street', candy: true, decorated: true, name: 'The Garcias', kids: 0, lat: 36.15043, lng: -115.16926 },
-  { num: '2112', street: 'Kirkland Avenue', candy: true, special: true, note: 'Raffle tickets sold here 🎟️', name: "Shelly's", kids: 0, lat: 36.14928, lng: -115.17137 },
-  { num: '2124', street: 'Kirkland Avenue', candy: true, kids: 2, lat: 36.14880, lng: -115.17176 },
-  { num: '1601', street: 'Bryn Mawr Avenue', candy: true, decorated: true, kids: 0, lat: 36.15104, lng: -115.17237 },
-  { num: '1633', street: 'Bryn Mawr Avenue', candy: true, special: true, note: 'Drinks for the grown-ups 🍷', kids: 2, lat: 36.14892, lng: -115.17241 },
-  { num: '2205', street: 'Bonnie Brae Avenue', candy: true, kids: 1, lat: 36.15071, lng: -115.17080 },
-  { num: '2231', street: 'Bonnie Brae Avenue', decorated: true, kids: 0, lat: 36.15073, lng: -115.17190 },
-  { num: '1809', street: 'Inverness Avenue', candy: true, decorated: true, kids: 4, lat: 36.14930, lng: -115.17030 },
-  { num: '1825', street: 'Inverness Avenue', candy: true, kids: 0, lat: 36.14836, lng: -115.17024 },
+  { num: '1900', street: 'S Loch Lomond Way', candy: true, decorated: true, special: true, note: 'Haunted garage 5–6 PM 👻', name: 'The Parks', kids: 3, lat: 36.14904, lng: -115.16795 },
+  { num: '1921', street: 'S Loch Lomond Way', candy: true, kids: 0, lat: 36.14835, lng: -115.16856 },
+  { num: '1710', street: 'W Ivanhoe Way', candy: true, decorated: true, kids: 1, lat: 36.14932, lng: -115.16827 },
+  { num: '2001', street: 'N Birch St', candy: true, kids: 2, lat: 36.15100, lng: -115.16920 },
+  { num: '2017', street: 'S Birch St', candy: true, decorated: true, name: 'The Garcias', kids: 0, lat: 36.15043, lng: -115.16926 },
+  { num: '2112', street: 'W Kirkland Ave', candy: true, special: true, note: 'Raffle tickets sold here 🎟️', name: "Shelly's", kids: 0, lat: 36.14928, lng: -115.17137 },
+  { num: '2124', street: 'W Kirkland Ave', candy: true, kids: 2, lat: 36.14880, lng: -115.17176 },
+  { num: '1601', street: 'S Bryn Mawr Ave', candy: true, decorated: true, kids: 0, lat: 36.15104, lng: -115.17237 },
+  { num: '1633', street: 'S Bryn Mawr Ave', candy: true, special: true, note: 'Drinks for the grown-ups 🍷', kids: 2, lat: 36.14892, lng: -115.17241 },
+  { num: '2205', street: 'W Bonnie Brae Ave', candy: true, kids: 1, lat: 36.15071, lng: -115.17080 },
+  { num: '2231', street: 'W Bonnie Brae Ave', decorated: true, kids: 0, lat: 36.15073, lng: -115.17190 },
+  { num: '1809', street: 'S Inverness Ave', candy: true, decorated: true, kids: 4, lat: 36.14930, lng: -115.17030 },
+  { num: '1825', street: 'S Inverness Ave', candy: true, kids: 0, lat: 36.14836, lng: -115.17024 },
   // Kids-only households (not on the map, but counted)
-  { num: '1820', street: 'Kiltie Way', kids: 3 }, { num: '2009', street: 'Birch Street', kids: 2 },
-  { num: '1605', street: 'Bryn Mawr Avenue', kids: 4 }, { num: '1817', street: 'Inverness Avenue', kids: 2 },
-  { num: '2215', street: 'Bonnie Brae Avenue', kids: 3 }, { num: '1915', street: 'Loch Lomond Way', kids: 2 },
-  { num: '2130', street: 'Kirkland Avenue', kids: 5 }, { num: '1722', street: 'Ivanhoe Way', kids: 2 }
+  { num: '1820', street: 'Kiltie Way', kids: 3 }, { num: '2009', street: 'S Birch St', kids: 2 },
+  { num: '1605', street: 'S Bryn Mawr Ave', kids: 4 }, { num: '1817', street: 'S Inverness Ave', kids: 2 },
+  { num: '2215', street: 'W Bonnie Brae Ave', kids: 3 }, { num: '1915', street: 'S Loch Lomond Way', kids: 2 },
+  { num: '2130', street: 'S Kirkland Ave', kids: 5 }, { num: '1705', street: 'W Glen Heather Way', kids: 2 }, { num: '1722', street: 'W Ivanhoe Way', kids: 2 }
 ];
 
 const api = {
@@ -678,7 +681,9 @@ function renderTally() {
 /* ---- Map ---- */
 function initMap() {
   if (!window.L) { $('#mapMsg').textContent = "The map couldn't load. The street list below has everything."; return; }
-  map = L.map('map', { center: CONFIG.map.center, zoom: CONFIG.map.zoom, minZoom: 15, maxZoom: 19, scrollWheelZoom: false });
+  const hood = L.latLngBounds(CONFIG.map.bounds);
+  map = L.map('map', { maxBounds: hood.pad(0.6), maxBoundsViscosity: 1, minZoom: 15, maxZoom: 19, scrollWheelZoom: false });
+  map.fitBounds(hood);
   // OpenStreetMap's own tiles: free, no key. Night mode darkens them with a CSS filter.
   tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -690,7 +695,6 @@ function initMap() {
 function renderMap() {
   if (!map) return;
   markerLayer.clearLayers();
-  const pts = [];
   data.filter(x => isStop(x) && x.lat).forEach(x => {
     const icon = L.divIcon({ className: 'pin-wrap', iconSize: [0, 0], html: `<span class="pin">${icons(x)}</span>` });
     const pop = h('div', null,
@@ -699,9 +703,7 @@ function renderMap() {
       h('div', null, `${icons(x)}  ${words(x)}`),
       x.note && h('div', { style: 'margin-top:6px;font-style:italic' }, x.note));
     L.marker([x.lat, x.lng], { icon, title: `${x.num} ${x.street}`, keyboard: true }).bindPopup(pop, { offset: [0, -34] }).addTo(markerLayer);
-    pts.push([x.lat, x.lng]);
   });
-  if (pts.length) map.fitBounds(pts, { padding: [40, 40], maxZoom: 17 });
 }
 
 function toggleFullMap() {
@@ -709,7 +711,7 @@ function toggleFullMap() {
   const on = !wrap.classList.contains('is-full');
   wrap.classList.toggle('is-full', on);
   document.body.classList.toggle('no-scroll', on);
-  if (map) setTimeout(() => map.invalidateSize(), 60);
+  if (map) setTimeout(() => { map.invalidateSize(); if (watchId == null) map.fitBounds(CONFIG.map.bounds); }, 60);
 }
 
 function toggleLocate() {
