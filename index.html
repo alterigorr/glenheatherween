@@ -387,6 +387,11 @@
     padding: .34in .5in 0; background: #fff;
     border: 3pt solid var(--f-ink); border-radius: 20pt;
   }
+  /* Content shares any spare height evenly (e.g. when the raffle is off), above the skyline. */
+  .f-body { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; }
+  .f-sheet.no-raffle .f-qr img, .f-sheet.no-raffle .f-qr canvas { width: 2.2in !important; height: 2.2in !important; }
+  .f-sheet.no-raffle .f-main { grid-template-columns: 1fr 2.6in; }
+  .f-sheet.no-raffle .f-list { font-size: 14.5pt; gap: 14pt; }
   .f-kicker { font-size: 11pt; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--f-orange); }
   #printFlyer h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: 46pt; line-height: 1; letter-spacing: -.01em; margin: 5pt 0 8pt; color: var(--f-ink); }
   #printFlyer h1 span { color: var(--f-orange); }
@@ -409,7 +414,7 @@
   .f-raffle b { font-family: 'Fraunces', Georgia, serif; font-size: 15pt; }
   .f-contacts { margin-top: .14in; font-size: 11.5pt; line-height: 1.5; }
   .f-contacts b { font-weight: 700; }
-  .f-scene { position: relative; margin-top: auto; align-self: stretch; margin-left: -.5in; margin-right: -.5in; height: 1.1in; flex: none;
+  .f-scene { position: relative; margin-top: 8pt; align-self: stretch; margin-left: -.5in; margin-right: -.5in; height: 1.1in; flex: none;
              background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #F5E1CC); }
   .f-scene .skyline { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: .95in; }
   .f-moon { position: absolute; right: 11%; top: .12in; width: .5in; height: .5in; border-radius: 50%; background: #F3D9B1; }
@@ -710,6 +715,7 @@
 <div class="print-only" id="printLists"></div>
 <div class="print-only" id="printFlyer">
   <div class="f-sheet">
+    <div class="f-body">
     <div class="f-top">
       <div class="f-kicker">Glen Heather Estates</div>
       <h1>Glenheather<span>ween</span> <span class="f-year"></span></h1>
@@ -731,6 +737,7 @@
     </div>
     <div class="f-raffle"></div>
     <div class="f-contacts"></div>
+    </div>
     <div class="f-scene"><div class="f-moon"></div></div>
   </div>
 </div>
@@ -910,6 +917,7 @@ function buildFlyer() {
   $('.f-hours', f).replaceChildren(...CONFIG.hours.flatMap((x, i) => [i ? h('br') : '', `${x.when} · ${x.what}`]));
   $('.f-site', f).textContent = CONFIG.siteUrl.replace(/^https?:\/\//, '');
   $('.f-raffle', f).classList.toggle('hidden', !r.enabled);
+  $('.f-sheet', f).classList.toggle('no-raffle', !r.enabled);
   $('.f-raffle', f).replaceChildren(
     h('b', null, '50/50 Raffle'), r.drawing ? ` · Drawing ${r.drawing.replace(/^After/, 'after')}` : '', h('br'),
     [r.location && `Tickets at ${r.location}`, r.pay].filter(Boolean).join(' · '), h('br'),
