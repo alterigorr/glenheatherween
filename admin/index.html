@@ -101,7 +101,7 @@
       <h2 id="raffleTitle">50/50 raffle</h2>
       <label class="toggle"><input type="checkbox" id="raffleOn"> <span>Show the raffle on the site and flyer</span></label>
       <fieldset class="raffle-fields" id="raffleFields">
-        <div class="field"><label for="rIntro">Description</label><textarea id="rIntro" maxlength="200"></textarea></div>
+        <div class="field"><label for="rIntro">Description <small>Shown on the site (the flyer keeps it short)</small></label><textarea id="rIntro" maxlength="200"></textarea></div>
         <div class="field"><label for="rLocation">Where to buy tickets</label><input id="rLocation" type="text" maxlength="80"></div>
         <div class="field"><label for="rPrice">Price</label><input id="rPrice" type="text" maxlength="80"></div>
         <div class="field"><label for="rPay">Pay with</label><input id="rPay" type="text" maxlength="60"></div>
@@ -126,6 +126,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx7zk15RRbM5bWB5mWUGV
 const $ = s => document.querySelector(s);
 const wait = ms => new Promise(r => setTimeout(r, ms));
 let pin = '';
+let rowId = 0;
 
 // Same approach as the main site: plain-text POST, and a receipt check if the reply can't be read.
 async function post(payload) {
@@ -155,7 +156,7 @@ function show(el, text, kind) {
 function hourRow(when = '', what = '') {
   const row = document.createElement('div');
   row.className = 'row2';
-  const n = $('#hoursList').children.length + 1;
+  const n = ++rowId;
   row.innerHTML = `
     <div class="field"><label>Time</label><input type="text" class="h-when" maxlength="30" placeholder="4 – 6 PM"></div>
     <div class="field"><label>For</label><input type="text" class="h-what" maxlength="60" placeholder="Glen Heather residents"></div>
@@ -163,7 +164,7 @@ function hourRow(when = '', what = '') {
   row.querySelector('.h-when').value = when;
   row.querySelector('.h-what').value = what;
   row.querySelectorAll('label').forEach((l, i) => { const id = `h${n}-${i}`; l.htmlFor = id; l.nextElementSibling.id = id; });
-  row.querySelector('button').addEventListener('click', () => { row.remove(); syncHours(); });
+  row.querySelector('button').addEventListener('click', () => { row.remove(); syncHours(); $('#addHour').focus(); });
   $('#hoursList').append(row);
   syncHours();
 }
@@ -221,7 +222,7 @@ async function unlock(candidate, quiet) {
   $('#pinBtn').disabled = false; $('#pinBtn').textContent = 'Unlock';
   if (!res.ok) {
     try { sessionStorage.removeItem('ghw-pin'); } catch (e) {}
-    if (!quiet) show($('#pinMsg'), res.error || "That PIN isn't right.", 'err');
+    if (!quiet) { show($('#pinMsg'), res.error || "That PIN isn't right.", 'err'); $('#pin').value = ''; $('#pin').focus(); }
     return;
   }
   pin = candidate;

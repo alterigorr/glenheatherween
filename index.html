@@ -861,6 +861,9 @@ function renderEvent() {
   const v = CONFIG.volunteer;
   $('#volText').textContent = `We can always use an extra hand with setup${r.enabled ? ', the raffle' : ''} or cleanup. Call or text ${v.name} at ${v.phone}.`;
 
+  const msg = `${CONFIG.shareText} ${CONFIG.siteUrl}`;
+  $('#shareSms').href = `sms:?&body=${encodeURIComponent(msg)}`;
+  $('#shareEmail').href = `mailto:?subject=${encodeURIComponent(`Glenheatherween ${CONFIG.year}: ${CONFIG.dateLong}`)}&body=${encodeURIComponent(msg)}`;
 
   buildFlyer();
 }
@@ -877,9 +880,6 @@ function renderStatic() {
 
   $('#fStreet').replaceChildren(h('option', { value: '' }, 'Choose your street…'), ...CONFIG.streets.map(s => h('option', { value: s }, s)));
 
-  const msg = `${CONFIG.shareText} ${CONFIG.siteUrl}`;
-  $('#shareSms').href = `sms:?&body=${encodeURIComponent(msg)}`;
-  $('#shareEmail').href = `mailto:?subject=${encodeURIComponent(`Glenheatherween ${CONFIG.year}: ${CONFIG.dateLong}`)}&body=${encodeURIComponent(msg)}`;
   if (navigator.share) $('#shareMore').classList.remove('hidden');
 
   if (window.QRCode) {
