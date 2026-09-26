@@ -277,6 +277,7 @@
 
   /* Volunteer + footer */
   .volunteer p { margin: 8px 0 18px; }
+  .linkish { border: 0; padding: 0; background: none; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; }
   footer { position: relative; border-top: 1px solid var(--line); padding: 32px 0 120px; color: var(--muted); }
   .cat { position: absolute; top: -41px; right: 24px; width: 40px; height: 42px; fill: var(--scene); }
   :root[data-theme="dark"] .cat { fill: #2C2433; }
@@ -368,10 +369,59 @@
     .dlg-head h2 { font-size: 1.35rem; }
   }
 
+  /* ---------- Flyer: one letter page, light on ink ---------- */
+  #printFlyer {
+    --f-ink: #2B1B3D; --f-orange: #D9480F; --f-cream: #FFF4E8;
+    --scene: #3A2E3F; --window: #F59E0B; --accent: #D9480F;
+    color: var(--f-ink); font-family: 'Atkinson Hyperlegible', sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  #printFlyer * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .f-sheet {
+    position: relative; width: 7.5in; height: 9.9in; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: .34in .5in 0; background: #fff;
+    border: 3pt solid var(--f-ink); border-radius: 20pt;
+  }
+  .f-kicker { font-size: 11pt; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--f-orange); }
+  #printFlyer h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: 46pt; line-height: 1; letter-spacing: -.01em; margin: 5pt 0 8pt; color: var(--f-ink); }
+  #printFlyer h1 span { color: var(--f-orange); }
+  .f-date { font-size: 24pt; font-weight: 700; }
+  .f-hours { font-size: 14pt; margin-top: 4pt; }
+  .f-site { margin-top: 8pt; font-family: 'Fraunces', Georgia, serif; font-size: 22pt; font-weight: 800; color: var(--f-orange); text-decoration: underline; text-underline-offset: 5pt; text-decoration-thickness: 2pt; }
+  .f-main { display: grid; grid-template-columns: 1fr 2.2in; gap: .35in; align-items: center; margin-top: .22in; width: 100%; text-align: left; }
+  .f-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 11pt; font-size: 13.5pt; line-height: 1.35; }
+  .f-list li { position: relative; padding-left: 26pt; }
+  .f-list li::before { content: '✓'; position: absolute; left: 0; top: -1pt; font-weight: 800; font-size: 16pt; color: var(--f-orange); }
+  .f-list li.tip::before { content: '★'; }
+  .f-scan { text-align: center; }
+  .f-qr { display: inline-block; padding: 9pt; border: 3pt solid var(--f-orange); border-radius: 14pt; background: #fff; line-height: 0; }
+  .f-qr img, .f-qr canvas { width: 1.8in !important; height: 1.8in !important; }
+  .f-cta { margin-top: 7pt; font-size: 11pt; font-weight: 700; white-space: nowrap; }
+  .f-raffle {
+    margin-top: .2in; width: 100%; padding: 8pt 14pt; border: 2pt dashed var(--f-orange); border-radius: 12pt;
+    background: var(--f-cream); font-size: 12pt; line-height: 1.45;
+  }
+  .f-raffle b { font-family: 'Fraunces', Georgia, serif; font-size: 15pt; }
+  .f-contacts { margin-top: .14in; font-size: 11.5pt; line-height: 1.5; }
+  .f-contacts b { font-weight: 700; }
+  .f-scene { position: relative; margin-top: auto; align-self: stretch; margin-left: -.5in; margin-right: -.5in; height: 1.1in; flex: none;
+             background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #F5E1CC); }
+  .f-scene .skyline { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: .95in; }
+  .f-moon { position: absolute; right: 11%; top: .12in; width: .5in; height: .5in; border-radius: 50%; background: #F3D9B1; }
+  #printFlyer .skyline .face, #printFlyer .skyline g[clip-path] { display: none !important; }
+  #printFlyer .skyline .w, #printFlyer .skyline .face { filter: none !important; animation: none !important; }
+
+  /* On-screen preview of the flyer: add ?flyer to the address. */
+  body[data-preview="flyer"] { background: #D8D2CB; }
+  body[data-preview="flyer"] > *:not(#printFlyer) { display: none !important; }
+  body[data-preview="flyer"] #printFlyer { display: block; padding: 24px 0; }
+  body[data-preview="flyer"] .f-sheet { margin: 0 auto; box-shadow: 0 10px 40px rgba(0, 0, 0, .25); }
+
   /* ---------- Print: street lists and flyer ---------- */
   .print-only { display: none; }
   @media print {
-    @page { margin: 0.6in; }
+    @page { size: letter; margin: 0.5in; }
     body { background: #fff; color: #000; font-size: 13pt; }
     body > *:not(.print-only) { display: none !important; }
     body[data-print="lists"] #printLists,
@@ -385,15 +435,6 @@
     .p-street td.box { width: 30pt; font-size: 18pt; }
     .p-street td.n { width: 60pt; font-weight: 700; }
     .p-foot { margin-top: 16pt; font-size: 11pt; }
-    #printFlyer { text-align: center; }
-    #printFlyer h1 { font-size: 54pt; margin: 0.3in 0 8pt; }
-    #printFlyer .f-date { font-size: 24pt; font-weight: 700; }
-    #printFlyer .f-hours { font-size: 16pt; margin: 6pt 0 24pt; }
-    #printFlyer .f-qr { display: inline-block; padding: 12pt; border: 3px solid #000; border-radius: 12pt; }
-    #printFlyer .f-qr img, #printFlyer .f-qr canvas { width: 3in !important; height: 3in !important; }
-    #printFlyer .f-cta { font-size: 20pt; font-weight: 700; margin: 20pt 0 6pt; }
-    #printFlyer .f-url { font-size: 22pt; }
-    #printFlyer .f-help { font-size: 14pt; margin-top: 24pt; }
   }
 </style>
 </head>
@@ -535,6 +576,7 @@
   <footer>
     <svg class="cat" viewBox="0 0 40 42" aria-hidden="true"><path d="M8 42c-2-8 0-16 6-21-2-3-2-7 0-10l-1-9 5 5c1-.5 3-.5 4 0l5-5-1 9c2 3 2 7 0 10 6 5 8 13 6 21zm25 0c3-2 5-6 4-10-.5-2 1-3 2-2 2 4 0 10-4 12z"/><ellipse class="eye" cx="17" cy="14" rx="1.6" ry="1.2"/><ellipse class="eye" cx="23" cy="14" rx="1.6" ry="1.2"/></svg>
     <p id="footHelp"></p>
+    <p style="margin-top:8px">Handing out flyers? <button class="linkish" type="button" data-action="print-flyer">Print a flyer</button></p>
     <p style="margin-top:8px">Made by neighbors, for neighbors · Glen Heather Estates, Las Vegas</p>
   </footer>
 </div>
@@ -646,13 +688,30 @@
 <!-- Print-only layouts -->
 <div class="print-only" id="printLists"></div>
 <div class="print-only" id="printFlyer">
-  <h1>Glenheatherween <span class="f-year"></span></h1>
-  <div class="f-date"></div>
-  <div class="f-hours"></div>
-  <div class="f-qr" id="qrFlyer"></div>
-  <div class="f-cta">Scan to RSVP your house and see the map</div>
-  <div class="f-url"></div>
-  <div class="f-help"></div>
+  <div class="f-sheet">
+    <div class="f-top">
+      <div class="f-kicker">Glen Heather Estates</div>
+      <h1>Glenheather<span>ween</span> <span class="f-year"></span></h1>
+      <div class="f-date"></div>
+      <div class="f-hours"></div>
+      <div class="f-site"></div>
+    </div>
+    <div class="f-main">
+      <ul class="f-list">
+        <li><b>RSVP your house</b> and your trick-or-treaters in seconds. No account needed.</li>
+        <li><b>See how many trick-or-treaters</b> are coming, so you can plan your candy.</li>
+        <li><b>Find the fun on the map:</b> candy, decorated houses and special stops.</li>
+        <li class="tip"><b>Pro tip:</b> save the website to your phone's home screen for quick access while you trick-or-treat.</li>
+      </ul>
+      <div class="f-scan">
+        <div class="f-qr" id="qrFlyer"></div>
+        <div class="f-cta">Scan with your phone camera</div>
+      </div>
+    </div>
+    <div class="f-raffle"></div>
+    <div class="f-contacts"></div>
+    <div class="f-scene"><div class="f-moon"></div></div>
+  </div>
 </div>
 
 <script>
@@ -677,7 +736,8 @@ const CONFIG = {
     ]
   },
   helpPhone: '323-401-5380',
-  volunteer: { name: 'Shelly', phone: '702-491-9979' },
+  volunteer: { name: 'Shelly', phone: '702-491-9979', email: 'sdwalters@cox.net' },
+  helpName: 'Igor',
   siteUrl: 'https://glenheatherween.com',
   sheetUrl: 'https://script.google.com/macros/s/AKfycbx7zk15RRbM5bWB5mWUGVJjfmNwpsks1nF69mWLuvyDJf7K__MU4dmfxblRFgqs-182/exec',
   shareText: 'Glenheatherween is Saturday, Oct 31 (4–6 PM for Glen Heather residents). Put your house on the map and see who is handing out candy:',
@@ -760,16 +820,12 @@ function renderStatic() {
   $('#shareEmail').href = `mailto:?subject=${encodeURIComponent(`Glenheatherween ${CONFIG.year}: ${CONFIG.dateLong}`)}&body=${encodeURIComponent(msg)}`;
   if (navigator.share) $('#shareMore').classList.remove('hidden');
 
-  $('#printFlyer .f-year').textContent = CONFIG.year;
-  $('#printFlyer .f-date').textContent = CONFIG.dateLong;
-  $('#printFlyer .f-hours').textContent = CONFIG.hours.map(r => `${r.when}: ${r.what}`).join('  ·  ');
-  $('#printFlyer .f-url').textContent = CONFIG.siteUrl.replace(/^https?:\/\//, '');
-  $('#printFlyer .f-help').textContent = `Questions? Text ${CONFIG.helpPhone}`;
+  buildFlyer();
 
   if (window.QRCode) {
     const opts = { text: CONFIG.siteUrl, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M };
     new QRCode($('#qrSmall'), { ...opts, width: 240, height: 240 });
-    new QRCode($('#qrFlyer'), { ...opts, width: 600, height: 600 });
+    new QRCode($('#qrFlyer'), { ...opts, colorDark: '#2B1B3D', width: 600, height: 600 });
   } else {
     $('.qr-block').classList.add('hidden');
   }
@@ -783,6 +839,32 @@ function renderCountdown() {
   if (days < 0) return el.classList.add('hidden');
   el.textContent = days === 0 ? "🎃 It's tonight!" : days === 1 ? '🎃 Tomorrow!' : `🎃 ${days} days to go`;
   el.classList.remove('hidden');
+}
+
+function buildFlyer() {
+  const f = $('#printFlyer');
+  const r = Object.fromEntries(CONFIG.raffle.rows);
+  const v = CONFIG.volunteer;
+  $('.f-year', f).textContent = CONFIG.year;
+  $('.f-date', f).textContent = CONFIG.dateLong;
+  $('.f-hours', f).replaceChildren(...CONFIG.hours.flatMap((x, i) => [i ? h('br') : '', `${x.when} · ${x.what}`]));
+  $('.f-site', f).textContent = CONFIG.siteUrl.replace(/^https?:\/\//, '');
+  $('.f-raffle', f).replaceChildren(
+    h('b', null, '🎟️ 50/50 Raffle'), ` · Drawing ${r['Drawing'].replace(/^After/, 'after')}`, h('br'),
+    `Tickets at ${r['Buy tickets at']} · ${r['Pay with']}`, h('br'),
+    r['Price']);
+  $('.f-contacts', f).replaceChildren(
+    'Event questions? Text or call ', h('b', null, `${v.name} at ${v.phone}`), v.email ? ` · ${v.email}` : '', h('br'),
+    'Website help? Text or call ', h('b', null, `${CONFIG.helpName} at ${CONFIG.helpPhone}`));
+  // Same skyline as the page, without any window figures that happen to be showing.
+  const sky = $('.scene .skyline');
+  if (sky) {
+    const copy = sky.cloneNode(true);
+    copy.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+    copy.querySelectorAll('g[clip-path], defs').forEach(n => n.remove());
+    $('.f-scene .skyline', f)?.remove();
+    $('.f-scene', f).append(copy);
+  }
 }
 
 /* ---- Tally ---- */
@@ -896,6 +978,7 @@ function buildPrintLists() {
 
 function printMode(mode) {
   if (mode === 'lists') buildPrintLists();
+  if (mode === 'flyer') buildFlyer();
   document.body.dataset.print = mode;
   window.print();
 }
@@ -1053,6 +1136,7 @@ async function refresh() {
 }
 
 async function boot() {
+  if (new URLSearchParams(location.search).has('flyer')) document.body.dataset.preview = 'flyer';
   if (new URLSearchParams(location.search).has('demo')) {
     api = (await import('./demo.js')).demoApi;
     $('#demoBanner').classList.remove('hidden');
