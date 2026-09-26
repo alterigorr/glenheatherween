@@ -23,17 +23,31 @@ jobs:
       - name: Have the settings changed?
         id: check
         run: |
-          curl -sfL "$SHEET_URL" | python3 -c 'import json,sys,hashlib; s=json.load(sys.stdin).get("settings") or {}; s.pop("updated",None); print(hashlib.sha256(json.dumps(s,sort_keys=True).encode()).hexdigest())' > new.sha
+          # Ask a few times: the backend can be briefly unavailable (e.g. while it's being redeployed).
+          for i in 1 2 3; do
+            if curl -sfL "$SHEET_URL" -o settings.json && python3 -c 'import json; json.load(open("settings.json"))' 2>/dev/null; then break; fi
+            rm -f settings.json; sleep 20
+          done
+          if [ ! -f settings.json ]; then
+            echo "Backend unavailable; will try again on the next run."
+            echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          python3 -c 'import json,hashlib; s=json.load(open("settings.json")).get("settings") or {}; s.pop("updated",None); print(hashlib.sha256(json.dumps(s,sort_keys=True).encode()).hexdigest())' > new.sha
           if cmp -s new.sha tools/flyer-settings.sha; then echo "changed=false" >> "$GITHUB_OUTPUT"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
 
       - name: Build flyer.pdf from the live site
         if: steps.check.outputs.changed == 'true'
         run: |
           google-chrome --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
-            --virtual-time-budget=20000 --print-to-pdf=flyer.pdf "https://glenheatherween.com/?flyer&t=$(date +%s)"
+            --virtual-time-budget=20000 --print-to-pdf=flyer.pdf "https://glenheatherween.com/?flyer&t=$(date +%s)" 2>/dev/null
           mv new.sha tools/flyer-settings.sha
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add flyer.pdf tools/flyer-settings.sha
           git commit -m "Rebuild flyer from admin settings"
-          git push
+          # Someone may have pushed while this ran: catch up and retry.
+          for i in 1 2 3; do
+            git pull --rebase -q origin main && git push -q && exit 0
+            sleep 10
+          done
+          exit 1
