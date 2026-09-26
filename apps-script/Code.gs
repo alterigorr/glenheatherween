@@ -12,6 +12,10 @@
  * Privacy: GET only ever returns houses that are stops on the map (address, optional
  * display name, what they offer, note, coordinates) plus two totals. Kid counts per
  * house are never sent to the browser.
+ *
+ * Admin (glenheatherween.com/admin): event date, times and raffle details are saved in
+ * Script Properties under SETTINGS. Saving needs the PIN stored in Script Properties under
+ * ADMIN_PIN (Project Settings > Script Properties). The PIN is never in this file, which is public.
  */
 
 var TAB = 'rsvps';
@@ -56,26 +60,28 @@ function doPost(e) {
     lock.waitLock(15000);
     var payload = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     rid = validRid_(payload.rid) ? payload.rid : null;
-    if (payload.type !== 'rsvp') {
-      result = { ok: false, error: 'Unknown request.' };
-    } else {
-      var entry = clean_(payload.data || {});
-      if (entry.error) {
-        result = { ok: false, error: entry.error };
-      } else {
-        result = saveRsvp_(entry);
-        CacheService.getScriptCache().remove(CACHE_KEY);
-      }
-    }
+    if (payload.type === 'rsvp') result = handleRsvp_(payload.data || {});
+    else if (payload.type === 'admin-check') result = checkPin_(payload.pin) || { ok: true, settings: getSettings_() };
+    else if (payload.type === 'settings') result = checkPin_(payload.pin) || saveSettings_(payload.data || {});
+    else result = { ok: false, error: 'Unknown request.' };
   } catch (err) {
     console.error(err);
     result = { ok: false, error: 'Something went wrong. Please try again.' };
   } finally {
     lock.releaseLock();
   }
+  result.done = true;
   // Keep the outcome for 6 hours so the page can look it up by receipt if the reply gets lost.
   if (rid) CacheService.getScriptCache().put('rid:' + rid, JSON.stringify(result), 21600);
   return json_(result);
+}
+
+function handleRsvp_(data) {
+  var entry = clean_(data);
+  if (entry.error) return { ok: false, error: entry.error };
+  var result = saveRsvp_(entry);
+  CacheService.getScriptCache().remove(CACHE_KEY);
+  return result;
 }
 
 function validRid_(rid) {
@@ -106,7 +112,7 @@ function publicData_() {
     });
   });
 
-  return { ok: true, houses: houses, totals: { houses: houses.length, kids: kids } };
+  return { ok: true, houses: houses, totals: { houses: houses.length, kids: kids }, settings: getSettings_() };
 }
 
 /* --------------------------------------------------------------- writes */
@@ -167,6 +173,61 @@ function geocode_(address) {
     console.warn('Geocode failed for ' + address + ': ' + err);
     return null;
   }
+}
+
+/* ---------------------------------------------------------------- admin */
+
+// Returns an error answer if the PIN is wrong (or locked out), or null when it's right.
+// Five wrong tries lock the admin for 15 minutes.
+function checkPin_(pin) {
+  var cache = CacheService.getScriptCache();
+  var fails = Number(cache.get('pin-fails') || 0);
+  if (fails >= 5) return { ok: false, locked: true, error: 'Too many wrong PINs. Try again in 15 minutes.' };
+  var real = PropertiesService.getScriptProperties().getProperty('ADMIN_PIN');
+  if (!real) return { ok: false, error: 'The admin PIN hasn\'t been set up yet (Script Properties > ADMIN_PIN).' };
+  if (String(pin == null ? '' : pin) !== String(real)) {
+    cache.put('pin-fails', String(fails + 1), 900);
+    return { ok: false, badPin: true, error: "That PIN isn't right." };
+  }
+  cache.remove('pin-fails');
+  return null;
+}
+
+function getSettings_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('SETTINGS');
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch (err) { return null; }
+}
+
+function saveSettings_(d) {
+  var date = String(d.eventDate || '');
+  var parts = date.split('-').map(Number);
+  var check = new Date(parts[0], parts[1] - 1, parts[2]);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || check.getMonth() !== parts[1] - 1 || check.getDate() !== parts[2]) {
+    return { ok: false, error: 'Please choose a valid date.' };
+  }
+  var hours = (Array.isArray(d.hours) ? d.hours : []).slice(0, 3)
+    .map(function (r) { return { when: text_(r && r.when, 30), what: text_(r && r.what, 60) }; })
+    .filter(function (r) { return r.when || r.what; });
+  if (!hours.length) return { ok: false, error: 'Please enter at least one time.' };
+
+  var r = d.raffle || {};
+  var settings = {
+    eventDate: date,
+    hours: hours,
+    raffle: {
+      enabled: r.enabled === true,
+      intro: text_(r.intro, 200),
+      location: text_(r.location, 80),
+      price: text_(r.price, 80),
+      pay: text_(r.pay, 60),
+      drawing: text_(r.drawing, 80)
+    },
+    updated: new Date().toISOString()
+  };
+  PropertiesService.getScriptProperties().setProperty('SETTINGS', JSON.stringify(settings));
+  CacheService.getScriptCache().remove(CACHE_KEY);
+  return { ok: true, settings: settings };
 }
 
 /* ------------------------------------------------------------- helpers */

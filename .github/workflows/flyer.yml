@@ -1,0 +1,39 @@
+# Rebuilds flyer.pdf from the live site whenever the admin page's settings change.
+# Checks every 15 minutes (GitHub may run scheduled jobs a little late); can also be run by hand.
+name: Rebuild flyer
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: flyer
+
+jobs:
+  flyer:
+    runs-on: ubuntu-latest
+    env:
+      SHEET_URL: https://script.google.com/macros/s/AKfycbx7zk15RRbM5bWB5mWUGVJjfmNwpsks1nF69mWLuvyDJf7K__MU4dmfxblRFgqs-182/exec
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Have the settings changed?
+        id: check
+        run: |
+          curl -sfL "$SHEET_URL" | python3 -c 'import json,sys,hashlib; s=json.load(sys.stdin).get("settings") or {}; s.pop("updated",None); print(hashlib.sha256(json.dumps(s,sort_keys=True).encode()).hexdigest())' > new.sha
+          if cmp -s new.sha tools/flyer-settings.sha; then echo "changed=false" >> "$GITHUB_OUTPUT"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Build flyer.pdf from the live site
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          google-chrome --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
+            --virtual-time-budget=20000 --print-to-pdf=flyer.pdf "https://glenheatherween.com/?flyer&t=$(date +%s)"
+          mv new.sha tools/flyer-settings.sha
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flyer.pdf tools/flyer-settings.sha
+          git commit -m "Rebuild flyer from admin settings"
+          git push

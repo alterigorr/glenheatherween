@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="defaults.js?v=2026b"></script>
 <script>
   // Apply the saved look before first paint so the page never flashes the wrong theme.
   (function () {
@@ -538,7 +539,7 @@
     <p class="breakdown" id="breakdown"></p>
   </section>
 
-  <section aria-labelledby="raffleTitle">
+  <section aria-labelledby="raffleTitle" id="raffleSection">
     <div class="card raffle">
       <h2 id="raffleTitle">🎟️ 50/50 Raffle</h2>
       <p id="raffleIntro" style="margin-top:8px"></p>
@@ -739,27 +740,12 @@
    CONFIG: everything that changes year to year.
    ========================================================================= */
 const CONFIG = {
-  year: 2026,
-  dateLong: 'Saturday, October 31',
-  eventDate: '2026-10-31',
-  hours: [
-    { when: '4 – 6 PM', what: 'Glen Heather residents' },
-    { when: 'After 6 PM', what: 'Regular Halloween' }
-  ],
-  raffle: {
-    intro: 'Winner gets half of the pot. The neighborhood association keeps the other half.',
-    rows: [
-      ['Buy tickets at', "Shelly's house, 2112 Kirkland Ave"],
-      ['Price', '$1 each · 6 for $5 · 12 for $10'],
-      ['Pay with', 'Cash or Zelle'],
-      ['Drawing', 'After 9 PM on Halloween']
-    ]
-  },
+  // Date, times and raffle come from defaults.js, then from whatever the admin page saved.
+  ...JSON.parse(JSON.stringify(window.GHW_DEFAULTS)),
   helpPhone: '323-401-5380',
   volunteer: { name: 'Shelly', phone: '702-491-9979', email: 'sdwalters@cox.net' },
   siteUrl: 'https://glenheatherween.com',
   sheetUrl: 'https://script.google.com/macros/s/AKfycbx7zk15RRbM5bWB5mWUGVJjfmNwpsks1nF69mWLuvyDJf7K__MU4dmfxblRFgqs-182/exec',
-  shareText: 'Glenheatherween is Saturday, Oct 31 (4–6 PM for Glen Heather residents). Put your house on the map and see who is handing out candy:',
   streets: [
     'Birch Street', 'Bonnie Brae Avenue', 'Bryn Mawr Avenue', 'Glen Heather Way', 'Inverness Avenue',
     'Ivanhoe Way', 'Kiltie Way', 'Kirkland Avenue', 'Loch Lomond Way'
@@ -794,7 +780,7 @@ let api = {
           const r = await fetch(`${CONFIG.sheetUrl}?rid=${encodeURIComponent(rid)}`, { cache: 'no-store' });
           const b = await r.json();
           // Only a receipt answer counts (older backends reply with the house list instead).
-          if ('updated' in b || 'removed' in b || b.error) return b;
+          if (b.done || 'updated' in b || 'removed' in b || b.error) return b;
         } catch (e2) { /* try again */ }
       }
       throw e;
@@ -831,24 +817,63 @@ let totals = { houses: 0, kids: 0 };
 let map, tiles, markerLayer, youMarker, watchId = null;
 
 /* ---- Static content from CONFIG ---- */
-function renderStatic() {
+// Fill in what's derived from the event date and times (year, "Saturday, October 31", share text).
+function deriveEvent() {
+  const [y, m, d] = CONFIG.eventDate.split('-').map(Number);
+  const day = new Date(y, m - 1, d);
+  CONFIG.year = y;
+  CONFIG.dateLong = day.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const short = day.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  const first = CONFIG.hours[0];
+  CONFIG.shareText = `Glenheatherween is ${short}${first ? ` (${first.when} for ${first.what})` : ''}. Put your house on the map and see who is handing out candy:`;
+}
+
+// Settings saved on the admin page. Remembered locally so the next visit shows them immediately.
+function applySettings(s) {
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s.eventDate || '')) return false;
+  CONFIG.eventDate = s.eventDate;
+  if (Array.isArray(s.hours) && s.hours.length) CONFIG.hours = s.hours;
+  if (s.raffle) CONFIG.raffle = { ...CONFIG.raffle, ...s.raffle };
+  try { localStorage.setItem('ghw-settings', JSON.stringify(s)); } catch (e) {}
+  return true;
+}
+try { applySettings(JSON.parse(localStorage.getItem('ghw-settings'))); } catch (e) {}
+deriveEvent();
+
+function raffleRows() {
+  const r = CONFIG.raffle;
+  return [['Buy tickets at', r.location], ['Price', r.price], ['Pay with', r.pay], ['Drawing', r.drawing]].filter(([, v]) => v);
+}
+
+// Everything that depends on the event settings. Runs at start and again when saved settings arrive.
+function renderEvent() {
+  document.title = `Glenheatherween ${CONFIG.year}`;
   $('#year').textContent = CONFIG.year;
   $('#dateLong').textContent = CONFIG.dateLong;
   renderCountdown();
   $('#hours').replaceChildren(...CONFIG.hours.map(r => h('div', { class: 'row' }, h('b', null, r.when), h('span', null, r.what))));
 
-  $('#raffleIntro').textContent = CONFIG.raffle.intro;
-  $('#raffleList').replaceChildren(...CONFIG.raffle.rows.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]));
+  const r = CONFIG.raffle;
+  $('#raffleSection').classList.toggle('hidden', !r.enabled);
+  $('#raffleIntro').textContent = r.intro;
+  $('#raffleList').replaceChildren(...raffleRows().flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]));
 
   const v = CONFIG.volunteer;
-  $('#volText').textContent = `We can always use an extra hand with setup, the raffle or cleanup. Call or text ${v.name} at ${v.phone}.`;
+  $('#volText').textContent = `We can always use an extra hand with setup${r.enabled ? ', the raffle' : ''} or cleanup. Call or text ${v.name} at ${v.phone}.`;
+
+
+  buildFlyer();
+}
+
+function renderStatic() {
+  const v = CONFIG.volunteer;
   $('#volSms').href = `sms:${telDigits(v.phone)}`;
   $('#volCall').href = `tel:${telDigits(v.phone)}`;
 
   $('#helpSms').href = `sms:${telDigits(CONFIG.helpPhone)}`;
   $('#helpSms').textContent = `💬 Text ${CONFIG.helpPhone}`;
   $('#helpCallLine').replaceChildren('Rather talk? You can also call ', h('a', { href: `tel:${telDigits(CONFIG.helpPhone)}` }, CONFIG.helpPhone), '.');
-  $('#footHelp').replaceChildren('Questions? Text ', h('a', { href: `sms:${telDigits(CONFIG.helpPhone)}` }, CONFIG.helpPhone), '.');
+  $('#footHelp').replaceChildren('Technical questions? Text ', h('a', { href: `sms:${telDigits(CONFIG.helpPhone)}` }, CONFIG.helpPhone), '.');
 
   $('#fStreet').replaceChildren(h('option', { value: '' }, 'Choose your street…'), ...CONFIG.streets.map(s => h('option', { value: s }, s)));
 
@@ -856,8 +881,6 @@ function renderStatic() {
   $('#shareSms').href = `sms:?&body=${encodeURIComponent(msg)}`;
   $('#shareEmail').href = `mailto:?subject=${encodeURIComponent(`Glenheatherween ${CONFIG.year}: ${CONFIG.dateLong}`)}&body=${encodeURIComponent(msg)}`;
   if (navigator.share) $('#shareMore').classList.remove('hidden');
-
-  buildFlyer();
 
   if (window.QRCode) {
     const opts = { text: CONFIG.siteUrl, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M };
@@ -880,16 +903,17 @@ function renderCountdown() {
 
 function buildFlyer() {
   const f = $('#printFlyer');
-  const r = Object.fromEntries(CONFIG.raffle.rows);
+  const r = CONFIG.raffle;
   const v = CONFIG.volunteer;
   $('.f-year', f).textContent = CONFIG.year;
   $('.f-date', f).textContent = CONFIG.dateLong;
   $('.f-hours', f).replaceChildren(...CONFIG.hours.flatMap((x, i) => [i ? h('br') : '', `${x.when} · ${x.what}`]));
   $('.f-site', f).textContent = CONFIG.siteUrl.replace(/^https?:\/\//, '');
+  $('.f-raffle', f).classList.toggle('hidden', !r.enabled);
   $('.f-raffle', f).replaceChildren(
-    h('b', null, '🎟️ 50/50 Raffle'), ` · Drawing ${r['Drawing'].replace(/^After/, 'after')}`, h('br'),
-    `Tickets at ${r['Buy tickets at']} · ${r['Pay with']}`, h('br'),
-    r['Price']);
+    h('b', null, '50/50 Raffle'), r.drawing ? ` · Drawing ${r.drawing.replace(/^After/, 'after')}` : '', h('br'),
+    [r.location && `Tickets at ${r.location}`, r.pay].filter(Boolean).join(' · '), h('br'),
+    r.price || '');
   $('.f-contacts', f).replaceChildren(
     'Questions? Text or call ', h('b', null, `${v.name} at ${v.phone}`), v.email ? ` · ${v.email}` : '');
   // Same skyline as the page, without any window figures that happen to be showing.
@@ -1166,6 +1190,7 @@ async function refresh() {
     const body = await api.load();
     data = body.houses || [];
     totals = body.totals || { houses: data.length, kids: 0 };
+    if (applySettings(body.settings)) { deriveEvent(); renderEvent(); }
   } catch (e) {
     $('#streets').replaceChildren(h('p', { class: 'empty' }, `Couldn't load the houses right now. Please refresh the page, or text ${CONFIG.helpPhone}.`));
     return;
@@ -1212,6 +1237,7 @@ $('#shareCopy').addEventListener('click', copyLink);
 $('#shareMore').addEventListener('click', () => navigator.share({ title: `Glenheatherween ${CONFIG.year}`, text: CONFIG.shareText, url: CONFIG.siteUrl }).catch(() => {}));
 
 renderStatic();
+renderEvent();
 applyTheme();
 setInterval(() => { if (getPref() === 'auto') applyTheme(); }, 60000);
 initMap();
