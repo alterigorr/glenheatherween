@@ -619,27 +619,27 @@
           <select id="fStreet"></select>
         </div>
       </div>
-      <p class="note-box hidden" id="existingNote" role="status">You've already RSVP'd. Saving will <b>update</b> your house, so check everything that applies, including kids.</p>
+      <p class="note-box hidden" id="existingNote" role="status">You've already RSVP'd. Saving will <b>update</b> your house. Kids you counted before stay counted unless you change them below.</p>
     </fieldset>
 
     <fieldset>
       <legend>What's happening at your house?<small>Check all that apply</small></legend>
 
-      <label class="check-card"><input type="checkbox" id="fCandy">
-        <span><span class="t">🍬 Handing out candy</span><small>Your house goes on the map</small></span></label>
+      <label class="check-card"><input type="checkbox" id="fCandy" aria-labelledby="fCandyL">
+        <span><span class="t" id="fCandyL">🍬 Handing out candy</span><small>Your house goes on the map</small></span></label>
 
-      <label class="check-card"><input type="checkbox" id="fDecorated">
-        <span><span class="t">🎃 We're decorated</span><small>Come take a look</small></span></label>
+      <label class="check-card"><input type="checkbox" id="fDecorated" aria-labelledby="fDecoratedL">
+        <span><span class="t" id="fDecoratedL">🎃 We're decorated</span><small>Come take a look</small></span></label>
 
-      <label class="check-card"><input type="checkbox" id="fSpecial">
-        <span><span class="t">⭐ Special stop</span><small>Something extra: a haunted garage, a photo spot, drinks for the grown-ups…</small></span></label>
+      <label class="check-card"><input type="checkbox" id="fSpecial" aria-labelledby="fSpecialL">
+        <span><span class="t" id="fSpecialL">⭐ Special stop</span><small>Something extra: a haunted garage, a photo spot, drinks for the grown-ups…</small></span></label>
       <div class="sub field hidden" id="specialMore">
         <label for="fNote">What's special? <small>Optional, shown on the map</small></label>
         <textarea id="fNote" maxlength="140" placeholder="e.g. Haunted garage 5–6 PM · Photo booth · Drinks for the grown-ups 🍷"></textarea>
       </div>
 
-      <label class="check-card"><input type="checkbox" id="fKids">
-        <span><span class="t">🧒 Our kids are trick-or-treating</span><small>Helps neighbors know how much candy to buy</small></span></label>
+      <label class="check-card"><input type="checkbox" id="fKids" aria-labelledby="fKidsL">
+        <span><span class="t" id="fKidsL">🧒 Our kids are trick-or-treating</span><small>Helps neighbors know how much candy to buy</small></span></label>
       <div class="sub field hidden" id="kidsMore">
         <span style="font-weight:700" id="kidsLabel">How many kids?</span>
         <div class="stepper" role="group" aria-labelledby="kidsLabel">
@@ -1063,6 +1063,7 @@ function applyTheme() {
 
 /* ---- RSVP form ---- */
 let kidsCount = 1;
+let kidsTouched = false;
 function formEntry() {
   return {
     num: $('#fNum').value.replace(/\D/g, ''),
@@ -1072,6 +1073,8 @@ function formEntry() {
     special: $('#fSpecial').checked,
     note: $('#fSpecial').checked ? $('#fNote').value.trim() : '',
     kids: $('#fKids').checked ? kidsCount : 0,
+    // Kids per house aren't public, so an update can't prefill them. Unless changed, keep what was saved.
+    keepKids: !kidsTouched && !$('#fKids').checked,
     name: $('#fName').value.trim()
   };
 }
@@ -1111,6 +1114,7 @@ function openDialog(d) {
 function openRsvp() {
   $('#rsvpForm').reset();
   kidsCount = 1;
+  kidsTouched = false;
   $('#formError').classList.add('hidden');
   $('#rsvpForm').classList.remove('hidden');
   $('#rsvpDone').classList.add('hidden');
@@ -1127,10 +1131,7 @@ async function submitRsvp(ev) {
 
   if (!e.num) return fail('Please enter your house number.', $('#fNum'));
   if (!e.street) return fail('Please choose your street.', $('#fStreet'));
-  const existing = data.find(x => sameHouse(x, e));
-  if (!existing && !e.candy && !e.decorated && !e.special && !e.kids) {
-    return fail('Please check at least one box: candy, decorated, special stop, or kids trick-or-treating.');
-  }
+  const nothing = !e.candy && !e.decorated && !e.special && !e.kids;
 
   const btn = $('#submitBtn');
   btn.disabled = true; btn.textContent = 'Saving…';
@@ -1142,18 +1143,40 @@ async function submitRsvp(ev) {
   }
   btn.disabled = false; syncForm();
   if (!res || !res.ok) return fail((res && res.error) || "Sorry, that didn't save. Please try again, or text " + CONFIG.helpPhone + ' for help.');
+  // Nothing checked and nothing on file: there was nothing to take off.
+  if (nothing && !res.removed) return fail('Please check at least one box: candy, decorated, special stop, or kids trick-or-treating.');
 
   // Saved. Nothing below can turn that into an error message.
+  applyLocally(e, res);
   const stop = e.candy || e.decorated || e.special;
+  const kids = res.kids ?? e.kids;
+  const kidsLine = kids ? ` We've counted ${kids} trick-or-treater${kids === 1 ? '' : 's'} from your house.` : '';
+  const addr = `${e.num} ${e.street}`;
   $('#doneTitle').textContent = res.removed ? "You're off the list" : (res.updated ? 'RSVP updated!' : "You're all set!");
   $('#doneText').textContent = res.removed
-    ? `${e.num} ${e.street} has been taken off. You can RSVP again any time.`
-    : stop ? `${e.num} ${e.street} is on the map. Thanks for joining in! 🎃`
-           : `Thanks! We've counted ${e.kids} trick-or-treater${e.kids === 1 ? '' : 's'} from ${e.num} ${e.street}.`;
+    ? `${addr} has been taken off. You can RSVP again any time.`
+    : stop ? `${addr} is ${res.updated ? 'updated on' : 'on'} the map.${kidsLine} Thanks for joining in! 🎃`
+           : `Thanks! We've counted ${kids} trick-or-treater${kids === 1 ? '' : 's'} from ${addr}.`;
   $('#rsvpForm').classList.add('hidden');
   $('#rsvpDone').classList.remove('hidden');
   if (!res.removed) { try { candyBurst($('#rsvpDone')); } catch (x) { /* decoration only */ } }
   refresh();
+}
+
+// Reflect a saved RSVP in the list and map immediately, before the refresh from the backend lands.
+function applyLocally(e, res) {
+  const i = data.findIndex(x => sameHouse(x, e));
+  const stop = e.candy || e.decorated || e.special;
+  if (res.removed || !stop) {
+    if (i >= 0) data.splice(i, 1);
+  } else {
+    const row = { ...(i >= 0 ? data[i] : {}), num: e.num, street: e.street, name: e.name, candy: e.candy, decorated: e.decorated, special: e.special, note: e.note };
+    if (i >= 0) data[i] = row; else data.push(row);
+  }
+  totals = { ...totals, houses: data.length };
+  renderTally();
+  renderMap();
+  renderStreets();
 }
 
 // A quick, small shower of treats from the pumpkin. Skipped for reduced motion.
@@ -1219,7 +1242,7 @@ document.addEventListener('click', ev => {
   else if (t.dataset.open) openDialog($('#' + t.dataset.open));
   else if (t.hasAttribute('data-close')) t.closest('dialog').close();
   else if (t.dataset.themePick) { setPref(t.dataset.themePick); applyTheme(); }
-  else if (t.dataset.step) { kidsCount = Math.min(20, Math.max(1, kidsCount + Number(t.dataset.step))); syncForm(); }
+  else if (t.dataset.step) { kidsCount = Math.min(20, Math.max(1, kidsCount + Number(t.dataset.step))); kidsTouched = true; syncForm(); }
   else if (t.dataset.action === 'fullscreen') toggleFullMap();
   else if (t.dataset.action === 'locate') toggleLocate();
   else if (t.dataset.action === 'print-lists') printMode('lists');
@@ -1230,7 +1253,8 @@ $$('dialog').forEach(d => d.addEventListener('click', ev => { if (ev.target === 
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('#mapWrap').classList.contains('is-full')) toggleFullMap(); });
 
 $('#rsvpForm').addEventListener('submit', submitRsvp);
-$('#rsvpForm').addEventListener('input', syncForm);
+$('#rsvpForm').addEventListener('input', () => { $('#formError').classList.add('hidden'); syncForm(); });
+$('#fKids').addEventListener('change', () => { kidsTouched = true; });
 $('#fNum').addEventListener('change', prefillIfExisting);
 $('#fStreet').addEventListener('change', prefillIfExisting);
 $('#shareCopy').addEventListener('click', copyLink);
