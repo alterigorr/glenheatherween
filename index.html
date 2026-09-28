@@ -9,11 +9,11 @@
 <link rel="icon" href="favicon.ico?v=2026" sizes="32x32">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026">
 <link rel="manifest" href="site.webmanifest?v=2026">
-<meta name="theme-color" content="#2B2139">
+<meta name="theme-color" content="#1E1429">
 <meta name="apple-mobile-web-app-title" content="Glenheatherween">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Creepster&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -178,6 +178,8 @@
   :root[data-theme="dark"] .moon { box-shadow: 0 0 40px 8px rgba(246, 231, 200, .18); }
 
   .bats { position: absolute; inset: 0; }
+  .witch { position: absolute; left: 0; top: 0; width: 96px; height: 62px; will-change: transform; }
+  .witch svg { width: 100%; height: 100%; overflow: visible; fill: #0E0913; }
   .flyer { position: absolute; left: 0; top: 0; width: 46px; height: 23px; will-change: transform; }
   .flyer svg { width: 100%; height: 100%; overflow: visible; fill: var(--scene); animation: bob var(--flap) var(--flap-delay) ease-in-out infinite; }
   :root[data-theme="dark"] .flyer svg { fill: #0A080C; }
@@ -210,15 +212,64 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .skyline .w, .skyline .face, .fog, .flyer svg, .flyer .wl, .flyer .wr { animation: none !important; }
+    .skyline .w, .skyline .face, .fog, .flyer svg, .flyer .wl, .flyer .wr, .spider, .spider .legs, .peek-cat .eyes, .cat .tail { animation: none !important; }
+  }
+
+  /* ---------- The purple band: topbar, title and skyline, always a Halloween night ---------- */
+  .band {
+    position: relative; overflow: hidden; color: #FFF3E6;
+    background:
+      radial-gradient(ellipse 60% 70% at 84% 0%, rgba(246, 231, 200, .12), transparent 60%),
+      linear-gradient(to bottom, #1E1429, #2E1D42 55%, #3B2555);
+    --ink: #FFF3E6; --muted: #DCCEEA; --line: rgba(255, 255, 255, .24);
+    --surface: rgba(255, 255, 255, .08); --surface-2: rgba(255, 255, 255, .1);
+    --accent: #FF8A3D; --accent-hover: #FFA05F; --accent-ink: #1B1210; --accent-soft: rgba(255, 138, 61, .2);
+    --scene: #120C18; --window: #FFB347; --moon: #F6E7C8; --shadow: none;
+  }
+  .band .wrap { position: relative; z-index: 2; }
+  .band .hero h1 { font-family: 'Creepster', 'Fraunces', Georgia, serif; font-weight: 400; letter-spacing: .03em; font-size: clamp(2.2rem, 11.4vw, 5.6rem); line-height: .95; color: #FFF3E6; }
+  .band .hero h1 #year { display: block; }
+  .band .hero h1 span { color: #FF8A3D; text-shadow: 0 0 26px rgba(255, 138, 61, .55); }
+  .band .look { color: var(--muted); }
+  .band .seg button { color: #FFF3E6; }
+  .band .seg button[aria-pressed="true"] { background: rgba(255, 255, 255, .22); box-shadow: none; }
+  .band .scene { margin: 24px 0 0; background: none; }
+  .band .skyline .w { filter: drop-shadow(0 0 4px rgba(255, 179, 71, .8)); animation: glow 6s infinite; }
+  .band .skyline .w:nth-of-type(3n) { animation-delay: -2.2s; }
+  .band .skyline .face { display: inline; filter: drop-shadow(0 0 3px rgba(255, 170, 60, .95)); animation: glow 3.2s infinite; }
+  .band .moon { box-shadow: 0 0 44px 10px rgba(246, 231, 200, .2); }
+  .band .fog { opacity: .2; }
+
+  /* Cobwebs in the band's top corners, and a spider on a thread */
+  .web { position: absolute; top: 0; width: 170px; height: 170px; fill: none; stroke: rgba(232, 222, 246, .42); stroke-width: 1.1; pointer-events: none; z-index: 1; }
+  .web path { vector-effect: non-scaling-stroke; }
+  .web-l { left: 0; }
+  .web-r { right: 0; transform: scaleX(-1); }
+  .spider { position: absolute; top: 0; right: 34px; width: 34px; z-index: 3; cursor: pointer; --drop: 150px; animation: dangle 5s ease-in-out infinite; transform-origin: 50% 0; }
+  .spider .thread { display: block; width: 1px; margin: 0 auto; height: var(--drop); background: rgba(232, 222, 246, .55); transition: height 1.6s cubic-bezier(.3, .7, .3, 1); }
+  .spider svg { display: block; width: 34px; height: 34px; margin-top: -6px; fill: #0B0710; stroke: #0B0710; }
+  .spider .eye { fill: #FF6B35; stroke: none; }
+  .spider .legs { transform-box: fill-box; transform-origin: center; }
+  .spider.scurry .thread { height: 8px; transition: height .5s cubic-bezier(.5, 0, .5, 1); }
+  .spider.scurry .legs { animation: legs .12s linear infinite alternate; }
+  @keyframes dangle { 0%, 100% { transform: rotate(2deg) translateY(0); } 50% { transform: rotate(-2deg) translateY(6px); } }
+  @keyframes legs { to { transform: scaleY(.85); } }
+
+  /* Candy-corn dividers between sections */
+  .wrap > section + section::before {
+    content: ''; display: block; width: 210px; height: 22px; margin: -6px auto 34px;
+    background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2030%2022%22%3E%3Cpath%20d%3D%22M15%202C18%202%2021%2010%2022%2019Q15%2021.5%208%2019C9%2010%2012%202%2015%202Z%22%20fill%3D%22%23F9C74F%22/%3E%3Cpath%20d%3D%22M15%202C18%202%2020.6%208%2021.4%2015Q15%2016.6%208.6%2015C9.4%208%2012%202%2015%202Z%22%20fill%3D%22%23F07A1F%22/%3E%3Cpath%20d%3D%22M15%202C17%202%2018.8%205%2019.6%209Q15%2010%2010.4%209C11.2%205%2013%202%2015%202Z%22%20fill%3D%22%23FFF7EC%22/%3E%3Cpath%20d%3D%22M15%202C18%202%2021%2010%2022%2019Q15%2021.5%208%2019C9%2010%2012%202%2015%202Z%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-opacity%3D%22.18%22/%3E%3C/svg%3E") center / 30px 22px repeat-x;
   }
 
   /* Tally */
   .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); }
-  .stat .num { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: 3rem; line-height: 1; color: var(--accent); }
-  :root[data-theme="dark"] .stat .num { text-shadow: 0 0 22px rgba(255, 138, 61, .35); }
-  .stat .label { font-weight: 700; margin-top: 8px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px 16px; }
+  .stat .label { min-width: 0; }
+  .pk-num { position: relative; width: 104px; height: 90px; display: grid; place-items: center; flex: none; }
+  .pk-shape { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .stat .num { position: relative; margin-top: 12px; font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: 2.2rem; line-height: 1; color: #3B1606; }
+  :root[data-theme="dark"] .pk-shape { filter: drop-shadow(0 0 14px rgba(255, 138, 61, .35)); }
+  .stat .label { font-weight: 700; font-size: 1.1rem; }
   .breakdown { margin-top: 14px; color: var(--muted); }
 
   /* Cards */
@@ -282,10 +333,26 @@
 
   /* Volunteer + footer */
   .volunteer p { margin: 8px 0 18px; }
+  .volunteer { position: relative; }
+  .hat { position: absolute; top: -38px; left: 14px; width: 74px; transform: rotate(-12deg); }
+  .hat .cone, .hat .brim { fill: #3A2150; }
+  .hat .hband { fill: #F07A1F; }
+  .hat .buckle { fill: none; stroke: #F9C74F; stroke-width: 2; }
+  .volunteer h2 { margin-top: 10px; }
+  #raffleSection { position: relative; }
+  .peek-cat { position: absolute; top: 18px; right: 46px; width: 70px; height: 44px; z-index: 2; fill: #241A2C; }
+  :root[data-theme="dark"] .peek-cat { fill: #0B0710; }
+  .peek-cat .eyes { fill: #FACC15; transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+  .map-web { position: absolute; top: 0; right: 0; width: 120px; height: 120px; z-index: 450; pointer-events: none; fill: none; stroke: rgba(60, 50, 70, .5); stroke-width: 1; transform: scaleX(-1); }
+  .map-web path { vector-effect: non-scaling-stroke; }
+  :root[data-theme="dark"] .map-web { stroke: rgba(232, 222, 246, .45); }
   footer { position: relative; border-top: 1px solid var(--line); padding: 32px 0 120px; color: var(--muted); }
   .cat { position: absolute; top: -41px; right: 24px; width: 40px; height: 42px; fill: var(--scene); }
   :root[data-theme="dark"] .cat { fill: #2C2433; }
   .cat .eye { fill: #FACC15; }
+  .cat .tail { transform-box: fill-box; transform-origin: 0% 100%; animation: swish 4s ease-in-out infinite; }
+  @keyframes swish { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-14deg); } }
 
   /* Floating help */
   .help-fab {
@@ -365,9 +432,17 @@
     .raffle { padding: 20px 28px; }
     .raffle dl { grid-template-columns: 1fr; gap: 2px; }
     .scene { height: 170px; }
+    .web { width: 104px; height: 104px; }
+    .spider { display: none; }
+    .pk-num { width: 88px; height: 76px; }
+    .stat .num { font-size: 1.9rem; }
+    .stat .label { font-size: 1rem; }
+    .stat { flex-direction: column; align-items: flex-start; }
+    .peek-cat { right: 24px; }
     .scene .skyline { height: 120px; }
     .moon { width: 54px; height: 54px; right: 8%; }
     .flyer { width: 36px; height: 18px; }
+    .witch { width: 70px; height: 45px; }
     .raffle dd { margin-bottom: 8px; }
     .addr { grid-template-columns: 6.5em 1fr; }
     .dlg-head h2 { font-size: 1.35rem; }
@@ -393,7 +468,11 @@
   .f-sheet.no-raffle .f-main { grid-template-columns: 1fr 2.6in; }
   .f-sheet.no-raffle .f-list { font-size: 14.5pt; gap: 14pt; }
   .f-kicker { font-size: 11pt; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--f-orange); }
-  #printFlyer h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: 46pt; line-height: 1; letter-spacing: -.01em; margin: 5pt 0 8pt; color: var(--f-ink); }
+  #printFlyer h1 { font-family: 'Creepster', 'Fraunces', Georgia, serif; font-weight: 400; font-size: 54pt; line-height: .95; letter-spacing: .03em; margin: 5pt 0 8pt; color: var(--f-ink); }
+  .f-web { position: absolute; top: 0; width: 1.35in; height: 1.35in; fill: none; stroke: rgba(43, 27, 61, .38); stroke-width: .8; z-index: 0; }
+  .f-web path { vector-effect: non-scaling-stroke; }
+  .f-web-l { left: 0; }
+  .f-web-r { right: 0; transform: scaleX(-1); }
   #printFlyer h1 span { color: var(--f-orange); }
   .f-date { font-size: 24pt; font-weight: 700; }
   .f-hours { font-size: 14pt; margin-top: 4pt; }
@@ -418,7 +497,8 @@
              background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #F5E1CC); }
   .f-scene .skyline { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: .95in; }
   .f-moon { position: absolute; right: 11%; top: .12in; width: .5in; height: .5in; border-radius: 50%; background: #F3D9B1; }
-  #printFlyer .skyline .face, #printFlyer .skyline g[clip-path] { display: none !important; }
+  #printFlyer .skyline g[clip-path] { display: none !important; }
+  #printFlyer .skyline .face { display: inline; }
   #printFlyer .skyline .w, #printFlyer .skyline .face { filter: none !important; animation: none !important; }
 
   /* ---------- Printable pages ----------
@@ -464,6 +544,17 @@
 
 <div class="mock-banner hidden" id="demoBanner">DEMO: these are sample houses, and nothing you enter is saved</div>
 
+<div class="band">
+  <svg class="web web-l" viewBox="-2 -2 162 162" aria-hidden="true"><path d="M0 0L157.4 1.1M0 0L152.4 37.9M0 0L129.9 75.1M0 0L112.8 104.9M0 0L82.7 126.0M0 0L43.5 142.9M0 0L-1.3 148.6M19.2 0.2Q15.9 2.0 19.9 4.9Q14.8 6.0 17.7 9.6Q12.9 9.5 14.2 13.7Q10.3 12.2 11.1 17.1Q6.8 14.5 6.0 18.2Q2.3 15.8 -0.2 20.1M39.6 0.3Q31.7 4.0 38.3 9.2Q29.7 12.0 35.8 20.6Q25.7 19.0 29.1 26.4Q20.6 24.5 22.6 33.4Q13.6 29.0 12.0 39.2Q4.6 31.7 -0.4 39.3M62.0 0.4Q49.2 6.2 57.5 14.5Q46.0 18.6 54.8 29.3Q39.9 29.5 42.9 42.3Q32.0 37.9 32.9 51.5Q21.0 44.9 17.8 57.8Q7.1 49.1 -0.6 59.5M84.4 0.6Q68.3 8.6 83.7 20.1Q63.8 25.8 72.6 43.7Q55.3 40.9 61.2 58.3Q44.4 52.6 48.6 68.3Q29.2 62.3 23.7 79.2Q9.8 68.1 -0.8 86.1M107.9 0.8Q88.9 11.2 104.1 26.6Q83.1 33.6 91.6 56.6Q72.0 53.3 84.4 79.0Q57.8 68.5 62.3 97.0Q38.0 81.1 30.7 103.8Q12.8 88.7 -1.0 114.0M137.3 1.1Q111.1 14.0 136.1 34.5Q103.8 42.0 117.5 67.2Q90.0 66.6 100.9 90.9Q72.2 85.6 75.1 121.3Q47.5 101.4 39.7 126.0Q16.0 110.9 -1.2 134.0"/></svg>
+  <svg class="web web-r" viewBox="-2 -2 162 162" aria-hidden="true"><path d="M0 0L157.4 1.1M0 0L152.4 37.9M0 0L129.9 75.1M0 0L112.8 104.9M0 0L82.7 126.0M0 0L43.5 142.9M0 0L-1.3 148.6M19.2 0.2Q15.9 2.0 19.9 4.9Q14.8 6.0 17.7 9.6Q12.9 9.5 14.2 13.7Q10.3 12.2 11.1 17.1Q6.8 14.5 6.0 18.2Q2.3 15.8 -0.2 20.1M39.6 0.3Q31.7 4.0 38.3 9.2Q29.7 12.0 35.8 20.6Q25.7 19.0 29.1 26.4Q20.6 24.5 22.6 33.4Q13.6 29.0 12.0 39.2Q4.6 31.7 -0.4 39.3M62.0 0.4Q49.2 6.2 57.5 14.5Q46.0 18.6 54.8 29.3Q39.9 29.5 42.9 42.3Q32.0 37.9 32.9 51.5Q21.0 44.9 17.8 57.8Q7.1 49.1 -0.6 59.5M84.4 0.6Q68.3 8.6 83.7 20.1Q63.8 25.8 72.6 43.7Q55.3 40.9 61.2 58.3Q44.4 52.6 48.6 68.3Q29.2 62.3 23.7 79.2Q9.8 68.1 -0.8 86.1M107.9 0.8Q88.9 11.2 104.1 26.6Q83.1 33.6 91.6 56.6Q72.0 53.3 84.4 79.0Q57.8 68.5 62.3 97.0Q38.0 81.1 30.7 103.8Q12.8 88.7 -1.0 114.0M137.3 1.1Q111.1 14.0 136.1 34.5Q103.8 42.0 117.5 67.2Q90.0 66.6 100.9 90.9Q72.2 85.6 75.1 121.3Q47.5 101.4 39.7 126.0Q16.0 110.9 -1.2 134.0"/></svg>
+  <div class="spider" aria-hidden="true" title="Poke the spider">
+    <span class="thread"></span>
+    <svg viewBox="0 0 40 40"><g class="legs" fill="none" stroke-width="1.8" stroke-linecap="round">
+      <path d="M16 18l-7-5-4 3M15 21l-8-2-4 4M15 24l-7 2-3 5M17 26l-5 5-1 5"/>
+      <path d="M24 18l7-5 4 3M25 21l8-2 4 4M25 24l7 2 3 5M23 26l5 5 1 5"/></g>
+      <ellipse cx="20" cy="24" rx="6" ry="7"/><circle cx="20" cy="15.5" r="4"/>
+      <circle class="eye" cx="18.4" cy="15" r="1"/><circle class="eye" cx="21.6" cy="15" r="1"/></svg>
+  </div>
 <div class="wrap">
   <div class="topbar">
     <div class="look">
@@ -486,58 +577,68 @@
       <button class="btn btn-primary" type="button" data-open="rsvp"><span aria-hidden="true">🏠</span> RSVP my house</button>
       <button class="btn btn-secondary" type="button" data-open="share"><span aria-hidden="true">📣</span> Tell a neighbor</button>
     </div>
-    <div class="scene">
-      <div class="moon" aria-hidden="true"></div>
-      <div class="bats" aria-hidden="true"></div>
-      <svg class="skyline" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-        <!-- ranch house -->
-        <path class="s" d="M30 138V92h150v46z"/><path class="s" d="M18 94l87-30 87 30z"/>
-        <rect class="w" x="48" y="104" width="26" height="16" rx="2"/><rect class="w" x="136" y="104" width="26" height="16" rx="2"/>
-        <!-- bare tree -->
-        <path class="s" d="M232 138h8l-1-40 16-20-3-3-13 16-1-28h-6l1 24-15-17-4 3 17 22z"/>
-        <!-- two-story house -->
-        <path class="s" d="M290 138V62h170v76z"/><path class="s" d="M278 64l97-50 97 50z"/>
-        <circle class="w" id="attic" cx="375" cy="44" r="8"/>
-        <rect class="w" x="310" y="78" width="20" height="18" rx="2"/><rect class="w" x="420" y="78" width="20" height="18" rx="2"/>
-        <rect class="w" x="310" y="108" width="20" height="18" rx="2"/><rect class="w" x="365" y="104" width="20" height="34" rx="2"/>
-        <!-- picket fence -->
-        <path class="s" d="M470 138v-16h150v16z"/>
-        <path class="s" d="M474 122v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10z"/>
-        <!-- pumpkins on the porch -->
-        <ellipse class="p" cx="640" cy="130" rx="13" ry="10"/><rect class="s" x="638" y="117" width="4" height="6" rx="1"/>
-        <ellipse class="p" cx="664" cy="133" rx="9" ry="7"/><rect class="s" x="662.5" y="124" width="3" height="4" rx="1"/>
-        <path class="face" d="M633 128l3-4.5 3 4.5zm8 0l3-4.5 3 4.5zm-8.5 3.5c3 4 12 4 15 0l-2.4 1.1-1.4-1.3-1.6 1.6-1.6-1.6-1.6 1.6-1.6-1.6-1.4 1.3z"/>
-        <path class="face" d="M659.5 131.5l2-3 2 3zm5 0l2-3 2 3zm-5 2.5c2 2.6 7 2.6 9 0l-1.8.7-1.2-.9-1.2.9-1.2-.9-1.2.9z"/>
-        <!-- ranch house with garage -->
-        <path class="s" d="M690 138V96h180v42z"/><path class="s" d="M676 98l104-26 104 26z"/>
-        <rect class="w" x="708" y="108" width="30" height="16" rx="2"/><rect class="w" x="820" y="108" width="30" height="16" rx="2"/>
-        <!-- palm tree (it's Vegas) -->
-        <path class="s" d="M914 138c2-30-1-58-9-80h6c8 22 10 50 9 80z"/>
-        <path class="s" d="M908 58c-14-10-30-10-42-2 14-2 28 2 40 6zm0 0c-6-16-20-24-34-24 12 6 22 14 30 26zm0 0c4-16 16-26 32-28-12 8-22 16-28 30zm0 0c14-8 30-6 42 4-14-4-28-2-40 0zm0 0c10 2 20 10 24 22-8-8-16-14-26-18z"/>
-        <!-- tall spooky house with tower -->
-        <path class="s" d="M960 138V78h120v60z"/><path class="s" d="M950 80l70-44 70 44z"/>
-        <path class="s" d="M1086 138V56h44v82z"/><path class="s" d="M1080 58l28-44 28 44z"/>
-        <rect class="w" x="978" y="96" width="16" height="22" rx="2"/><rect class="w" x="1044" y="96" width="16" height="22" rx="2"/>
-        <rect class="w" x="1100" y="72" width="16" height="20" rx="8"/>
-        <!-- small cottage at the edge -->
-        <path class="s" d="M1140 138v-34h70v34z"/><path class="s" d="M1132 106l43-26 43 26z"/>
-        <rect class="w" x="1156" y="114" width="16" height="14" rx="2"/>
-        <!-- ground -->
-        <rect class="s" x="0" y="136" width="1200" height="4"/>
-      </svg>
-      <div class="fog" aria-hidden="true"></div>
-    </div>
   </header>
+</div>
+  <div class="scene">
+    <div class="moon" aria-hidden="true"></div>
+    <div class="bats" aria-hidden="true"></div>
+    <svg class="skyline" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <!-- ranch house -->
+      <path class="s" d="M30 138V92h150v46z"/><path class="s" d="M18 94l87-30 87 30z"/>
+      <rect class="w" x="48" y="104" width="26" height="16" rx="2"/><rect class="w" x="136" y="104" width="26" height="16" rx="2"/>
+      <!-- bare tree -->
+      <path class="s" d="M232 138h8l-1-40 16-20-3-3-13 16-1-28h-6l1 24-15-17-4 3 17 22z"/>
+      <!-- two-story house -->
+      <path class="s" d="M290 138V62h170v76z"/><path class="s" d="M278 64l97-50 97 50z"/>
+      <circle class="w" id="attic" cx="375" cy="44" r="8"/>
+      <rect class="w" x="310" y="78" width="20" height="18" rx="2"/><rect class="w" x="420" y="78" width="20" height="18" rx="2"/>
+      <rect class="w" x="310" y="108" width="20" height="18" rx="2"/><rect class="w" x="365" y="104" width="20" height="34" rx="2"/>
+      <!-- picket fence -->
+      <path class="s" d="M470 138v-16h150v16z"/>
+      <path class="s" d="M474 122v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10zm14 0v-10l4-5 4 5v10z"/>
+      <!-- pumpkins on the porch -->
+      <ellipse class="p" cx="640" cy="130" rx="13" ry="10"/><rect class="s" x="638" y="117" width="4" height="6" rx="1"/>
+      <ellipse class="p" cx="664" cy="133" rx="9" ry="7"/><rect class="s" x="662.5" y="124" width="3" height="4" rx="1"/>
+      <path class="face" d="M633 128l3-4.5 3 4.5zm8 0l3-4.5 3 4.5zm-8.5 3.5c3 4 12 4 15 0l-2.4 1.1-1.4-1.3-1.6 1.6-1.6-1.6-1.6 1.6-1.6-1.6-1.4 1.3z"/>
+      <path class="face" d="M659.5 131.5l2-3 2 3zm5 0l2-3 2 3zm-5 2.5c2 2.6 7 2.6 9 0l-1.8.7-1.2-.9-1.2.9-1.2-.9-1.2.9z"/>
+      <!-- ranch house with garage -->
+      <path class="s" d="M690 138V96h180v42z"/><path class="s" d="M676 98l104-26 104 26z"/>
+      <rect class="w" x="708" y="108" width="30" height="16" rx="2"/><rect class="w" x="820" y="108" width="30" height="16" rx="2"/>
+      <!-- palm tree (it's Vegas) -->
+      <path class="s" d="M914 138c2-30-1-58-9-80h6c8 22 10 50 9 80z"/>
+      <path class="s" d="M908 58c-14-10-30-10-42-2 14-2 28 2 40 6zm0 0c-6-16-20-24-34-24 12 6 22 14 30 26zm0 0c4-16 16-26 32-28-12 8-22 16-28 30zm0 0c14-8 30-6 42 4-14-4-28-2-40 0zm0 0c10 2 20 10 24 22-8-8-16-14-26-18z"/>
+      <!-- tall spooky house with tower -->
+      <path class="s" d="M960 138V78h120v60z"/><path class="s" d="M950 80l70-44 70 44z"/>
+      <path class="s" d="M1086 138V56h44v82z"/><path class="s" d="M1080 58l28-44 28 44z"/>
+      <rect class="w" x="978" y="96" width="16" height="22" rx="2"/><rect class="w" x="1044" y="96" width="16" height="22" rx="2"/>
+      <rect class="w" x="1100" y="72" width="16" height="20" rx="8"/>
+      <!-- small cottage at the edge -->
+      <path class="s" d="M1140 138v-34h70v34z"/><path class="s" d="M1132 106l43-26 43 26z"/>
+      <rect class="w" x="1156" y="114" width="16" height="14" rx="2"/>
+      <!-- pumpkin patch -->
+      <g class="pk"><ellipse cx="89.7" cy="126.0" rx="9.0" ry="12.0" fill="#D9571A"/><ellipse cx="102.3" cy="126.0" rx="9.0" ry="12.0" fill="#D9571A"/><ellipse cx="96.0" cy="126.0" rx="9.3" ry="12.2" fill="#F07A1F"/><rect x="94.5" y="109.5" width="3.0" height="6.3" rx="1" fill="#3E4A1E"/><path class="face" d="M87.8 124.2l3.0 -4.8l3.0 4.8zM98.2 124.2l3.0 -4.8l3.0 4.8zM87.3 129.0Q96.0 138.4 104.7 129.0l-2.4 1.5l-1.5 -1.8l-2.0 2.1l-1.8 -2.1l-2.0 2.1l-1.5 -1.8z"/></g>
+      <g class="pk"><ellipse cx="257.0" cy="128.4" rx="7.2" ry="9.6" fill="#D9571A"/><ellipse cx="267.0" cy="128.4" rx="7.2" ry="9.6" fill="#D9571A"/><ellipse cx="262.0" cy="128.4" rx="7.4" ry="9.8" fill="#F07A1F"/><rect x="260.8" y="115.2" width="2.4" height="5.0" rx="1" fill="#3E4A1E"/><path class="face" d="M258.2 126.0m-1.6 0a1.6 1.8 0 1 0 3.1 0a1.6 1.8 0 1 0 -3.1 0M265.8 126.0m-1.6 0a1.6 1.8 0 1 0 3.1 0a1.6 1.8 0 1 0 -3.1 0M262.0 131.8m-1.8 0a1.8 2.4 0 1 0 3.6 0a1.8 2.4 0 1 0 -3.6 0"/></g>
+      <g class="pk"><ellipse cx="397.4" cy="129.2" rx="6.6" ry="8.8" fill="#D9571A"/><ellipse cx="406.6" cy="129.2" rx="6.6" ry="8.8" fill="#D9571A"/><ellipse cx="402.0" cy="129.2" rx="6.8" ry="9.0" fill="#F07A1F"/><rect x="400.9" y="117.1" width="2.2" height="4.6" rx="1" fill="#3E4A1E"/><path class="face" d="M395.6 124.8l4.6 2.0l-0.9 2.2zM408.4 124.8l-4.6 2.0l0.9 2.2zM396.3 131.7h11.4l-1.3 3.1l-1.5 -1.3l-1.3 1.8l-1.3 -1.8l-1.3 1.8l-1.5 -1.3z"/></g>
+      <g class="pk"><ellipse cx="882.5" cy="127.6" rx="7.8" ry="10.4" fill="#D9571A"/><ellipse cx="893.5" cy="127.6" rx="7.8" ry="10.4" fill="#D9571A"/><ellipse cx="888.0" cy="127.6" rx="8.1" ry="10.6" fill="#F07A1F"/><rect x="886.7" y="113.3" width="2.6" height="5.5" rx="1" fill="#3E4A1E"/><path class="face" d="M880.9 126.0l2.6 -4.2l2.6 4.2zM890.0 126.0l2.6 -4.2l2.6 4.2zM880.5 130.2Q888.0 138.4 895.5 130.2l-2.1 1.3l-1.3 -1.6l-1.7 1.8l-1.6 -1.8l-1.7 1.8l-1.3 -1.6z"/></g>
+      <g class="pk"><ellipse cx="1053.0" cy="128.4" rx="7.2" ry="9.6" fill="#D9571A"/><ellipse cx="1063.0" cy="128.4" rx="7.2" ry="9.6" fill="#D9571A"/><ellipse cx="1058.0" cy="128.4" rx="7.4" ry="9.8" fill="#F07A1F"/><rect x="1056.8" y="115.2" width="2.4" height="5.0" rx="1" fill="#3E4A1E"/><path class="face" d="M1054.2 126.0m-1.6 0a1.6 1.8 0 1 0 3.1 0a1.6 1.8 0 1 0 -3.1 0M1061.8 126.0m-1.6 0a1.6 1.8 0 1 0 3.1 0a1.6 1.8 0 1 0 -3.1 0M1058.0 131.8m-1.8 0a1.8 2.4 0 1 0 3.6 0a1.8 2.4 0 1 0 -3.6 0"/></g>
+      <!-- ground -->
+      <rect class="s" x="0" y="136" width="1200" height="4"/>
+    </svg>
+    <div class="fog" aria-hidden="true"></div>
+  </div>
+</div>
+
+<div class="wrap">
 
   <section aria-labelledby="tallyTitle">
     <h2 id="tallyTitle" class="hidden">Who's coming</h2>
     <div class="tally">
       <div class="stat">
-        <div class="num" id="statHouses">–</div>
+        <div class="pk-num"><svg class="pk-shape" viewBox="0 0 110 96" aria-hidden="true"><ellipse cx="34" cy="56" rx="30" ry="36" fill="#D9571A"/><ellipse cx="76" cy="56" rx="30" ry="36" fill="#D9571A"/><ellipse cx="55" cy="56" rx="33" ry="38" fill="#F07A1F"/><path d="M52 20c0-8 3-14 9-17l3 4c-4 3-6 7-6 13z" fill="#3E4A1E"/></svg><span class="num" id="statHouses">–</span></div>
         <div class="label">houses on the map</div>
       </div>
       <div class="stat">
-        <div class="num" id="statKids">–</div>
+        <div class="pk-num"><svg class="pk-shape" viewBox="0 0 110 96" aria-hidden="true"><ellipse cx="34" cy="56" rx="30" ry="36" fill="#D9571A"/><ellipse cx="76" cy="56" rx="30" ry="36" fill="#D9571A"/><ellipse cx="55" cy="56" rx="33" ry="38" fill="#F07A1F"/><path d="M52 20c0-8 3-14 9-17l3 4c-4 3-6 7-6 13z" fill="#3E4A1E"/></svg><span class="num" id="statKids">–</span></div>
         <div class="label">trick-or-treaters coming</div>
       </div>
     </div>
@@ -545,6 +646,7 @@
   </section>
 
   <section aria-labelledby="raffleTitle" id="raffleSection">
+    <svg class="peek-cat" viewBox="0 0 70 44" aria-hidden="true"><path d="M13 44c-1-10 2-19 9-24l-2-15 9 9c4-1 8-1 12 0l9-9-2 15c7 5 10 14 9 24z"/><g class="eyes"><ellipse cx="28" cy="26" rx="3.2" ry="3.6"/><ellipse cx="42" cy="26" rx="3.2" ry="3.6"/></g><path class="paws" d="M8 44c0-5 3-8 8-8s8 3 8 8zM46 44c0-5 3-8 8-8s8 3 8 8z"/></svg>
     <div class="card raffle">
       <h2 id="raffleTitle">🎟️ 50/50 Raffle</h2>
       <p id="raffleIntro" style="margin-top:8px"></p>
@@ -568,6 +670,7 @@
         <button class="btn btn-primary" type="button" data-action="fullscreen"><span aria-hidden="true">✕</span> Close big map</button>
       </div>
       <div id="map" role="region" aria-label="Map of houses"></div>
+      <svg class="map-web" viewBox="-2 -2 162 162" aria-hidden="true"><path d="M0 0L157.4 1.1M0 0L152.4 37.9M0 0L129.9 75.1M0 0L112.8 104.9M0 0L82.7 126.0M0 0L43.5 142.9M0 0L-1.3 148.6M19.2 0.2Q15.9 2.0 19.9 4.9Q14.8 6.0 17.7 9.6Q12.9 9.5 14.2 13.7Q10.3 12.2 11.1 17.1Q6.8 14.5 6.0 18.2Q2.3 15.8 -0.2 20.1M39.6 0.3Q31.7 4.0 38.3 9.2Q29.7 12.0 35.8 20.6Q25.7 19.0 29.1 26.4Q20.6 24.5 22.6 33.4Q13.6 29.0 12.0 39.2Q4.6 31.7 -0.4 39.3M62.0 0.4Q49.2 6.2 57.5 14.5Q46.0 18.6 54.8 29.3Q39.9 29.5 42.9 42.3Q32.0 37.9 32.9 51.5Q21.0 44.9 17.8 57.8Q7.1 49.1 -0.6 59.5M84.4 0.6Q68.3 8.6 83.7 20.1Q63.8 25.8 72.6 43.7Q55.3 40.9 61.2 58.3Q44.4 52.6 48.6 68.3Q29.2 62.3 23.7 79.2Q9.8 68.1 -0.8 86.1M107.9 0.8Q88.9 11.2 104.1 26.6Q83.1 33.6 91.6 56.6Q72.0 53.3 84.4 79.0Q57.8 68.5 62.3 97.0Q38.0 81.1 30.7 103.8Q12.8 88.7 -1.0 114.0M137.3 1.1Q111.1 14.0 136.1 34.5Q103.8 42.0 117.5 67.2Q90.0 66.6 100.9 90.9Q72.2 85.6 75.1 121.3Q47.5 101.4 39.7 126.0Q16.0 110.9 -1.2 134.0"/></svg>
     </div>
     <div class="map-tools">
       <button class="btn btn-secondary" type="button" data-action="locate"><span aria-hidden="true">📍</span> Show where I am</button>
@@ -586,6 +689,7 @@
 
   <section aria-labelledby="volTitle">
     <div class="card volunteer">
+      <svg class="hat" viewBox="0 0 80 60" aria-hidden="true"><path class="brim" d="M2 50c12-7 64-9 76-2-8 6-66 8-76 2z"/><path class="cone" d="M18 48C26 34 30 18 36 8c3-5 10-8 18-6-7 2-9 6-9 12 0 12 4 24 14 32-14 4-28 5-41 2z"/><path class="hband" d="M20 44c12 3 26 3 38-1l-1 5c-12 4-26 4-38 1z"/><rect class="buckle" x="34" y="42" width="8" height="7" rx="1"/></svg>
       <h2 id="volTitle">🙋 Want to help out?</h2>
       <p id="volText"></p>
       <div class="btn-row">
@@ -596,7 +700,7 @@
   </section>
 
   <footer>
-    <svg class="cat" viewBox="0 0 40 42" aria-hidden="true"><path d="M8 42c-2-8 0-16 6-21-2-3-2-7 0-10l-1-9 5 5c1-.5 3-.5 4 0l5-5-1 9c2 3 2 7 0 10 6 5 8 13 6 21zm25 0c3-2 5-6 4-10-.5-2 1-3 2-2 2 4 0 10-4 12z"/><ellipse class="eye" cx="17" cy="14" rx="1.6" ry="1.2"/><ellipse class="eye" cx="23" cy="14" rx="1.6" ry="1.2"/></svg>
+    <svg class="cat" viewBox="0 0 40 42" aria-hidden="true"><path d="M8 42c-2-8 0-16 6-21-2-3-2-7 0-10l-1-9 5 5c1-.5 3-.5 4 0l5-5-1 9c2 3 2 7 0 10 6 5 8 13 6 21z"/><path class="tail" d="M33 42c3-2 5-6 4-10-.5-2 1-3 2-2 2 4 0 10-4 12z"/><ellipse class="eye" cx="17" cy="14" rx="1.6" ry="1.2"/><ellipse class="eye" cx="23" cy="14" rx="1.6" ry="1.2"/></svg>
     <p id="footHelp"></p>
     <p style="margin-top:8px">Handing out flyers? <a href="flyer.pdf" target="_blank" rel="noopener">Get the printable flyer (PDF)</a></p>
     <p style="margin-top:8px">Made by neighbors, for neighbors · Glen Heather Estates, Las Vegas</p>
@@ -715,6 +819,8 @@
 <div class="print-only" id="printLists"></div>
 <div class="print-only" id="printFlyer">
   <div class="f-sheet">
+    <svg class="web f-web f-web-l" viewBox="-2 -2 162 162" aria-hidden="true"><path d="M0 0L157.4 1.1M0 0L152.4 37.9M0 0L129.9 75.1M0 0L112.8 104.9M0 0L82.7 126.0M0 0L43.5 142.9M0 0L-1.3 148.6M19.2 0.2Q15.9 2.0 19.9 4.9Q14.8 6.0 17.7 9.6Q12.9 9.5 14.2 13.7Q10.3 12.2 11.1 17.1Q6.8 14.5 6.0 18.2Q2.3 15.8 -0.2 20.1M39.6 0.3Q31.7 4.0 38.3 9.2Q29.7 12.0 35.8 20.6Q25.7 19.0 29.1 26.4Q20.6 24.5 22.6 33.4Q13.6 29.0 12.0 39.2Q4.6 31.7 -0.4 39.3M62.0 0.4Q49.2 6.2 57.5 14.5Q46.0 18.6 54.8 29.3Q39.9 29.5 42.9 42.3Q32.0 37.9 32.9 51.5Q21.0 44.9 17.8 57.8Q7.1 49.1 -0.6 59.5M84.4 0.6Q68.3 8.6 83.7 20.1Q63.8 25.8 72.6 43.7Q55.3 40.9 61.2 58.3Q44.4 52.6 48.6 68.3Q29.2 62.3 23.7 79.2Q9.8 68.1 -0.8 86.1M107.9 0.8Q88.9 11.2 104.1 26.6Q83.1 33.6 91.6 56.6Q72.0 53.3 84.4 79.0Q57.8 68.5 62.3 97.0Q38.0 81.1 30.7 103.8Q12.8 88.7 -1.0 114.0M137.3 1.1Q111.1 14.0 136.1 34.5Q103.8 42.0 117.5 67.2Q90.0 66.6 100.9 90.9Q72.2 85.6 75.1 121.3Q47.5 101.4 39.7 126.0Q16.0 110.9 -1.2 134.0"/></svg>
+    <svg class="web f-web f-web-r" viewBox="-2 -2 162 162" aria-hidden="true"><path d="M0 0L157.4 1.1M0 0L152.4 37.9M0 0L129.9 75.1M0 0L112.8 104.9M0 0L82.7 126.0M0 0L43.5 142.9M0 0L-1.3 148.6M19.2 0.2Q15.9 2.0 19.9 4.9Q14.8 6.0 17.7 9.6Q12.9 9.5 14.2 13.7Q10.3 12.2 11.1 17.1Q6.8 14.5 6.0 18.2Q2.3 15.8 -0.2 20.1M39.6 0.3Q31.7 4.0 38.3 9.2Q29.7 12.0 35.8 20.6Q25.7 19.0 29.1 26.4Q20.6 24.5 22.6 33.4Q13.6 29.0 12.0 39.2Q4.6 31.7 -0.4 39.3M62.0 0.4Q49.2 6.2 57.5 14.5Q46.0 18.6 54.8 29.3Q39.9 29.5 42.9 42.3Q32.0 37.9 32.9 51.5Q21.0 44.9 17.8 57.8Q7.1 49.1 -0.6 59.5M84.4 0.6Q68.3 8.6 83.7 20.1Q63.8 25.8 72.6 43.7Q55.3 40.9 61.2 58.3Q44.4 52.6 48.6 68.3Q29.2 62.3 23.7 79.2Q9.8 68.1 -0.8 86.1M107.9 0.8Q88.9 11.2 104.1 26.6Q83.1 33.6 91.6 56.6Q72.0 53.3 84.4 79.0Q57.8 68.5 62.3 97.0Q38.0 81.1 30.7 103.8Q12.8 88.7 -1.0 114.0M137.3 1.1Q111.1 14.0 136.1 34.5Q103.8 42.0 117.5 67.2Q90.0 66.6 100.9 90.9Q72.2 85.6 75.1 121.3Q47.5 101.4 39.7 126.0Q16.0 110.9 -1.2 134.0"/></svg>
     <div class="f-body">
     <div class="f-top">
       <div class="f-kicker">Glen Heather Estates</div>
@@ -1074,7 +1180,7 @@ function applyTheme() {
   const theme = resolveTheme(pref);
   document.documentElement.dataset.theme = theme;
   const bar = document.querySelector('meta[name="theme-color"]');
-  if (bar) bar.content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  if (bar) bar.content = '#1E1429';
   $$('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === pref)));
 }
 
@@ -1287,6 +1393,6 @@ setInterval(() => { if (getPref() === 'auto') applyTheme(); }, 60000);
 initMap();
 boot();
 </script>
-<script src="scene.js" defer></script>
+<script src="scene.js?v=2026i" defer></script>
 </body>
 </html>

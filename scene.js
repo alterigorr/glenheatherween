@@ -1,4 +1,5 @@
-// Halloween scene: bats flying across the sky and figures in the windows. Purely decorative.
+// Halloween scene: bats and a witch flying across the sky, figures in the windows, a cat on the
+// fence, and a spider that scurries up its thread when poked. Purely decorative.
 // Motion only runs while the scene is on screen, and not at all for reduced-motion users.
 (() => {
   const scene = document.querySelector('.scene');
@@ -10,6 +11,7 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   const rand = (a, b) => a + Math.random() * (b - a);
+  const wait = ms => new Promise(r => setTimeout(r, ms));
   const pick = list => list[Math.floor(Math.random() * list.length)];
 
   let onScreen = true;
@@ -189,6 +191,78 @@
     g.remove();
   }
 
+  /* ----------------------------------------------------------------- witch */
+
+  // A witch on her broom, facing right, drawn in a 130×66 box.
+  const WITCH_SVG = `<svg viewBox="-10 -24 130 84">
+    <path d="M8 44L112 31L112.5 33.5L8.5 46.5Z"/>
+    <path d="M10 45C4 40-2 38-6 36C-2 42-4 48-8 52C-2 52 4 50 10 48Z"/>
+    <g transform="translate(66 36) scale(1.45) translate(-66 -36)">
+      <path d="M62 36C52 28 38 22 22 22C30 28 36 36 46 42C52 40 57 38 62 38Z"/>
+      <path d="M60 37L76 34L73 20C70 17 64 17 62 20Z"/>
+      <circle cx="69" cy="15" r="4.6"/>
+      <path d="M65 14C58 16 54 20 50 26C56 22 60 21 66 19Z"/>
+      <path d="M56 12.5C64 9.5 76 9 84 11.5C76 13 64 13.5 56 12.5Z"/>
+      <path d="M63 11.5C64 6 66 2 70-2C69 3 71 7 76 11Z"/>
+      <path d="M73 15L77.5 16.8L73 17.6Z"/>
+      <path d="M68 24L80 31L82 29.5L70 22Z"/>
+      <path d="M70 35L80 39L86 37.5L85 40.5L78 41.5L68 38Z"/>
+    </g></svg>`;
+
+  // Flies left to right, passing in front of the moon.
+  function witch() {
+    const moon = scene.querySelector('.moon');
+    if (!moon) return;
+    const el = document.createElement('div');
+    el.className = 'witch';
+    el.innerHTML = WITCH_SVG;
+    batLayer.append(el);
+    const s = scene.getBoundingClientRect(), m = moon.getBoundingClientRect();
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const mx = m.left - s.left + m.width / 2, my = m.top - s.top + m.height / 2;
+    const x0 = -w, x1 = s.width + w, frames = [], N = 30;
+    for (let i = 0; i <= N; i++) {
+      const x = x0 + (x1 - x0) * i / N;
+      const k = (x - mx) / s.width;
+      const y = my + 90 * k * k + Math.sin(i / N * Math.PI * 4) * 3;
+      frames.push({ transform: `translate(${(x - w / 2).toFixed(1)}px, ${(y - h / 2).toFixed(1)}px) rotate(${(-8 * k).toFixed(1)}deg)` });
+    }
+    return el.animate(frames, { duration: (x1 - x0) / 95 * 1000, easing: 'linear' }).finished.then(() => el.remove());
+  }
+
+  /* ------------------------------------------------------------ fence cat */
+
+  // A cat that strolls along the picket fence (fence runs x 470–620, picket tips at y 107).
+  const CAT_PATH = 'M4 0L4.6-5.2C3-6.4 2.6-8.4 3.4-10C2-11 .6-13 .8-16.2C.9-17.2 2.2-17.2 2.2-16.2C2.1-13.6 3.2-11.9 4.8-11C7-11.8 12-11.6 15.5-10.8C16.6-12.4 17.4-13.6 18-14.8L18.6-12.9L19.8-13L20.6-14.9L21.2-12.4C22.8-11.4 23.4-9.6 22-8.6C21-8 19.6-8.2 18.8-8.4L18.4-5.6L18.9 0H17.6L16.9-5H15.8L15.6 0H14.3L14.4-5.3C11.5-5.8 8.5-5.8 7-5.4L6.6 0H5.4L5.6-5.2H5.2L4.9 0Z';
+  async function fenceCat() {
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('transform', 'translate(0 108)');
+    const cat = document.createElementNS(NS, 'path');
+    cat.setAttribute('class', 's');
+    cat.setAttribute('d', CAT_PATH);
+    g.append(cat);
+    svg.append(g);
+    const walk = [];
+    for (let i = 0; i <= 20; i++) {
+      walk.push({ transform: `translate(${470 + 124 * i / 20}px, ${i % 2 ? -0.8 : 0}px)` });
+    }
+    await cat.animate(walk, { duration: 8000, easing: 'linear', fill: 'forwards' }).finished;
+    await wait(1800);
+    await cat.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, fill: 'forwards' }).finished;
+    g.remove();
+  }
+
+  /* --------------------------------------------------------------- spider */
+
+  const spider = document.querySelector('.spider');
+  if (spider) {
+    spider.addEventListener('click', () => {
+      if (spider.classList.contains('scurry')) return;
+      spider.classList.add('scurry');
+      setTimeout(() => spider.classList.remove('scurry'), 2600);
+    });
+  }
+
   /* ------------------------------------------------------------- schedule */
 
   // ?demo runs everything more often so the effects are quick to review.
@@ -196,4 +270,6 @@
   const often = demo ? .3 : 1;
   every(7000 * often, 15000 * often, flock, 1800);
   every(9000 * often, 18000 * often, () => (Math.random() < .2 ? atticEyes() : peek()), demo ? 2500 : 5000);
+  every(45000 * often, 90000 * often, witch, demo ? 6000 : 20000);
+  every(35000 * often, 70000 * often, fenceCat, demo ? 9000 : 30000);
 })();
