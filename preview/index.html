@@ -593,7 +593,10 @@
     body[data-preview="lists"] #printLists,
     body[data-preview="flyer"] #printFlyer { display: block !important; padding: 0 !important; }
     body[data-preview] .p-street { max-width: none; margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
-    body[data-preview="flyer"] .f-sheet { box-shadow: none; margin: 0; }
+    body[data-preview="flyer"] .f-sheet { box-shadow: none; margin: 0 auto; }
+    /* Printed straight from a browser, leave room for its own margins, headers and footers.
+       The PDF generator adds ?pdf and gets the full-size page. */
+    body[data-preview="flyer"]:not(.pdf) .f-sheet { zoom: .86; }
     .p-street { page-break-after: always; break-after: page; }
     .p-street:last-child { page-break-after: auto; break-after: auto; }
   }
@@ -1443,6 +1446,7 @@ async function refresh() {
 async function boot() {
   const q = new URLSearchParams(location.search);
   if (q.has('flyer')) document.body.dataset.preview = 'flyer';
+  if (q.has('pdf')) document.body.classList.add('pdf');
   if (q.has('lists')) document.body.dataset.preview = 'lists';
   if (new URLSearchParams(location.search).has('demo')) {
     api = (await import('/preview/demo.js')).demoApi;
@@ -1492,6 +1496,6 @@ setInterval(() => { if (getPref() === 'auto') applyTheme(); }, 60000);
 initMap();
 boot();
 </script>
-<script src="/preview/scene.js?v=202609272010" defer></script>
+<script src="/preview/scene.js?v=202609272014" defer></script>
 </body>
 </html>
