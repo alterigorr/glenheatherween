@@ -193,23 +193,48 @@
 
   /* ----------------------------------------------------------------- witch */
 
-  // A witch on her broom, facing right, drawn in a 130×66 box.
-  const WITCH_SVG = `<svg viewBox="-10 -24 130 84">
-    <path d="M8 44L112 31L112.5 33.5L8.5 46.5Z"/>
-    <path d="M10 45C4 40-2 38-6 36C-2 42-4 48-8 52C-2 52 4 50 10 48Z"/>
-    <g transform="translate(66 36) scale(1.45) translate(-66 -36)">
-      <path d="M62 36C52 28 38 22 22 22C30 28 36 36 46 42C52 40 57 38 62 38Z"/>
-      <path d="M60 37L76 34L73 20C70 17 64 17 62 20Z"/>
-      <circle cx="69" cy="15" r="4.6"/>
-      <path d="M65 14C58 16 54 20 50 26C56 22 60 21 66 19Z"/>
-      <path d="M56 12.5C64 9.5 76 9 84 11.5C76 13 64 13.5 56 12.5Z"/>
-      <path d="M63 11.5C64 6 66 2 70-2C69 3 71 7 76 11Z"/>
-      <path d="M73 15L77.5 16.8L73 17.6Z"/>
-      <path d="M68 24L80 31L82 29.5L70 22Z"/>
-      <path d="M70 35L80 39L86 37.5L85 40.5L78 41.5L68 38Z"/>
-    </g></svg>`;
+  // A witch on her broom (facing right), cape and hair streaming behind, a black cat riding along.
+  const WITCH_SVG = `<svg viewBox="-8 -10 128 76">
+    <path d="M14 50Q60 44 116 40L116 42.4Q60 46.6 14 52.4Z"/>
+    <path d="M16 49C10 46 4 42-3 40C1 45 0 50-5 55C1 55 9 54 16 53Z"/>
+    <path class="cape" d="M60 26C50 29 38 34 22 35C30 37 36 38 42 41C36 42 30 44 24 47C36 47 48 45 58 42Z"/>
+    <path d="M53 45C51 49 47 52 41 54C44 56 49 56 53 55C57 54 61 51 64 48L66 45Z"/>
+    <path d="M56 45L63 26C65 21 72 21 73 26L70 45Z"/>
+    <path d="M66 30L83 40.5L82 43L64 34Z"/>
+    <circle cx="70" cy="18" r="5"/>
+    <path d="M74.6 17.6L81 20.4L74.6 21.2Z"/>
+    <path class="hair" d="M66 17C60 19 53 22 46 21C52 25 60 25 67 22Z"/>
+    <path d="M57 14.5C65 11 80 11 87 14C79 16 66 16.6 57 14.5Z"/>
+    <path d="M63.5 13.5C63 7 60 1 51-6C60-4 68 3 74 12Z"/>
+    <path d="M66 45L78 49L85 47L86.6 49.4L78 52L64 48Z"/>
+    <path d="M33 48C32 44 33 41 35 40L34.5 36.5L36.6 38.6H38.6L40.6 36.5L40.2 40C42 41 43 44 42 48Z"/>
+    <path class="wcat-tail" d="M33.5 47C29 46 27 42 29 39C29.6 38 30.8 38.4 30.4 39.4C29.4 42 30.6 44.6 34 45.4Z"/></svg>`;
 
-  // Flies left to right, passing in front of the moon.
+  // Smooth curve through waypoints (Catmull-Rom), sampled evenly by distance so the speed is steady.
+  function spline(pts, n) {
+    const out = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+      for (let k = 0; k < 40; k++) {
+        const t = k / 40, t2 = t * t, t3 = t2 * t;
+        const f = (a, b, c, d) => .5 * ((2 * b) + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+        out.push({ x: f(p0.x, p1.x, p2.x, p3.x), y: f(p0.y, p1.y, p2.y, p3.y) });
+      }
+    }
+    out.push(pts[pts.length - 1]);
+    const len = [0];
+    for (let i = 1; i < out.length; i++) len.push(len[i - 1] + Math.hypot(out[i].x - out[i - 1].x, out[i].y - out[i - 1].y));
+    const total = len[len.length - 1], res = [];
+    for (let j = 0, i = 0; j <= n; j++) {
+      const d = total * j / n;
+      while (i < len.length - 2 && len[i + 1] < d) i++;
+      const u = (d - len[i]) / ((len[i + 1] - len[i]) || 1);
+      res.push({ x: out[i].x + (out[i + 1].x - out[i].x) * u, y: out[i].y + (out[i + 1].y - out[i].y) * u });
+    }
+    return { points: res, length: total };
+  }
+
+  // Swoops in low from the left, climbs across the face of the moon, and banks away up to the right.
   function witch() {
     const moon = scene.querySelector('.moon');
     if (!moon) return;
@@ -218,38 +243,54 @@
     el.innerHTML = WITCH_SVG;
     batLayer.append(el);
     const s = scene.getBoundingClientRect(), m = moon.getBoundingClientRect();
-    const w = el.offsetWidth, h = el.offsetHeight;
+    const W = s.width, H = s.height, w = el.offsetWidth, h = el.offsetHeight;
     const mx = m.left - s.left + m.width / 2, my = m.top - s.top + m.height / 2;
-    const x0 = -w, x1 = s.width + w, frames = [], N = 30;
-    for (let i = 0; i <= N; i++) {
-      const x = x0 + (x1 - x0) * i / N;
-      const k = (x - mx) / s.width;
-      const y = my + 90 * k * k + Math.sin(i / N * Math.PI * 4) * 3;
-      frames.push({ transform: `translate(${(x - w / 2).toFixed(1)}px, ${(y - h / 2).toFixed(1)}px) rotate(${(-8 * k).toFixed(1)}deg)` });
-    }
-    return el.animate(frames, { duration: (x1 - x0) / 95 * 1000, easing: 'linear' }).finished.then(() => el.remove());
+    const { points, length } = spline([
+      { x: -w, y: H * .46 }, { x: W * .28, y: H * .34 }, { x: mx - W * .12, y: my + H * .1 },
+      { x: mx, y: my }, { x: W + w, y: Math.max(h * .3, my - H * .16) }
+    ], 90);
+    const frames = points.map((p, i) => {
+      const q = points[Math.min(points.length - 1, i + 1)], o = points[Math.max(0, i - 1)];
+      const bank = Math.max(-16, Math.min(16, Math.atan2(q.y - o.y, q.x - o.x) * 180 / Math.PI * .8));
+      const bob = Math.sin(i / 90 * Math.PI * 9) * 2.2;
+      return { transform: `translate(${(p.x - w / 2).toFixed(1)}px, ${(p.y - h / 2 + bob).toFixed(1)}px) rotate(${bank.toFixed(1)}deg)` };
+    });
+    return el.animate(frames, { duration: length / 150 * 1000, easing: 'ease-in-out' }).finished.then(() => el.remove());
   }
 
   /* ------------------------------------------------------------ fence cat */
 
-  // A cat that strolls along the picket fence (fence runs x 470–620, picket tips at y 107).
-  const CAT_PATH = 'M4 0L4.6-5.2C3-6.4 2.6-8.4 3.4-10C2-11 .6-13 .8-16.2C.9-17.2 2.2-17.2 2.2-16.2C2.1-13.6 3.2-11.9 4.8-11C7-11.8 12-11.6 15.5-10.8C16.6-12.4 17.4-13.6 18-14.8L18.6-12.9L19.8-13L20.6-14.9L21.2-12.4C22.8-11.4 23.4-9.6 22-8.6C21-8 19.6-8.2 18.8-8.4L18.4-5.6L18.9 0H17.6L16.9-5H15.8L15.6 0H14.3L14.4-5.3C11.5-5.8 8.5-5.8 7-5.4L6.6 0H5.4L5.6-5.2H5.2L4.9 0Z';
-  async function fenceCat() {
+  // A black cat walking the picket fence (fence runs x 470–620; picket tips at y 107).
+  // Legs swing from the hips in a diagonal gait (CSS), the body bobs, the tail sways.
+  function makeCat() {
     const g = document.createElementNS(NS, 'g');
-    g.setAttribute('transform', 'translate(0 108)');
-    const cat = document.createElementNS(NS, 'path');
-    cat.setAttribute('class', 's');
-    cat.setAttribute('d', CAT_PATH);
-    g.append(cat);
-    svg.append(g);
-    const walk = [];
-    for (let i = 0; i <= 20; i++) {
-      walk.push({ transform: `translate(${470 + 124 * i / 20}px, ${i % 2 ? -0.8 : 0}px)` });
-    }
-    await cat.animate(walk, { duration: 8000, easing: 'linear', fill: 'forwards' }).finished;
-    await wait(1800);
-    await cat.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, fill: 'forwards' }).finished;
-    g.remove();
+    g.setAttribute('class', 'walk-cat');
+    g.innerHTML = `
+      <rect class="s leg a" x="5.2" y="-6.2" width="1.3" height="6.2" rx=".6"/>
+      <rect class="s leg b" x="6.8" y="-6.2" width="1.3" height="6.2" rx=".6"/>
+      <rect class="s leg b" x="14.6" y="-6.2" width="1.3" height="6.2" rx=".6"/>
+      <rect class="s leg a" x="16.2" y="-6.2" width="1.3" height="6.2" rx=".6"/>
+      <g class="torso">
+        <path class="s ctail" d="M4.2-8.2C1.6-9.2.4-12.2.9-15.6C1.1-16.7 2.4-16.5 2.3-15.5C2-12.6 3-10.6 5.2-9.6Z"/>
+        <path class="s" d="M3.6-7.8C3.2-10.2 5.6-11.4 8.6-11.2C11.2-11 13.4-11.6 15.6-11.2C17.4-10.9 18.4-9.6 18.2-8C18-6.4 16.8-5.6 15.2-5.6L6.4-5.6C4.8-5.6 3.8-6.4 3.6-7.8Z"/>
+        <path class="s" d="M15.4-10.8L18.2-13.2L20.2-10.2L17.8-7.2Z"/>
+        <path class="s" d="M17.2-11.2C17.2-13.4 18.8-14.6 20.4-14.6L21-16.8L22.1-14.3C23.6-13.6 24-12.2 23.4-11C22.8-9.8 21.4-9.2 20-9.4C18.6-9.6 17.2-10.2 17.2-11.2ZM18.9-14.2L19.1-16.8L20.4-14.6Z"/>
+      </g>`;
+    return g;
+  }
+
+  async function fenceCat() {
+    const cat = makeCat();
+    svg.append(cat);
+    const at = x => ({ transform: `translate(${x}px, 107px)` });
+    // Planted paw sweeps 2 × 6.2 × sin(18°) ≈ 3.8 units per 0.4 s, so walk 9.6 units/s to keep paws from sliding.
+    const pace = 9.6;
+    await cat.animate([at(466), at(588)], { duration: (588 - 466) / pace * 1000, easing: 'linear', fill: 'forwards' }).finished;
+    cat.classList.add('stopped');               // pause and look out over the street
+    await wait(2600);
+    cat.classList.remove('stopped');
+    await cat.animate([{ ...at(588), opacity: 1 }, { ...at(606), opacity: 0 }], { duration: 18 / pace * 1000, easing: 'linear', fill: 'forwards' }).finished;
+    cat.remove();
   }
 
   /* --------------------------------------------------------------- spider */

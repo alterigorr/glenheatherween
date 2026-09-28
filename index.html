@@ -178,8 +178,23 @@
   :root[data-theme="dark"] .moon { box-shadow: 0 0 40px 8px rgba(246, 231, 200, .18); }
 
   .bats { position: absolute; inset: 0; }
-  .witch { position: absolute; left: 0; top: 0; width: 96px; height: 62px; will-change: transform; }
+  .witch { position: absolute; left: 0; top: 0; width: 104px; height: 64px; will-change: transform; }
   .witch svg { width: 100%; height: 100%; overflow: visible; fill: #0E0913; }
+  .witch .cape, .witch .hair { transform-box: fill-box; transform-origin: 100% 0%; animation: flutter .32s ease-in-out infinite alternate; }
+  .witch .hair { animation-duration: .27s; }
+  .witch .wcat-tail { transform-box: fill-box; transform-origin: 100% 100%; animation: flutter .5s ease-in-out infinite alternate; }
+  @keyframes flutter { from { transform: rotate(-4deg) scaleY(.92); } to { transform: rotate(3deg) scaleY(1.06); } }
+
+  /* The fence cat: legs swing in a diagonal walking gait, the body bobs, the tail sways. */
+  .walk-cat .leg { transform-box: fill-box; transform-origin: 50% 0%; animation: catleg .8s linear infinite; }
+  .walk-cat .leg.b { animation-delay: -.4s; }
+  .walk-cat .torso { animation: catbob .4s ease-in-out infinite; }
+  .walk-cat .ctail { transform-box: fill-box; transform-origin: 100% 100%; animation: cattail 1.6s ease-in-out infinite; }
+  .walk-cat.stopped .leg, .walk-cat.stopped .torso { animation-play-state: paused; }
+  /* 0→50%: paw swings forward; 50→100%: paw planted while the body passes over it */
+  @keyframes catleg { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(-18deg); } }
+  @keyframes catbob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-.45px); } }
+  @keyframes cattail { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(10deg); } }
   .flyer { position: absolute; left: 0; top: 0; width: 46px; height: 23px; will-change: transform; }
   .flyer svg { width: 100%; height: 100%; overflow: visible; fill: var(--scene); animation: bob var(--flap) var(--flap-delay) ease-in-out infinite; }
   :root[data-theme="dark"] .flyer svg { fill: #0A080C; }
@@ -212,7 +227,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .skyline .w, .skyline .face, .fog, .flyer svg, .flyer .wl, .flyer .wr, .spider, .spider .legs, .peek-cat .eyes, .peek-cat .pupils, .cat .tail { animation: none !important; }
+    .skyline .w, .skyline .face, .skyline .beacon, .fog, .flyer svg, .flyer .wl, .flyer .wr, .walk-cat *, .witch *, .spider, .spider .legs, .peek-cat .eyes, .peek-cat .pupils, .cat .tail { animation: none !important; }
   }
 
   /* ---------- The purple band: topbar, title and skyline, always a Halloween night ---------- */
@@ -233,10 +248,17 @@
   .band .look { color: var(--muted); }
   .band .seg button { color: #FFF3E6; }
   .band .seg button[aria-pressed="true"] { background: rgba(255, 255, 255, .22); box-shadow: none; }
-  .band .scene { margin: 24px 0 0; background: none; }
+  .band .scene { margin: 24px 0 0; background: none; height: max(200px, 16.67vw); }
+  .band .scene .skyline { height: 100%; }
   .band .skyline .w { filter: drop-shadow(0 0 4px rgba(255, 179, 71, .8)); animation: glow 6s infinite; }
   .band .skyline .w:nth-of-type(3n) { animation-delay: -2.2s; }
   .band .skyline .face { display: inline; filter: drop-shadow(0 0 3px rgba(255, 170, 60, .95)); animation: glow 3.2s infinite; }
+  .skyline .strip { fill: #1E1430; }
+  .skyline .strip .winfill { fill: url(#stripWin); }
+  .skyline .strip .lights { fill: #FFD696; fill-opacity: .7; }
+  .skyline .strip .beacon { fill: #FF4040; animation: beacon 2.4s steps(1) infinite; }
+  @keyframes beacon { 0%, 60% { opacity: 1; } 61%, 100% { opacity: .15; } }
+  #printFlyer .skyline .strip { display: none; }
   .band .moon { box-shadow: 0 0 44px 10px rgba(246, 231, 200, .2); }
   .band .fog { opacity: .2; }
 
@@ -436,7 +458,7 @@
     .look > span { display: none; }
     .raffle { padding: 20px 28px; }
     .raffle dl { grid-template-columns: 1fr; gap: 2px; }
-    .scene { height: 170px; }
+    .band .scene { height: 190px; }
     .web { width: 104px; height: 104px; }
     .spider { display: none; }
     .pk-num { width: 88px; height: 76px; }
@@ -444,10 +466,9 @@
     .stat .label { font-size: 1rem; }
     .stat { flex-direction: column; align-items: flex-start; }
     .peek-cat { right: 24px; }
-    .scene .skyline { height: 120px; }
     .moon { width: 54px; height: 54px; right: 8%; }
     .flyer { width: 36px; height: 18px; }
-    .witch { width: 70px; height: 45px; }
+    .witch { width: 76px; height: 47px; }
     .raffle dd { margin-bottom: 8px; }
     .addr { grid-template-columns: 6.5em 1fr; }
     .dlg-head h2 { font-size: 1.35rem; }
@@ -587,7 +608,25 @@
   <div class="scene">
     <div class="moon" aria-hidden="true"></div>
     <div class="bats" aria-hidden="true"></div>
-    <svg class="skyline" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <svg class="skyline" viewBox="0 -60 1200 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <!-- the north Strip in the distance: Sahara, the Strat, Resorts World, Fontainebleau, Wynn/Encore -->
+      <defs><pattern id="stripWin" width="6" height="7" patternUnits="userSpaceOnUse"><rect x="1.6" y="2" width="1.6" height="2.2" fill="#FFD696" fill-opacity=".32"/></pattern></defs>
+      <g class="strip">
+        <path d="M536 136V76h44v60z"/>
+        <path d="M600 136V42h56v94zM600 42l6-6h44l6 6z"/>
+        <!-- the Strat: tripod base, shaft, tiered pod, spire -->
+        <path d="M678 136l16-78h3l-9 78zM726 136l-16-78h-3l9 78z"/>
+        <path d="M697 136l2-142h6l2 142z"/>
+        <path d="M684-6h36l-6-8h-24zM679-14h46l-2-8h-42zM686-22h32l-3-6h-26z"/>
+        <rect x="690" y="-32.5" width="24" height="4.5" rx="1"/>
+        <path d="M700.8-32l.7-26h1l.7 26z"/>
+        <path d="M760 136V6c14-7 34-7 48 0v130zM812 136V26h20v110z"/>
+        <path d="M1080 136V-24c9-6 22-6 30 0v160z"/>
+        <path d="M1128 136V12c18-9 40-9 60 2v122zM1190 136V30h14v106z"/>
+        <path class="winfill" d="M602 136V46h52v90zM762 136V10c14-6 30-6 44 0v126zM1082 136V-18c9-5 20-5 26 0v154zM1130 136V16c18-8 38-8 56 2v118z"/>
+        <rect class="lights" x="682" y="-19" width="40" height="2"/><rect class="lights" x="689" y="-26" width="26" height="1.4"/>
+        <circle class="beacon" cx="702" cy="-58" r="1.8"/>
+      </g>
       <!-- ranch house -->
       <path class="s" d="M30 138V92h150v46z"/><path class="s" d="M18 94l87-30 87 30z"/>
       <rect class="w" x="48" y="104" width="26" height="16" rx="2"/><rect class="w" x="136" y="104" width="26" height="16" rx="2"/>
@@ -1405,6 +1444,6 @@ setInterval(() => { if (getPref() === 'auto') applyTheme(); }, 60000);
 initMap();
 boot();
 </script>
-<script src="scene.js?v=2026i" defer></script>
+<script src="scene.js?v=2026l" defer></script>
 </body>
 </html>
