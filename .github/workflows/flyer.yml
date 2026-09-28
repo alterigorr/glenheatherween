@@ -40,7 +40,7 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         run: |
           google-chrome --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
-            --virtual-time-budget=20000 --print-to-pdf=flyer.pdf "https://glenheatherween.com/?flyer&t=$(date +%s)" 2>/dev/null
+            --virtual-time-budget=20000 --print-to-pdf=flyer.pdf "https://glenheatherween.com/?flyer&pdf&t=$(date +%s)" 2>/dev/null
           mv new.sha tools/flyer-settings.sha
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
