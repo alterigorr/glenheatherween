@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="robots" content="noindex, nofollow">
-<script>if (!new URLSearchParams(location.search).has("demo")) history.replaceState(null, "", location.pathname + "?demo");</script>
+<script>
+  // The preview always runs on sample houses; keep any other options (like ?flyer).
+  (function () {
+    var q = new URLSearchParams(location.search);
+    if (!q.has("demo")) { q.set("demo", ""); history.replaceState(null, "", location.pathname + "?" + q.toString().replace(/=(&|$)/g, "$1")); }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Glenheatherween 2026</title>
 <meta name="description" content="Glen Heather Estates Halloween: RSVP your house and see who's handing out candy.">
@@ -215,7 +221,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .skyline .w, .skyline .face, .fog, .flyer svg, .flyer .wl, .flyer .wr, .spider, .spider .legs, .peek-cat .eyes, .cat .tail { animation: none !important; }
+    .skyline .w, .skyline .face, .fog, .flyer svg, .flyer .wl, .flyer .wr, .spider, .spider .legs, .peek-cat .eyes, .peek-cat .pupils, .cat .tail { animation: none !important; }
   }
 
   /* ---------- The purple band: topbar, title and skyline, always a Halloween night ---------- */
@@ -343,9 +349,14 @@
   .hat .buckle { fill: none; stroke: #F9C74F; stroke-width: 2; }
   .volunteer h2 { margin-top: 10px; }
   #raffleSection { position: relative; }
-  .peek-cat { position: absolute; top: 18px; right: 46px; width: 70px; height: 44px; z-index: 2; fill: #241A2C; }
-  :root[data-theme="dark"] .peek-cat { fill: #0B0710; }
+  /* A cat peeking over the raffle card, front paws draped over its top edge (edge is at y=40 in the drawing). */
+  .peek-cat { position: absolute; top: 16px; right: 46px; width: 80px; height: 58px; z-index: 2; }
+  .peek-cat .head, .peek-cat .paw { fill: #241A2C; }
+  :root[data-theme="dark"] .peek-cat .head, :root[data-theme="dark"] .peek-cat .paw { fill: #0B0710; }
   .peek-cat .eyes { fill: #FACC15; transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }
+  .peek-cat .pupils { fill: #1A1208; transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }
+  .peek-cat .nose { fill: #E88AA0; }
+  .peek-cat .toes { stroke: rgba(255, 255, 255, .35); stroke-width: 1.2; stroke-linecap: round; }
   @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
   .map-web { position: absolute; top: 0; right: 0; width: 120px; height: 120px; z-index: 450; pointer-events: none; fill: none; stroke: rgba(60, 50, 70, .5); stroke-width: 1; transform: scaleX(-1); }
   .map-web path { vector-effect: non-scaling-stroke; }
@@ -545,7 +556,7 @@
 </head>
 <body>
 
-<div class="mock-banner hidden" id="demoBanner">PREVIEW of the new look: sample houses, and nothing you enter is saved</div>
+<div class="mock-banner hidden" id="demoBanner">PREVIEW of the new look (sample houses, nothing is saved) · <a href="/preview/?flyer">See the new flyer</a> · <a href="/preview/flyer.pdf">PDF</a></div>
 
 <div class="band">
   <svg class="web web-l" viewBox="-2 -2 162 162" aria-hidden="true"><path d="M0 0L157.4 1.1M0 0L152.4 37.9M0 0L129.9 75.1M0 0L112.8 104.9M0 0L82.7 126.0M0 0L43.5 142.9M0 0L-1.3 148.6M19.2 0.2Q15.9 2.0 19.9 4.9Q14.8 6.0 17.7 9.6Q12.9 9.5 14.2 13.7Q10.3 12.2 11.1 17.1Q6.8 14.5 6.0 18.2Q2.3 15.8 -0.2 20.1M39.6 0.3Q31.7 4.0 38.3 9.2Q29.7 12.0 35.8 20.6Q25.7 19.0 29.1 26.4Q20.6 24.5 22.6 33.4Q13.6 29.0 12.0 39.2Q4.6 31.7 -0.4 39.3M62.0 0.4Q49.2 6.2 57.5 14.5Q46.0 18.6 54.8 29.3Q39.9 29.5 42.9 42.3Q32.0 37.9 32.9 51.5Q21.0 44.9 17.8 57.8Q7.1 49.1 -0.6 59.5M84.4 0.6Q68.3 8.6 83.7 20.1Q63.8 25.8 72.6 43.7Q55.3 40.9 61.2 58.3Q44.4 52.6 48.6 68.3Q29.2 62.3 23.7 79.2Q9.8 68.1 -0.8 86.1M107.9 0.8Q88.9 11.2 104.1 26.6Q83.1 33.6 91.6 56.6Q72.0 53.3 84.4 79.0Q57.8 68.5 62.3 97.0Q38.0 81.1 30.7 103.8Q12.8 88.7 -1.0 114.0M137.3 1.1Q111.1 14.0 136.1 34.5Q103.8 42.0 117.5 67.2Q90.0 66.6 100.9 90.9Q72.2 85.6 75.1 121.3Q47.5 101.4 39.7 126.0Q16.0 110.9 -1.2 134.0"/></svg>
@@ -649,7 +660,14 @@
   </section>
 
   <section aria-labelledby="raffleTitle" id="raffleSection">
-    <svg class="peek-cat" viewBox="0 0 70 44" aria-hidden="true"><path d="M13 44c-1-10 2-19 9-24l-2-15 9 9c4-1 8-1 12 0l9-9-2 15c7 5 10 14 9 24z"/><g class="eyes"><ellipse cx="28" cy="26" rx="3.2" ry="3.6"/><ellipse cx="42" cy="26" rx="3.2" ry="3.6"/></g><path class="paws" d="M8 44c0-5 3-8 8-8s8 3 8 8zM46 44c0-5 3-8 8-8s8 3 8 8z"/></svg>
+    <svg class="peek-cat" viewBox="0 0 80 58" aria-hidden="true">
+      <path class="head" d="M14 40C12 28 16 18 25 14L22 1L34 10C38 9 42 9 46 10L58 1L55 14C64 18 68 28 66 40Z"/>
+      <g class="eyes"><ellipse cx="31" cy="26" rx="4.2" ry="4.6"/><ellipse cx="49" cy="26" rx="4.2" ry="4.6"/></g>
+      <g class="pupils"><ellipse cx="31" cy="26" rx="1.2" ry="3.4"/><ellipse cx="49" cy="26" rx="1.2" ry="3.4"/></g>
+      <path class="nose" d="M37.6 32h4.8L40 35z"/>
+      <rect class="paw" x="20" y="34" width="14" height="22" rx="7"/><rect class="paw" x="46" y="34" width="14" height="22" rx="7"/>
+      <path class="toes" d="M24.7 50v5M29.3 50v5M50.7 50v5M55.3 50v5"/>
+    </svg>
     <div class="card raffle">
       <h2 id="raffleTitle">🎟️ 50/50 Raffle</h2>
       <p id="raffleIntro" style="margin-top:8px"></p>
@@ -685,7 +703,7 @@
   <section aria-labelledby="listTitle">
     <div class="section-head">
       <h2 id="listTitle">Street by street</h2>
-      <a class="btn btn-secondary" href="?lists" target="_blank" rel="noopener"><span aria-hidden="true">🖨️</span> Print street lists</a>
+      <a class="btn btn-secondary" href="/preview/?lists" target="_blank" rel="noopener"><span aria-hidden="true">🖨️</span> Print street lists</a>
     </div>
     <div class="streets" id="streets"></div>
   </section>
@@ -705,7 +723,7 @@
   <footer>
     <svg class="cat" viewBox="0 0 40 42" aria-hidden="true"><path d="M8 42c-2-8 0-16 6-21-2-3-2-7 0-10l-1-9 5 5c1-.5 3-.5 4 0l5-5-1 9c2 3 2 7 0 10 6 5 8 13 6 21z"/><path class="tail" d="M33 42c3-2 5-6 4-10-.5-2 1-3 2-2 2 4 0 10-4 12z"/><ellipse class="eye" cx="17" cy="14" rx="1.6" ry="1.2"/><ellipse class="eye" cx="23" cy="14" rx="1.6" ry="1.2"/></svg>
     <p id="footHelp"></p>
-    <p style="margin-top:8px">Handing out flyers? <a href="flyer.pdf" target="_blank" rel="noopener">Get the printable flyer (PDF)</a></p>
+    <p style="margin-top:8px">Handing out flyers? <a href="/preview/flyer.pdf" target="_blank" rel="noopener">Get the printable flyer (PDF)</a></p>
     <p style="margin-top:8px">Made by neighbors, for neighbors · Glen Heather Estates, Las Vegas</p>
   </footer>
 </div>
@@ -795,7 +813,7 @@
       <div class="qr" id="qrSmall" aria-label="QR code for the website"></div>
       <div>
         <p><b>Standing next to them?</b> They can point their phone camera at this code.</p>
-        <a class="btn btn-secondary" href="flyer.pdf" target="_blank" rel="noopener" style="margin-top:12px"><span aria-hidden="true">🖨️</span> Printable flyer (PDF)</a>
+        <a class="btn btn-secondary" href="/preview/flyer.pdf" target="_blank" rel="noopener" style="margin-top:12px"><span aria-hidden="true">🖨️</span> Printable flyer (PDF)</a>
       </div>
     </div>
   </div>
@@ -1357,7 +1375,7 @@ async function boot() {
   if (q.has('flyer')) document.body.dataset.preview = 'flyer';
   if (q.has('lists')) document.body.dataset.preview = 'lists';
   if (new URLSearchParams(location.search).has('demo')) {
-    api = (await import('./demo.js')).demoApi;
+    api = (await import('/preview/demo.js')).demoApi;
     $('#demoBanner').classList.remove('hidden');
   }
   await refresh();
@@ -1396,6 +1414,6 @@ setInterval(() => { if (getPref() === 'auto') applyTheme(); }, 60000);
 initMap();
 boot();
 </script>
-<script src="/preview/scene.js?v=202609271728" defer></script>
+<script src="/preview/scene.js?v=202609271736" defer></script>
 </body>
 </html>
