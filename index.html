@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,16 +18,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="defaults.js?v=2026b"></script>
-<script>
-  // Apply the saved look before first paint so the page never flashes the wrong theme.
-  (function () {
-    var pref = 'auto';
-    try { pref = localStorage.getItem('ghw-theme') || 'auto'; } catch (e) {}
-    var h = new Date().getHours() + new Date().getMinutes() / 60;
-    var night = h >= 17.5 || h < 6;
-    document.documentElement.dataset.theme = pref === 'auto' ? (night ? 'dark' : 'light') : pref;
-  })();
-</script>
 <style>
   :root[data-theme="light"] {
     --bg: #FBF6EE;
@@ -130,16 +120,6 @@
   .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
 
   /* Top bar */
-  .topbar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 14px 0; }
-  .wordmark { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: 1.1rem; }
-  .look { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--muted); }
-  .seg { display: inline-flex; background: var(--surface-2); border-radius: 12px; padding: 4px; }
-  .seg button {
-    border: 0; background: transparent; color: var(--ink);
-    font: 700 .9rem 'Atkinson Hyperlegible', sans-serif;
-    padding: 8px 12px; min-height: 40px; border-radius: 9px; cursor: pointer;
-  }
-  .seg button[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow); }
 
   /* Hero */
   .hero { padding: 24px 0 8px; }
@@ -230,7 +210,7 @@
     .top-bats *, .top-bats .tb, .skyline .w, .skyline .face, .skyline .beacon, .fog, .flyer svg, .flyer .wl, .flyer .wr, .walk-cat *, .witch *, .spider, .spider .legs, .peek-cat .eyes, .peek-cat .pupils, .cat .tail { animation: none !important; }
   }
 
-  /* ---------- The purple band: topbar, title and skyline, always a Halloween night ---------- */
+  /* ---------- The purple band: title and skyline, always a Halloween night ---------- */
   .band {
     position: relative; overflow: hidden; color: #FFF3E6;
     background:
@@ -242,12 +222,10 @@
     --scene: #120C18; --window: #FFB347; --moon: #F6E7C8; --shadow: none;
   }
   .band .wrap { position: relative; z-index: 2; }
+  .band .hero { padding-top: 76px; }
   .band .hero h1 { font-family: 'Creepster', 'Fraunces', Georgia, serif; font-weight: 400; letter-spacing: .03em; font-size: clamp(2.2rem, 11.4vw, 5.6rem); line-height: .95; color: #FFF3E6; }
   .band .hero h1 #year { display: block; }
   .band .hero h1 span { color: #FF8A3D; text-shadow: 0 0 26px rgba(255, 138, 61, .55); }
-  .band .look { color: var(--muted); }
-  .band .seg button { color: #FFF3E6; }
-  .band .seg button[aria-pressed="true"] { background: rgba(255, 255, 255, .22); box-shadow: none; }
   .band .scene { margin: 24px 0 0; background: none; height: max(200px, 16.67vw); }
   .band .scene .skyline { height: 100%; }
   .band .skyline .w { filter: drop-shadow(0 0 4px rgba(255, 179, 71, .8)); animation: glow 6s infinite; }
@@ -475,10 +453,10 @@
     .hero .btn-row .btn { width: 100%; }
     .map-tools .btn { flex: 1; }
     #map { height: 420px; }
-    .look > span { display: none; }
     .raffle { padding: 20px 28px; }
     .raffle dl { grid-template-columns: 1fr; gap: 2px; }
     .band .scene { height: 190px; }
+    .band .hero { padding-top: 64px; }
     .web { width: 104px; height: 104px; }
     .spider { display: none; }
     .pk-num { width: 88px; height: 76px; }
@@ -564,13 +542,18 @@
   #listsBar .btn { background: #C2410C; color: #fff; }
   #listsBar p { margin-top: 10px; color: #3B3330; }
   body[data-preview="lists"] #printLists { padding: 8px 16px 40px; }
-  body[data-preview="lists"] .p-street { max-width: 7.5in; margin: 0 auto 20px; padding: .45in; background: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); border-radius: 6px; }
+  body[data-preview="lists"] #printLists > * { max-width: 7.5in; margin-left: auto; margin-right: auto; }
+  body[data-preview="lists"] #printLists { max-width: 7.5in; margin: 0 auto 40px; padding: .45in; background: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); border-radius: 6px; }
 
   #printLists { font-family: 'Atkinson Hyperlegible', sans-serif; color: #000; }
-  .p-street h1 { font-family: 'Fraunces', Georgia, serif; font-size: 26pt; margin-bottom: 4pt; }
-  .p-street .p-sub { margin-bottom: 14pt; }
+  .p-head h1 { font-family: 'Fraunces', Georgia, serif; font-size: 24pt; margin-bottom: 2pt; }
+  .p-head .p-sub { margin-bottom: 16pt; }
+  /* Streets flow one after another; a street is never split across two pages. */
+  .p-street { break-inside: avoid; page-break-inside: avoid; margin-bottom: 18pt; }
+  .p-street h2 { font-family: 'Fraunces', Georgia, serif; font-size: 16pt; margin: 0 0 4pt; }
+  .p-street h2 small { font: 400 11pt 'Atkinson Hyperlegible', sans-serif; color: #555; }
   .p-street table { width: 100%; border-collapse: collapse; }
-  .p-street th, .p-street td { text-align: left; padding: 9pt 6pt; border-bottom: 1px solid #999; vertical-align: top; }
+  .p-street th, .p-street td { text-align: left; padding: 6pt 6pt; border-bottom: 1px solid #999; vertical-align: top; }
   .p-street td.box { width: 30pt; font-size: 18pt; }
   .p-street td.n { width: 60pt; font-weight: 700; }
   .p-foot { margin-top: 16pt; font-size: 11pt; }
@@ -583,13 +566,11 @@
     body[data-print="lists"] #printLists,
     body[data-preview="lists"] #printLists,
     body[data-preview="flyer"] #printFlyer { display: block !important; padding: 0 !important; }
-    body[data-preview] .p-street { max-width: none; margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
+    body[data-preview="lists"] #printLists { max-width: none; margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
     body[data-preview="flyer"] .f-sheet { box-shadow: none; margin: 0 auto; }
     /* Printed straight from a browser, leave room for its own margins, headers and footers.
        The PDF generator adds ?pdf and gets the full-size page. */
     body[data-preview="flyer"]:not(.pdf) .f-sheet { zoom: .86; }
-    .p-street { page-break-after: always; break-after: page; }
-    .p-street:last-child { page-break-after: auto; break-after: auto; }
   }
 </style>
 </head>
@@ -610,17 +591,6 @@
       <circle class="eye" cx="18.4" cy="15" r="1"/><circle class="eye" cx="21.6" cy="15" r="1"/></svg>
   </div>
 <div class="wrap">
-  <div class="topbar">
-    <div class="look">
-      <span id="lookLabel">Look:</span>
-      <div class="seg" role="group" aria-labelledby="lookLabel">
-        <button type="button" data-theme-pick="light">☀️ Day</button>
-        <button type="button" data-theme-pick="dark">🌙 Night</button>
-        <button type="button" data-theme-pick="auto">Auto</button>
-      </div>
-    </div>
-  </div>
-
   <header class="hero">
     <h1>Glenheather<span>ween</span> <span id="year"></span></h1>
     <div class="when">
@@ -916,7 +886,7 @@
     </div>
     <div class="f-main">
       <ul class="f-list">
-        <li><b>RSVP your house</b> and your trick-or-treaters in seconds. No account needed.</li>
+        <li><b>RSVP your house</b> in seconds. No sign-up or contact info needed.</li>
         <li><b>See how many trick-or-treaters</b> are coming, so you can plan your candy.</li>
         <li><b>Find the fun on the map:</b> candy, decorated houses and special stops.</li>
         <li class="tip"><b>Pro tip:</b> save the website to your phone's home screen for quick access while you trick-or-treat.</li>
@@ -950,7 +920,6 @@ const CONFIG = {
   ],
   // Oakey Blvd to Glen Heather Way, Bryn Mawr to the freeway.
   map: { bounds: [[36.1471, -115.1738], [36.1521, -115.1656]], zoom: 17 },
-  night: { from: 17.5, to: 6 }   // "Auto" look switches to Night between 5:30 PM and 6 AM
 };
 
 // Talks to the Apps Script web app (apps-script/Code.gs). Add ?demo to the address to use sample data instead.
@@ -1057,7 +1026,7 @@ function renderEvent() {
   $('#raffleList').replaceChildren(...raffleRows().flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]));
 
   const v = CONFIG.volunteer;
-  $('#volText').textContent = `We can always use an extra hand with setup${r.enabled ? ', the raffle' : ''} or cleanup. Call or text ${v.name} at ${v.phone}.`;
+  $('#volText').textContent = `We can always use an extra hand: handing out flyers, setting up${r.enabled ? ', selling raffle tickets' : ''} or cleaning up. Call or text ${v.name} at ${v.phone}.`;
 
   const msg = `${CONFIG.shareText} ${CONFIG.siteUrl}`;
   $('#shareSms').href = `sms:?&body=${encodeURIComponent(msg)}`;
@@ -1231,18 +1200,20 @@ function renderStreets() {
 function buildPrintLists() {
   const groups = byStreet(data.filter(isStop));
   if (!groups.length) return $('#printLists').replaceChildren(h('div', { class: 'p-street' }, h('p', null, "No houses have RSVP'd yet. Check back soon!")));
-  $('#printLists').replaceChildren(...groups.map(g => h('div', { class: 'p-street' },
-    h('h1', null, g.street),
-    h('p', { class: 'p-sub' }, `Glenheatherween ${CONFIG.year} · ${CONFIG.dateLong} · ${CONFIG.hours[0].when}`),
-    h('table', null,
-      h('thead', null, h('tr', null, h('th', null, ''), h('th', null, 'House'), h('th', null, "What's there"))),
-      h('tbody', null, g.houses.map(x => h('tr', null,
-        h('td', { class: 'box' }, '☐'),
-        h('td', { class: 'n' }, x.num),
-        h('td', null, words(x), x.name ? ` (${x.name})` : '', x.note ? h('div', null, h('i', null, x.note)) : '')
-      )))),
-    h('p', { class: 'p-foot' }, `Live map: ${CONFIG.siteUrl.replace(/^https?:\/\//, '')}`)
-  )));
+  $('#printLists').replaceChildren(
+    h('div', { class: 'p-head' },
+      h('h1', null, `Glenheatherween ${CONFIG.year}`),
+      h('p', { class: 'p-sub' }, `Houses on the map, street by street · ${CONFIG.dateLong} · ${CONFIG.hours[0].when}`)),
+    ...groups.map(g => h('div', { class: 'p-street' },
+      h('h2', null, g.street, h('small', null, ` · ${g.houses.length} ${g.houses.length === 1 ? 'house' : 'houses'}`)),
+      h('table', null,
+        h('thead', null, h('tr', null, h('th', null, ''), h('th', null, 'House'), h('th', null, "What's there"))),
+        h('tbody', null, g.houses.map(x => h('tr', null,
+          h('td', { class: 'box' }, '☐'),
+          h('td', { class: 'n' }, x.num),
+          h('td', null, words(x), x.name ? ` (${x.name})` : '', x.note ? h('div', null, h('i', null, x.note)) : '')
+        )))))),
+    h('p', { class: 'p-foot' }, `Live map: ${CONFIG.siteUrl.replace(/^https?:\/\//, '')}`));
 }
 
 function printMode(mode) {
@@ -1251,23 +1222,6 @@ function printMode(mode) {
   window.print();
 }
 window.addEventListener('afterprint', () => { delete document.body.dataset.print; });
-
-/* ---- Theme picker ---- */
-function getPref() { try { return localStorage.getItem('ghw-theme') || 'auto'; } catch (e) { return 'auto'; } }
-function setPref(p) { try { localStorage.setItem('ghw-theme', p); } catch (e) {} }
-function resolveTheme(pref) {
-  if (pref !== 'auto') return pref;
-  const d = new Date(), hr = d.getHours() + d.getMinutes() / 60;
-  return (hr >= CONFIG.night.from || hr < CONFIG.night.to) ? 'dark' : 'light';
-}
-function applyTheme() {
-  const pref = getPref();
-  const theme = resolveTheme(pref);
-  document.documentElement.dataset.theme = theme;
-  const bar = document.querySelector('meta[name="theme-color"]');
-  if (bar) bar.content = '#1E1429';
-  $$('[data-theme-pick]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themePick === pref)));
-}
 
 /* ---- RSVP form ---- */
 let kidsCount = 1;
@@ -1448,12 +1402,11 @@ async function boot() {
 }
 
 document.addEventListener('click', ev => {
-  const t = ev.target.closest('[data-open],[data-close],[data-action],[data-theme-pick],[data-step]');
+  const t = ev.target.closest('[data-open],[data-close],[data-action],[data-step]');
   if (!t) return;
   if (t.dataset.open === 'rsvp') openRsvp();
   else if (t.dataset.open) openDialog($('#' + t.dataset.open));
   else if (t.hasAttribute('data-close')) t.closest('dialog').close();
-  else if (t.dataset.themePick) { setPref(t.dataset.themePick); applyTheme(); }
   else if (t.dataset.step) { kidsCount = Math.min(20, Math.max(1, kidsCount + Number(t.dataset.step))); kidsTouched = true; syncForm(); }
   else if (t.dataset.action === 'fullscreen') toggleFullMap();
   else if (t.dataset.action === 'locate') toggleLocate();
@@ -1482,8 +1435,6 @@ $('#shareMore').addEventListener('click', () => navigator.share({ title: `Glenhe
 
 renderStatic();
 renderEvent();
-applyTheme();
-setInterval(() => { if (getPref() === 'auto') applyTheme(); }, 60000);
 initMap();
 boot();
 </script>
