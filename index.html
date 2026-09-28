@@ -279,7 +279,7 @@
   @keyframes dangle { 0%, 100% { transform: rotate(2deg) translateY(0); } 50% { transform: rotate(-2deg) translateY(6px); } }
   @keyframes legs { to { transform: scaleY(.85); } }
 
-  /* A few lavender bats hanging about near the cobwebs (hover gently; add &bats=still to hold them still) */
+  /* A few lavender bats hovering near the cobwebs */
   .top-bats { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
   .top-bats .tb { position: absolute; width: 34px; height: 17px; transform: none; will-change: auto; }
   :root:root .top-bats .tb svg { fill: rgba(232, 222, 246, .6); }
@@ -293,7 +293,6 @@
   }
   @media (max-width: 600px) { .top-bats { display: none; } }
   @keyframes hover { 0%, 100% { translate: 0 0; } 50% { translate: 5px -7px; } }
-  .top-bats.still .tb, .top-bats.still .tb * { animation: none !important; }
 
   /* Candy-corn dividers between sections */
   .wrap > section + section::before {
@@ -520,6 +519,10 @@
   .f-web path { vector-effect: non-scaling-stroke; }
   .f-web-l { left: 0; }
   .f-web-r { right: 0; transform: scaleX(-1); }
+  .f-bat { position: absolute; fill: #B9A8D0; z-index: 0; }
+  .fb1 { left: .32in; top: 1.5in; width: .5in; transform: rotate(-8deg); }
+  .fb2 { left: .98in; top: 1.82in; width: .34in; transform: rotate(6deg); }
+  .fb3 { right: .42in; top: 1.62in; width: .44in; transform: rotate(10deg); }
   #printFlyer h1 span { color: var(--f-orange); }
   .f-date { font-size: 24pt; font-weight: 700; }
   .f-hours { font-size: 14pt; margin-top: 4pt; }
@@ -897,6 +900,9 @@
   <div class="f-sheet">
     <svg class="web f-web f-web-l" viewBox="-2 -2 162 162" aria-hidden="true"><path d="M0 0L157.4 1.1M0 0L152.4 37.9M0 0L129.9 75.1M0 0L112.8 104.9M0 0L82.7 126.0M0 0L43.5 142.9M0 0L-1.3 148.6M19.2 0.2Q15.9 2.0 19.9 4.9Q14.8 6.0 17.7 9.6Q12.9 9.5 14.2 13.7Q10.3 12.2 11.1 17.1Q6.8 14.5 6.0 18.2Q2.3 15.8 -0.2 20.1M39.6 0.3Q31.7 4.0 38.3 9.2Q29.7 12.0 35.8 20.6Q25.7 19.0 29.1 26.4Q20.6 24.5 22.6 33.4Q13.6 29.0 12.0 39.2Q4.6 31.7 -0.4 39.3M62.0 0.4Q49.2 6.2 57.5 14.5Q46.0 18.6 54.8 29.3Q39.9 29.5 42.9 42.3Q32.0 37.9 32.9 51.5Q21.0 44.9 17.8 57.8Q7.1 49.1 -0.6 59.5M84.4 0.6Q68.3 8.6 83.7 20.1Q63.8 25.8 72.6 43.7Q55.3 40.9 61.2 58.3Q44.4 52.6 48.6 68.3Q29.2 62.3 23.7 79.2Q9.8 68.1 -0.8 86.1M107.9 0.8Q88.9 11.2 104.1 26.6Q83.1 33.6 91.6 56.6Q72.0 53.3 84.4 79.0Q57.8 68.5 62.3 97.0Q38.0 81.1 30.7 103.8Q12.8 88.7 -1.0 114.0M137.3 1.1Q111.1 14.0 136.1 34.5Q103.8 42.0 117.5 67.2Q90.0 66.6 100.9 90.9Q72.2 85.6 75.1 121.3Q47.5 101.4 39.7 126.0Q16.0 110.9 -1.2 134.0"/></svg>
     <svg class="web f-web f-web-r" viewBox="-2 -2 162 162" aria-hidden="true"><path d="M0 0L157.4 1.1M0 0L152.4 37.9M0 0L129.9 75.1M0 0L112.8 104.9M0 0L82.7 126.0M0 0L43.5 142.9M0 0L-1.3 148.6M19.2 0.2Q15.9 2.0 19.9 4.9Q14.8 6.0 17.7 9.6Q12.9 9.5 14.2 13.7Q10.3 12.2 11.1 17.1Q6.8 14.5 6.0 18.2Q2.3 15.8 -0.2 20.1M39.6 0.3Q31.7 4.0 38.3 9.2Q29.7 12.0 35.8 20.6Q25.7 19.0 29.1 26.4Q20.6 24.5 22.6 33.4Q13.6 29.0 12.0 39.2Q4.6 31.7 -0.4 39.3M62.0 0.4Q49.2 6.2 57.5 14.5Q46.0 18.6 54.8 29.3Q39.9 29.5 42.9 42.3Q32.0 37.9 32.9 51.5Q21.0 44.9 17.8 57.8Q7.1 49.1 -0.6 59.5M84.4 0.6Q68.3 8.6 83.7 20.1Q63.8 25.8 72.6 43.7Q55.3 40.9 61.2 58.3Q44.4 52.6 48.6 68.3Q29.2 62.3 23.7 79.2Q9.8 68.1 -0.8 86.1M107.9 0.8Q88.9 11.2 104.1 26.6Q83.1 33.6 91.6 56.6Q72.0 53.3 84.4 79.0Q57.8 68.5 62.3 97.0Q38.0 81.1 30.7 103.8Q12.8 88.7 -1.0 114.0M137.3 1.1Q111.1 14.0 136.1 34.5Q103.8 42.0 117.5 67.2Q90.0 66.6 100.9 90.9Q72.2 85.6 75.1 121.3Q47.5 101.4 39.7 126.0Q16.0 110.9 -1.2 134.0"/></svg>
+    <svg class="f-bat fb1" viewBox="0 0 100 50" aria-hidden="true"><path d="M47 24C40 15 24 10 3 16C8 20 10 25 9 30C14 26 19 26 22 31C25 26 30 26 33 32C36 27 42 27 47 32Z"/><path d="M47 24C40 15 24 10 3 16C8 20 10 25 9 30C14 26 19 26 22 31C25 26 30 26 33 32C36 27 42 27 47 32Z" transform="matrix(-1 0 0 1 100 0)"/><ellipse cx="50" cy="31" rx="4.6" ry="8.5"/><circle cx="50" cy="22.5" r="4.2"/><path d="M46.6 21L45.2 13.2L48.8 19ZM53.4 21L54.8 13.2L51.2 19Z"/></svg>
+    <svg class="f-bat fb2" viewBox="0 0 100 50" aria-hidden="true"><path d="M47 24C40 15 24 10 3 16C8 20 10 25 9 30C14 26 19 26 22 31C25 26 30 26 33 32C36 27 42 27 47 32Z"/><path d="M47 24C40 15 24 10 3 16C8 20 10 25 9 30C14 26 19 26 22 31C25 26 30 26 33 32C36 27 42 27 47 32Z" transform="matrix(-1 0 0 1 100 0)"/><ellipse cx="50" cy="31" rx="4.6" ry="8.5"/><circle cx="50" cy="22.5" r="4.2"/><path d="M46.6 21L45.2 13.2L48.8 19ZM53.4 21L54.8 13.2L51.2 19Z"/></svg>
+    <svg class="f-bat fb3" viewBox="0 0 100 50" aria-hidden="true"><path d="M47 24C40 15 24 10 3 16C8 20 10 25 9 30C14 26 19 26 22 31C25 26 30 26 33 32C36 27 42 27 47 32Z"/><path d="M47 24C40 15 24 10 3 16C8 20 10 25 9 30C14 26 19 26 22 31C25 26 30 26 33 32C36 27 42 27 47 32Z" transform="matrix(-1 0 0 1 100 0)"/><ellipse cx="50" cy="31" rx="4.6" ry="8.5"/><circle cx="50" cy="22.5" r="4.2"/><path d="M46.6 21L45.2 13.2L48.8 19ZM53.4 21L54.8 13.2L51.2 19Z"/></svg>
     <div class="f-body">
     <div class="f-top">
       <div class="f-kicker">Glen Heather Estates</div>
@@ -1429,7 +1435,6 @@ async function boot() {
   const q = new URLSearchParams(location.search);
   if (q.has('flyer')) document.body.dataset.preview = 'flyer';
   if (q.has('lists')) document.body.dataset.preview = 'lists';
-  if (q.get('bats') === 'still') $('.top-bats')?.classList.add('still');
   if (new URLSearchParams(location.search).has('demo')) {
     api = (await import('./demo.js')).demoApi;
     $('#demoBanner').classList.remove('hidden');
