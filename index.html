@@ -1026,7 +1026,7 @@ function renderEvent() {
   $('#raffleList').replaceChildren(...raffleRows().flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]));
 
   const v = CONFIG.volunteer;
-  $('#volText').textContent = `We can always use an extra hand: handing out flyers, setting up${r.enabled ? ', selling raffle tickets' : ''} or cleaning up. Call or text ${v.name} at ${v.phone}.`;
+  $('#volText').textContent = `We can always use an extra hand with handing out flyers, setup${r.enabled ? ', raffle' : ''} or cleanup. Call or text ${v.name} at ${v.phone}.`;
 
   const msg = `${CONFIG.shareText} ${CONFIG.siteUrl}`;
   $('#shareSms').href = `sms:?&body=${encodeURIComponent(msg)}`;
