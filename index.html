@@ -258,7 +258,9 @@
   .skyline .strip .lights { fill: #FFD696; fill-opacity: .7; }
   .skyline .strip .beacon { fill: #FF4040; animation: beacon 2.4s steps(1) infinite; }
   @keyframes beacon { 0%, 60% { opacity: 1; } 61%, 100% { opacity: .15; } }
-  #printFlyer .skyline .strip { display: none; }
+  #printFlyer .skyline .strip { fill: #DDD4E6; }
+  #printFlyer .skyline .strip .winfill, #printFlyer .skyline .strip .lights { display: none; }
+  #printFlyer .skyline .strip .beacon { fill: #E0413B; animation: none; }
   .band .moon { box-shadow: 0 0 44px 10px rgba(246, 231, 200, .2); }
   .band .fog { opacity: .2; }
 
@@ -519,9 +521,9 @@
   .f-raffle b { font-family: 'Fraunces', Georgia, serif; font-size: 15pt; }
   .f-contacts { margin-top: .14in; font-size: 11.5pt; line-height: 1.5; }
   .f-contacts b { font-weight: 700; }
-  .f-scene { position: relative; margin-top: 8pt; align-self: stretch; margin-left: -.5in; margin-right: -.5in; height: 1.1in; flex: none;
+  .f-scene { position: relative; margin-top: 8pt; align-self: stretch; margin-left: -.5in; margin-right: -.5in; height: 1.34in; flex: none;
              background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #F5E1CC); }
-  .f-scene .skyline { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: .95in; }
+  .f-scene .skyline { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 1.25in; }
   .f-moon { position: absolute; right: 11%; top: .12in; width: .5in; height: .5in; border-radius: 50%; background: #F3D9B1; }
   #printFlyer .skyline g[clip-path] { display: none !important; }
   #printFlyer .skyline .face { display: inline; }
