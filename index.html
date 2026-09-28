@@ -212,7 +212,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .skyline .w, .skyline .face, .fog, .flyer svg, .flyer .wl, .flyer .wr, .spider, .spider .legs, .peek-cat .eyes, .cat .tail { animation: none !important; }
+    .skyline .w, .skyline .face, .fog, .flyer svg, .flyer .wl, .flyer .wr, .spider, .spider .legs, .peek-cat .eyes, .peek-cat .pupils, .cat .tail { animation: none !important; }
   }
 
   /* ---------- The purple band: topbar, title and skyline, always a Halloween night ---------- */
@@ -340,9 +340,14 @@
   .hat .buckle { fill: none; stroke: #F9C74F; stroke-width: 2; }
   .volunteer h2 { margin-top: 10px; }
   #raffleSection { position: relative; }
-  .peek-cat { position: absolute; top: 18px; right: 46px; width: 70px; height: 44px; z-index: 2; fill: #241A2C; }
-  :root[data-theme="dark"] .peek-cat { fill: #0B0710; }
+  /* A cat peeking over the raffle card, front paws draped over its top edge (edge is at y=40 in the drawing). */
+  .peek-cat { position: absolute; top: 16px; right: 46px; width: 80px; height: 58px; z-index: 2; }
+  .peek-cat .head, .peek-cat .paw { fill: #241A2C; }
+  :root[data-theme="dark"] .peek-cat .head, :root[data-theme="dark"] .peek-cat .paw { fill: #0B0710; }
   .peek-cat .eyes { fill: #FACC15; transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }
+  .peek-cat .pupils { fill: #1A1208; transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }
+  .peek-cat .nose { fill: #E88AA0; }
+  .peek-cat .toes { stroke: rgba(255, 255, 255, .35); stroke-width: 1.2; stroke-linecap: round; }
   @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
   .map-web { position: absolute; top: 0; right: 0; width: 120px; height: 120px; z-index: 450; pointer-events: none; fill: none; stroke: rgba(60, 50, 70, .5); stroke-width: 1; transform: scaleX(-1); }
   .map-web path { vector-effect: non-scaling-stroke; }
@@ -646,7 +651,14 @@
   </section>
 
   <section aria-labelledby="raffleTitle" id="raffleSection">
-    <svg class="peek-cat" viewBox="0 0 70 44" aria-hidden="true"><path d="M13 44c-1-10 2-19 9-24l-2-15 9 9c4-1 8-1 12 0l9-9-2 15c7 5 10 14 9 24z"/><g class="eyes"><ellipse cx="28" cy="26" rx="3.2" ry="3.6"/><ellipse cx="42" cy="26" rx="3.2" ry="3.6"/></g><path class="paws" d="M8 44c0-5 3-8 8-8s8 3 8 8zM46 44c0-5 3-8 8-8s8 3 8 8z"/></svg>
+    <svg class="peek-cat" viewBox="0 0 80 58" aria-hidden="true">
+      <path class="head" d="M14 40C12 28 16 18 25 14L22 1L34 10C38 9 42 9 46 10L58 1L55 14C64 18 68 28 66 40Z"/>
+      <g class="eyes"><ellipse cx="31" cy="26" rx="4.2" ry="4.6"/><ellipse cx="49" cy="26" rx="4.2" ry="4.6"/></g>
+      <g class="pupils"><ellipse cx="31" cy="26" rx="1.2" ry="3.4"/><ellipse cx="49" cy="26" rx="1.2" ry="3.4"/></g>
+      <path class="nose" d="M37.6 32h4.8L40 35z"/>
+      <rect class="paw" x="20" y="34" width="14" height="22" rx="7"/><rect class="paw" x="46" y="34" width="14" height="22" rx="7"/>
+      <path class="toes" d="M24.7 50v5M29.3 50v5M50.7 50v5M55.3 50v5"/>
+    </svg>
     <div class="card raffle">
       <h2 id="raffleTitle">🎟️ 50/50 Raffle</h2>
       <p id="raffleIntro" style="margin-top:8px"></p>
