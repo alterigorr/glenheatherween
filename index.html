@@ -344,6 +344,9 @@
 
   /* Street list */
   .streets { display: grid; gap: 16px; }
+  .streets[hidden] { display: none; }
+  #streetsToggle .chev { display: inline-block; transition: transform .2s; }
+  #streetsToggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
   .street h3 { display: flex; justify-content: space-between; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
   .street h3 small { font: 400 .95rem 'Atkinson Hyperlegible', sans-serif; color: var(--muted); }
   .street ul { list-style: none; margin: 0; padding: 0; }
@@ -735,9 +738,12 @@
   <section aria-labelledby="listTitle">
     <div class="section-head">
       <h2 id="listTitle">Street by street</h2>
-      <a class="btn btn-secondary" href="?lists" target="_blank" rel="noopener"><span aria-hidden="true">🖨️</span> Print street lists</a>
+      <div class="btn-row">
+        <button class="btn btn-secondary" type="button" id="streetsToggle" aria-expanded="false" aria-controls="streets"><span aria-hidden="true" class="chev">▾</span> <span class="lbl">Show street by street</span></button>
+        <a class="btn btn-secondary" href="?lists" target="_blank" rel="noopener"><span aria-hidden="true">🖨️</span> Print street lists</a>
+      </div>
     </div>
-    <div class="streets" id="streets"></div>
+    <div class="streets" id="streets" hidden></div>
   </section>
 
   <section aria-labelledby="volTitle">
@@ -1437,6 +1443,14 @@ $('#fKids').addEventListener('change', () => { kidsTouched = true; });
 $('#fNum').addEventListener('change', prefillIfExisting);
 $('#fStreet').addEventListener('change', prefillIfExisting);
 $('#shareCopy').addEventListener('click', copyLink);
+// The street list starts folded away so the page stays short; one tap opens it.
+$('#streetsToggle').addEventListener('click', () => {
+  const btn = $('#streetsToggle');
+  const open = btn.getAttribute('aria-expanded') !== 'true';
+  btn.setAttribute('aria-expanded', String(open));
+  $('.lbl', btn).textContent = open ? 'Hide street by street' : 'Show street by street';
+  $('#streets').hidden = !open;
+});
 $('#shareMore').addEventListener('click', () => navigator.share({ title: `Glenheatherween ${CONFIG.year}`, text: CONFIG.shareText, url: CONFIG.siteUrl }).catch(() => {}));
 
 renderStatic();
