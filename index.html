@@ -395,6 +395,8 @@
   /* Keep the page underneath still while a pop-up is open. */
   body:has(dialog[open]) { overflow: hidden; }
   dialog { overscroll-behavior: contain; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  #mapSection { scroll-margin-top: 12px; }
   dialog::backdrop { background: rgba(10, 8, 12, .6); }
   .dlg-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; background: var(--surface); border-bottom: 1px solid var(--line); }
   .dlg-body { padding: 20px; display: grid; gap: 22px; }
@@ -450,7 +452,10 @@
     body { font-size: 18px; }
     .stat { padding: 16px; }
     .stat .num { font-size: 2.4rem; }
-    .hero .btn-row .btn { width: 100%; }
+    /* RSVP full width; the map and share buttons side by side underneath */
+    .hero .btn-row { display: grid; grid-template-columns: 1fr 1fr; }
+    .hero .btn-row .btn { width: 100%; padding: 12px 10px; }
+    .hero .btn-row .btn-primary { grid-column: 1 / -1; }
     .map-tools .btn { flex: 1; }
     #map { height: 420px; }
     .raffle { padding: 20px 28px; }
@@ -599,6 +604,7 @@
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" type="button" data-open="rsvp"><span aria-hidden="true">🏠</span> RSVP my house</button>
+      <a class="btn btn-secondary" href="#mapSection"><span aria-hidden="true">🗺️</span> See the map</a>
       <button class="btn btn-secondary" type="button" data-open="share"><span aria-hidden="true">📣</span> Tell a neighbor</button>
     </div>
   </header>
@@ -703,7 +709,7 @@
     </div>
   </section>
 
-  <section aria-labelledby="mapTitle">
+  <section aria-labelledby="mapTitle" id="mapSection">
     <div class="section-head">
       <h2 id="mapTitle">The map</h2>
       <span class="muted">Tap a pin to see what's there</span>
