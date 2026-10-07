@@ -34,7 +34,7 @@ var STREETS = [
 var AREA = { south: 36.1462, west: -115.1750, north: 36.1530, east: -115.1645 };
 
 var CACHE_KEY = 'public-v1';
-var CACHE_SECONDS = 30;
+var CACHE_SECONDS = 600; // every RSVP or settings save clears it, so a long life only saves work
 
 function doGet(e) {
   var cache = CacheService.getScriptCache();
@@ -316,6 +316,24 @@ function rows_() {
 
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * Google can take up to ~20 s to wake this script after a quiet spell. keepWarm runs every
+ * 5 minutes to keep it awake and the public house list ready in the cache.
+ * Run installKeepWarm once from the editor (select it, click Run, approve) to schedule it.
+ */
+function keepWarm() {
+  CacheService.getScriptCache().put(CACHE_KEY, JSON.stringify(publicData_()), CACHE_SECONDS);
+}
+
+function installKeepWarm() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'keepWarm') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('keepWarm').timeBased().everyMinutes(5).create();
+  keepWarm();
+  console.log('keepWarm scheduled every 5 minutes');
 }
 
 /**

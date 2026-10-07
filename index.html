@@ -288,6 +288,9 @@
   :root[data-theme="dark"] .pk-shape { filter: drop-shadow(0 0 14px rgba(255, 138, 61, .35)); }
   .stat .label { font-weight: 700; font-size: 1.1rem; }
   .breakdown { margin-top: 14px; color: var(--muted); }
+  .load-note { margin-top: 12px; padding: 12px 16px; border-radius: 12px; background: var(--accent-soft); font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+  .load-note .btn { min-height: 44px; padding: 8px 16px; }
+  .save-note { color: var(--muted); text-align: center; }
 
   /* Cards */
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px; box-shadow: var(--shadow); }
@@ -691,6 +694,7 @@
       </div>
     </div>
     <p class="breakdown" id="breakdown"></p>
+    <p class="load-note hidden" id="loadNote" role="status"></p>
   </section>
 
   <section aria-labelledby="raffleTitle" id="raffleSection">
@@ -824,6 +828,7 @@
 
     <p class="error hidden" id="formError" role="alert"></p>
     <button class="btn btn-primary btn-block" type="submit" id="submitBtn">RSVP my house 🎃</button>
+    <p class="save-note hidden" id="saveNote" role="status"></p>
   </form>
   <div class="done hidden" id="rsvpDone">
     <div class="big">🎃</div>
@@ -929,7 +934,7 @@ const CONFIG = {
 };
 
 // Talks to the Apps Script web app (apps-script/Code.gs). Add ?demo to the address to use sample data instead.
-let api = {
+const realApi = {
   async load() {
     const r = await fetch(CONFIG.sheetUrl, { cache: 'no-store' });
     const body = await r.json();
@@ -960,6 +965,8 @@ let api = {
     }
   }
 };
+let api = realApi;
+
 
 /* =========================================================================
    App
@@ -1303,12 +1310,16 @@ async function submitRsvp(ev) {
 
   const btn = $('#submitBtn');
   btn.disabled = true; btn.textContent = 'Saving…';
+  const note = $('#saveNote');
+  const t1 = setTimeout(() => { btn.textContent = 'Still saving…'; note.textContent = 'This can take up to 20 seconds. Please keep this page open.'; note.classList.remove('hidden'); }, 4000);
+  const t2 = setTimeout(() => { btn.textContent = 'Almost there…'; }, 12000);
   let res;
   try {
     res = await api.rsvp(e);
   } catch (x) {
     res = null;
   }
+  clearTimeout(t1); clearTimeout(t2); note.classList.add('hidden');
   btn.disabled = false; syncForm();
   if (!res || !res.ok) return fail((res && res.error) || "Sorry, that didn't save. Please try again, or text " + CONFIG.helpPhone + ' for help.');
   // Nothing checked and nothing on file: there was nothing to take off.
@@ -1377,17 +1388,53 @@ async function copyLink() {
 
 /* ---- Wiring ---- */
 let loadSeq = 0;
-async function refresh() {
+// The backend (Google Apps Script) can take up to ~20 s to wake after a quiet spell, so:
+// show what we had last time straight away, say clearly when we're still loading, and retry on failure.
+function showLoadNote(text, withRetry) {
+  const note = $('#loadNote');
+  if (!text) return note.classList.add('hidden');
+  note.replaceChildren(h('span', null, text), withRetry ? h('button', { class: 'btn btn-secondary', type: 'button', id: 'retryLoad' }, 'Try again') : '');
+  note.classList.remove('hidden');
+  if (withRetry) $('#retryLoad').addEventListener('click', () => refresh());
+}
+
+function remember(body) {
+  if (api !== realApi) return;
+  try { localStorage.setItem('ghw-data', JSON.stringify({ houses: body.houses, totals: body.totals, at: Date.now() })); } catch (e) {}
+}
+function recall() {
+  if (api !== realApi) return false;
+  try {
+    const saved = JSON.parse(localStorage.getItem('ghw-data'));
+    if (!saved || !Array.isArray(saved.houses)) return false;
+    data = saved.houses;
+    totals = saved.totals || { houses: data.length, kids: 0 };
+    return true;
+  } catch (e) { return false; }
+}
+
+async function refresh(attempt = 1) {
   const seq = ++loadSeq;
+  const haveData = data.length > 0 || totals.houses > 0;
+  const slow = setTimeout(() => {
+    if (seq === loadSeq && !haveData) showLoadNote('Still loading. The neighborhood server can take a few seconds to wake up… 🎃');
+  }, 6000);
+  if (!haveData) showLoadNote('Loading the houses… 🎃');
   try {
     const body = await api.load();
     if (seq !== loadSeq) return; // a newer refresh is on its way
     data = body.houses || [];
     totals = body.totals || { houses: data.length, kids: 0 };
     if (applySettings(body.settings)) { deriveEvent(); renderEvent(); }
+    remember(body);
+    showLoadNote('');
   } catch (e) {
-    $('#streets').replaceChildren(h('p', { class: 'empty' }, `Couldn't load the houses right now. Please refresh the page, or text ${CONFIG.helpPhone}.`));
+    if (seq !== loadSeq) return;
+    if (attempt < 2) { clearTimeout(slow); setTimeout(() => refresh(attempt + 1), 3000); return; }
+    showLoadNote(haveData ? "Couldn't get the latest houses, so this may be a little out of date." : "Couldn't load the houses right now.", true);
     return;
+  } finally {
+    clearTimeout(slow);
   }
   renderTally();
   renderMap();
@@ -1403,6 +1450,7 @@ async function boot() {
     api = (await import('./demo.js')).demoApi;
     $('#demoBanner').classList.remove('hidden');
   }
+  if (recall()) { renderTally(); renderMap(); renderStreets(); }
   await refresh();
   if (document.body.dataset.preview === 'lists') buildPrintLists();
 }
